@@ -13,14 +13,26 @@ import { parseReportForm } from "@/lib/data/db/report-shared";
 import { createReport } from "@/lib/data/db/report";
 import { getVoteForComment } from "@/lib/data/db/vote";
 import { ensureUser } from "@/lib/data/user";
+import { createHeadlessEditor } from "@lexical/headless";
+import {
+  SerializedEditorState,
+  $parseSerializedNode,
+  LexicalEditor,
+  $getRoot,
+  EditorState,
+  LexicalNode,
+  $isTextNode,
+  $isElementNode,
+} from "lexical";
 import { revalidatePath } from "next/cache";
+import { deletePost } from "@/lib/data/atproto/post";
 
-export async function createCommentAction(
-  input: { parentRkey?: string; postRkey: string; postAuthorDid: DID },
-  _prevState: unknown,
-  formData: FormData,
-) {
-  const content = formData.get("comment") as string;
+export async function createCommentAction(input: {
+  parentRkey?: string;
+  postRkey: string;
+  postAuthorDid: DID;
+  content: SerializedEditorState;
+}) {
   const user = await ensureUser();
 
   const [post, comment] = await Promise.all([
@@ -41,13 +53,15 @@ export async function createCommentAction(
     throw new Error(`[naughty] Cannot comment on deleted post. ${user.did}`);
   }
 
-  const { rkey } = await createComment({
-    content,
-    post,
-    parent: comment,
-  });
-  await waitForComment(rkey);
-  revalidatePath(`/post`);
+  const state = createHeadlessEditor().parseEditorState(input.content);
+
+  // const { rkey } = await createComment({
+  //   content,
+  //   post,
+  //   parent: comment,
+  // });
+  // await waitForComment(rkey);
+  // revalidatePath(`/post`);
 }
 
 const MAX_POLLS = 15;
@@ -62,6 +76,28 @@ async function waitForComment(rkey: string) {
   if (!exists) {
     throw new Error(`Comment not found after polling: ${rkey}`);
   }
+}
+
+function editorStateToCommentContent(editorState: EditorState) {
+  return editorState.read(() => {
+    const root = $getRoot();
+    root.getChildren().forEach((child) => {});
+
+    const text = root.getTextContent();
+  });
+}
+
+function $nodeToFacets(node: LexicalNode) {
+  if ($isTextNode(node)) {
+    if (node.hasFormat("bold")) {
+      return node.selectStart;
+    }
+  }
+  if ($isElementNode(node) && node.isEmpty()) return [];
+}
+
+export async function deletePostAction(rkey: string) {
+  await deletePost(rkey);
 }
 
 export async function deleteCommentAction(rkey: string) {

@@ -11,7 +11,7 @@ import {
   AlertDialogTrigger,
 } from "@/lib/components/ui/alert-dialog";
 import { Button } from "@/lib/components/ui/button";
-import { Textarea } from "@/lib/components/ui/textarea";
+import { EditableTextArea } from "@/lib/components/ui/textarea";
 import { SimpleTooltip } from "@/lib/components/ui/tooltip";
 import { useToast } from "@/lib/components/ui/use-toast";
 import {
@@ -22,13 +22,7 @@ import {
   reportCommentAction,
 } from "./actions";
 import { ChatBubbleIcon, TrashIcon } from "@radix-ui/react-icons";
-import {
-  useActionState,
-  useRef,
-  useState,
-  useId,
-  startTransition,
-} from "react";
+import { useRef, useState, useId, startTransition, useTransition } from "react";
 import {
   VoteButton,
   VoteButtonState,
@@ -44,6 +38,7 @@ import { DeleteButton } from "@/app/(app)/_components/delete-button";
 import { cva, VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 import { ShareDropdownButton } from "@/app/(app)/_components/share-button";
+import { LexicalEditor } from "lexical";
 
 const commentVariants = cva(undefined, {
   variants: {
@@ -226,7 +221,6 @@ export function NewComment({
   postRkey,
   postAuthorDid,
   extraButton,
-  textAreaRef,
   onActionDone,
 }: {
   parentRkey?: string;
@@ -237,23 +231,28 @@ export function NewComment({
   extraButton?: React.ReactNode;
   textAreaRef?: React.RefObject<HTMLTextAreaElement>;
 }) {
+  const editorRef = useRef<LexicalEditor | null>(null);
   const [input, setInput] = useState("");
-  const [_, action, isPending] = useActionState(
-    createCommentAction.bind(null, { parentRkey, postRkey, postAuthorDid }),
-    undefined,
-  );
+  const [isPending, startTransition] = useTransition();
+
   const id = useId();
   const textAreaId = `${id}-comment`;
 
   return (
     <form
-      action={action}
       onSubmit={(event) => {
         event.preventDefault();
-        startTransition(() => {
-          action(new FormData(event.currentTarget));
+        startTransition(async () => {
+          const state = editorRef.current?.getEditorState().toJSON();
+          if (!state) throw new Error("Empty comment");
+          console.log(state);
+          await createCommentAction({
+            parentRkey,
+            postRkey,
+            postAuthorDid,
+            content: state,
+          });
           onActionDone?.();
-          setInput("");
         });
       }}
       aria-busy={isPending}
@@ -271,7 +270,7 @@ export function NewComment({
       }}
       className="space-y-2"
     >
-      <Textarea
+      <EditableTextArea
         value={input}
         onChange={(event) => {
           setInput(event.target.value);
@@ -280,10 +279,10 @@ export function NewComment({
         // eslint-disable-next-line jsx-a11y/no-autofocus
         autoFocus={autoFocus}
         name="comment"
-        ref={textAreaRef}
+        ref={editorRef}
         placeholder="Write a comment..."
         disabled={isPending}
-        className="resize-y flex-1"
+        className="resize-y flex-1 overflow-auto grow"
       />
       <div className="w-full flex justify-between">
         <InputLengthIndicator
