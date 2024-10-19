@@ -8,6 +8,9 @@ import * as dbPost from "@/lib/data/db/post";
 import { CommentCollection, getComment } from "@/lib/data/atproto/comment";
 import { VoteRecord } from "@/lib/data/atproto/vote";
 import { getPdsUrl } from "@/lib/data/atproto/did";
+import { unauthed_createNotification } from "@/lib/data/db/notification";
+import { atUriToString } from "@/lib/data/atproto/uri";
+import { invariant } from "@/lib/utils";
 
 export async function POST(request: Request) {
   const auth = request.headers.get("Authorization");
@@ -88,16 +91,34 @@ export async function POST(request: Request) {
             );
           }
           //TODO: move this to db folder
-          await tx.insert(schema.Comment).values({
-            cid: comment.cid,
-            rkey,
-            body: comment.content,
-            postId: post.id,
-            authorDid: repo,
-            createdAt: new Date(comment.createdAt),
-            parentCommentId: parentComment?.id ?? null,
-          });
+          const [newComment] = await tx
+            .insert(schema.Comment)
+            .values({
+              cid: comment.cid,
+              rkey,
+              body: comment.content,
+              postId: post.id,
+              authorDid: repo,
+              createdAt: new Date(comment.createdAt),
+              parentCommentId: parentComment?.id ?? null,
+            })
+            .returning({ id: schema.Comment.id });
+
+          invariant(newComment, "New comment should be returned");
+
+          const userToNotify = parentComment
+            ? parentComment.authorDid
+            : post.authorDid;
+          // Only notify a user if they are not the author of the post/comment
+          if (userToNotify !== repo) {
+            await unauthed_createNotification(tx, {
+              did: userToNotify,
+              reason: parentComment ? "commentReply" : "postComment",
+              commentId: newComment.id,
+            });
+          }
         } else if (op.action === "delete") {
+          // TODO: delete related notifications
           await tx
             .update(schema.Comment)
             .set({ status: "deleted" })
@@ -142,7 +163,7 @@ export async function POST(request: Request) {
 
           if (!subject) {
             throw new Error(
-              `Subject not found with uri: ${hydratedVoteRecordValue.subject.uri.value}`,
+              `Subject not found with uri: ${atUriToString(hydratedVoteRecordValue.subject.uri)}`,
             );
           }
 

@@ -215,3 +215,14 @@ export const Report = sqliteTable("reports", {
     enum: ["pending", "accepted", "rejected"],
   }).default("pending"),
 });
+
+export const Notification = sqliteTable("notifications", {
+  id: integer("id").primaryKey(),
+  did: did("did").notNull(),
+  createdAt: dateIsoText("created_at")
+    .notNull()
+    .default(sql`(current_timestamp)`),
+  readAt: dateIsoText("read_at"),
+  reason: text("reason", { enum: ["postComment", "commentReply"] }).notNull(),
+  commentId: integer("comment_id").references(() => Comment.id),
+});
