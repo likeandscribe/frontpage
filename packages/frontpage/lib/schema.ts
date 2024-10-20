@@ -5,6 +5,7 @@ import {
   customType,
   unique,
   foreignKey,
+  index,
 } from "drizzle-orm/sqlite-core";
 import type { DID } from "./data/atproto/did";
 import {
@@ -47,9 +48,14 @@ export const Post = sqliteTable(
     authorDid: did("author_did").notNull(),
     // TODO: add notNull once this is rolled out
     status: createStatusColumn("status"),
+    voteCount: integer("vote_count"),
+    hotScore: integer("hot_score"),
   },
   (t) => ({
     unique_author_rkey: unique().on(t.authorDid, t.rkey),
+    live_vote_count_index: index("live_vote_count_idx")
+      .on(t.voteCount)
+      .where(sql`status = 'live'`),
   }),
 );
 

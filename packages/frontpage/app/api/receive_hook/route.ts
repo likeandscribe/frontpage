@@ -1,6 +1,6 @@
 import { db } from "@/lib/db";
 import * as schema from "@/lib/schema";
-import { and, eq } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 import { atprotoGetRecord } from "@/lib/data/atproto/record";
 import { Commit } from "@/lib/data/atproto/event";
 import * as atprotoPost from "@/lib/data/atproto/post";
@@ -161,6 +161,11 @@ export async function POST(request: Request) {
               cid: hydratedRecord.cid,
               rkey,
             });
+
+            await tx
+              .update(schema.Post)
+              .set({ voteCount: sql`${schema.Post.voteCount} + 1` })
+              .where(eq(schema.Post.id, subject.id));
           } else if (
             hydratedVoteRecordValue.subject.uri.collection === CommentCollection
           ) {

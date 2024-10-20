@@ -9,17 +9,6 @@ import * as atprotoPost from "../atproto/post";
 import { DID } from "../atproto/did";
 import { sendDiscordMessage } from "@/lib/discord";
 
-const votesSubQuery = db
-  .select({
-    postId: schema.PostVote.postId,
-    voteCount: sql`coalesce(${count(schema.PostVote.id)}, 1)`
-      .mapWith(Number)
-      .as("voteCount"),
-  })
-  .from(schema.PostVote)
-  .groupBy(schema.PostVote.postId)
-  .as("vote");
-
 const buildUserHasVotedQuery = cache(async () => {
   const user = await getUser();
 
@@ -50,16 +39,6 @@ const bannedUserSubQuery = db
 
 export const getFrontpagePosts = cache(async (offset: number) => {
   const POSTS_PER_PAGE = 10;
-  // This ranking is very naive. I believe it'll need to consider every row in the table even if you limit the results.
-  // We should closely monitor this and consider alternatives if it gets slow over time https://linear.app/likeandscribe/issue/UN-111/improve-algorithm-hotness-efficiency
-  const rank = sql<number>`
-  CAST(COALESCE(${votesSubQuery.voteCount}, 1) AS REAL) / (
-    pow(
-      (JULIANDAY('now') - JULIANDAY(${schema.Post.createdAt})) * 24 + 2,
-      1.8
-    )
-  )
-`.as("rank");
 
   const userHasVoted = await buildUserHasVotedQuery();
 
@@ -72,9 +51,9 @@ export const getFrontpagePosts = cache(async (offset: number) => {
       url: schema.Post.url,
       createdAt: schema.Post.createdAt,
       authorDid: schema.Post.authorDid,
-      voteCount: votesSubQuery.voteCount,
+      voteCount: schema.Post.voteCount,
       commentCount: commentCountSubQuery.commentCount,
-      rank: rank,
+      rank: schema.Post.hotScore ?? 0.1,
       userHasVoted: userHasVoted.postId,
       status: schema.Post.status,
     })
@@ -83,7 +62,6 @@ export const getFrontpagePosts = cache(async (offset: number) => {
       commentCountSubQuery,
       eq(commentCountSubQuery.postId, schema.Post.id),
     )
-    .leftJoin(votesSubQuery, eq(votesSubQuery.postId, schema.Post.id))
     .leftJoin(userHasVoted, eq(userHasVoted.postId, schema.Post.id))
     .leftJoin(
       bannedUserSubQuery,
@@ -98,10 +76,11 @@ export const getFrontpagePosts = cache(async (offset: number) => {
         ),
       ),
     )
-    .orderBy(desc(rank))
+    .orderBy(desc(schema.Post.hotScore))
     .limit(POSTS_PER_PAGE)
     .offset(offset);
 
+  console.log("Got frontpage posts", rows);
   const posts = rows.map((row) => ({
     id: row.id,
     rkey: row.rkey,
@@ -133,7 +112,7 @@ export const getUserPosts = cache(async (userDid: DID) => {
       url: schema.Post.url,
       createdAt: schema.Post.createdAt,
       authorDid: schema.Post.authorDid,
-      voteCount: votesSubQuery.voteCount,
+      voteCount: schema.Post.voteCount,
       commentCount: commentCountSubQuery.commentCount,
       userHasVoted: userHasVoted.postId,
       status: schema.Post.status,
@@ -143,7 +122,6 @@ export const getUserPosts = cache(async (userDid: DID) => {
       commentCountSubQuery,
       eq(commentCountSubQuery.postId, schema.Post.id),
     )
-    .leftJoin(votesSubQuery, eq(votesSubQuery.postId, schema.Post.id))
     .leftJoin(userHasVoted, eq(userHasVoted.postId, schema.Post.id))
     .where(
       and(eq(schema.Post.authorDid, userDid), eq(schema.Post.status, "live")),
@@ -176,7 +154,6 @@ export const getPost = cache(async (authorDid: DID, rkey: string) => {
       commentCountSubQuery,
       eq(commentCountSubQuery.postId, schema.Post.id),
     )
-    .leftJoin(votesSubQuery, eq(votesSubQuery.postId, schema.Post.id))
     .leftJoin(userHasVoted, eq(userHasVoted.postId, schema.Post.id))
     .limit(1);
 
@@ -186,7 +163,7 @@ export const getPost = cache(async (authorDid: DID, rkey: string) => {
   return {
     ...row.posts,
     commentCount: row.commentCount?.commentCount ?? 0,
-    voteCount: row.vote?.voteCount ?? 1,
+    voteCount: row.posts.voteCount ?? 1,
     userHasVoted: Boolean(row.hasVoted),
   };
 });
@@ -226,6 +203,7 @@ export async function unauthed_createPost({
       title: post.title,
       url: post.url,
       createdAt: new Date(post.createdAt),
+      voteCount: 1,
     });
 
     await tx.insert(schema.ConsumedOffset).values({ offset });
