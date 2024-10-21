@@ -2,23 +2,12 @@ import "server-only";
 
 import { cache } from "react";
 import { db } from "@/lib/db";
-import { eq, sql, count, desc, and, isNull, or } from "drizzle-orm";
+import { eq, sql, desc, and, isNull, or } from "drizzle-orm";
 import * as schema from "@/lib/schema";
 import { getBlueskyProfile, getUser, isAdmin } from "../user";
 import * as atprotoPost from "../atproto/post";
 import { DID } from "../atproto/did";
 import { sendDiscordMessage } from "@/lib/discord";
-
-const votesSubQuery = db
-  .select({
-    postId: schema.PostVote.postId,
-    voteCount: sql`coalesce(${count(schema.PostVote.id)}, 1)`
-      .mapWith(Number)
-      .as("voteCount"),
-  })
-  .from(schema.PostVote)
-  .groupBy(schema.PostVote.postId)
-  .as("vote");
 
 const buildUserHasVotedQuery = cache(async () => {
   const user = await getUser();
@@ -30,16 +19,6 @@ const buildUserHasVotedQuery = cache(async () => {
     .as("hasVoted");
 });
 
-const commentCountSubQuery = db
-  .select({
-    postId: schema.Comment.postId,
-    commentCount: count(schema.Comment.id).as("commentCount"),
-  })
-  .from(schema.Comment)
-  .where(eq(schema.Comment.status, "live"))
-  .groupBy(schema.Comment.postId, schema.Comment.status)
-  .as("commentCount");
-
 const bannedUserSubQuery = db
   .select({
     did: schema.LabelledProfile.did,
@@ -50,40 +29,26 @@ const bannedUserSubQuery = db
 
 export const getFrontpagePosts = cache(async (offset: number) => {
   const POSTS_PER_PAGE = 10;
-  // This ranking is very naive. I believe it'll need to consider every row in the table even if you limit the results.
-  // We should closely monitor this and consider alternatives if it gets slow over time https://linear.app/likeandscribe/issue/UN-111/improve-algorithm-hotness-efficiency
-  const rank = sql<number>`
-  CAST(COALESCE(${votesSubQuery.voteCount}, 1) AS REAL) / (
-    pow(
-      (JULIANDAY('now') - JULIANDAY(${schema.Post.createdAt})) * 24 + 2,
-      1.8
-    )
-  )
-`.as("rank");
 
   const userHasVoted = await buildUserHasVotedQuery();
 
   const rows = await db
     .select({
-      id: schema.Post.id,
+      id: schema.PostAggregates.id,
       rkey: schema.Post.rkey,
       cid: schema.Post.cid,
       title: schema.Post.title,
       url: schema.Post.url,
       createdAt: schema.Post.createdAt,
       authorDid: schema.Post.authorDid,
-      voteCount: votesSubQuery.voteCount,
-      commentCount: commentCountSubQuery.commentCount,
-      rank: rank,
+      voteCount: schema.PostAggregates.voteCount,
+      commentCount: schema.PostAggregates.commentCount,
+      rank: schema.PostAggregates.rank ?? 0,
       userHasVoted: userHasVoted.postId,
       status: schema.Post.status,
     })
-    .from(schema.Post)
-    .leftJoin(
-      commentCountSubQuery,
-      eq(commentCountSubQuery.postId, schema.Post.id),
-    )
-    .leftJoin(votesSubQuery, eq(votesSubQuery.postId, schema.Post.id))
+    .from(schema.PostAggregates)
+    .innerJoin(schema.Post, eq(schema.PostAggregates.postId, schema.Post.id))
     .leftJoin(userHasVoted, eq(userHasVoted.postId, schema.Post.id))
     .leftJoin(
       bannedUserSubQuery,
@@ -98,7 +63,7 @@ export const getFrontpagePosts = cache(async (offset: number) => {
         ),
       ),
     )
-    .orderBy(desc(rank))
+    .orderBy(desc(schema.PostAggregates.rank))
     .limit(POSTS_PER_PAGE)
     .offset(offset);
 
@@ -133,17 +98,13 @@ export const getUserPosts = cache(async (userDid: DID) => {
       url: schema.Post.url,
       createdAt: schema.Post.createdAt,
       authorDid: schema.Post.authorDid,
-      voteCount: votesSubQuery.voteCount,
-      commentCount: commentCountSubQuery.commentCount,
+      voteCount: schema.PostAggregates.voteCount,
+      commentCount: schema.PostAggregates.commentCount,
       userHasVoted: userHasVoted.postId,
       status: schema.Post.status,
     })
-    .from(schema.Post)
-    .leftJoin(
-      commentCountSubQuery,
-      eq(commentCountSubQuery.postId, schema.Post.id),
-    )
-    .leftJoin(votesSubQuery, eq(votesSubQuery.postId, schema.Post.id))
+    .from(schema.PostAggregates)
+    .innerJoin(schema.Post, eq(schema.PostAggregates.postId, schema.Post.id))
     .leftJoin(userHasVoted, eq(userHasVoted.postId, schema.Post.id))
     .where(
       and(eq(schema.Post.authorDid, userDid), eq(schema.Post.status, "live")),
@@ -173,10 +134,9 @@ export const getPost = cache(async (authorDid: DID, rkey: string) => {
       and(eq(schema.Post.authorDid, authorDid), eq(schema.Post.rkey, rkey)),
     )
     .leftJoin(
-      commentCountSubQuery,
-      eq(commentCountSubQuery.postId, schema.Post.id),
+      schema.PostAggregates,
+      eq(schema.PostAggregates.postId, schema.Post.id),
     )
-    .leftJoin(votesSubQuery, eq(votesSubQuery.postId, schema.Post.id))
     .leftJoin(userHasVoted, eq(userHasVoted.postId, schema.Post.id))
     .limit(1);
 
@@ -185,8 +145,8 @@ export const getPost = cache(async (authorDid: DID, rkey: string) => {
 
   return {
     ...row.posts,
-    commentCount: row.commentCount?.commentCount ?? 0,
-    voteCount: row.vote?.voteCount ?? 1,
+    commentCount: row.post_aggregates?.commentCount ?? 0,
+    voteCount: row.post_aggregates?.voteCount ?? 1,
     userHasVoted: Boolean(row.hasVoted),
   };
 });
@@ -219,13 +179,30 @@ export async function unauthed_createPost({
   offset,
 }: CreatePostInput) {
   await db.transaction(async (tx) => {
-    await tx.insert(schema.Post).values({
-      rkey,
-      cid,
-      authorDid,
-      title: post.title,
-      url: post.url,
-      createdAt: new Date(post.createdAt),
+    const [insertedPost] = await tx
+      .insert(schema.Post)
+      .values({
+        rkey,
+        cid,
+        authorDid,
+        title: post.title,
+        url: post.url,
+        createdAt: new Date(post.createdAt),
+      })
+      .returning({ postId: schema.Post.id });
+
+    if (!insertedPost) {
+      throw new Error("Failed to insert post");
+    }
+
+    const rankSql = sql`(CAST(1 AS REAL) / (pow(2,1.8)))`;
+
+    await tx.insert(schema.PostAggregates).values({
+      postId: insertedPost?.postId,
+      commentCount: 0,
+      voteCount: 1,
+      rank: rankSql,
+      createdAt: new Date(),
     });
 
     await tx.insert(schema.ConsumedOffset).values({ offset });

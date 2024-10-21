@@ -12,6 +12,7 @@
     "db:migrate": "NODE_OPTIONS=--use-openssl-ca drizzle-kit migrate",
     "db:studio": "NODE_OPTIONS=--use-openssl-ca drizzle-kit studio",
     "db:push": "NODE_OPTIONS=--use-openssl-ca drizzle-kit push",
+    "db:pull": "NODE_OPTIONS=--use-openssl-ca drizzle-kit pull",
     "test": "vitest",
     "type-check": "tsc --noEmit"
   },
