@@ -48,7 +48,7 @@ export const getFrontpagePosts = cache(async (offset: number) => {
       status: schema.Post.status,
     })
     .from(schema.PostAggregates)
-    .leftJoin(schema.Post, eq(schema.PostAggregates.postId, schema.Post.id))
+    .innerJoin(schema.Post, eq(schema.PostAggregates.postId, schema.Post.id))
     .leftJoin(userHasVoted, eq(userHasVoted.postId, schema.Post.id))
     .leftJoin(
       bannedUserSubQuery,
@@ -104,7 +104,7 @@ export const getUserPosts = cache(async (userDid: DID) => {
       status: schema.Post.status,
     })
     .from(schema.PostAggregates)
-    .leftJoin(schema.Post, eq(schema.PostAggregates.postId, schema.Post.id))
+    .innerJoin(schema.Post, eq(schema.PostAggregates.postId, schema.Post.id))
     .leftJoin(userHasVoted, eq(userHasVoted.postId, schema.Post.id))
     .where(
       and(eq(schema.Post.authorDid, userDid), eq(schema.Post.status, "live")),
