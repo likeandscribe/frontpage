@@ -7,7 +7,7 @@
     },
     {
       "path": "/api/cron/rank-posts",
-      "schedule": "0 */4 * * *"
+      "schedule": "*/30 * * * *"
     }
   ]
 }

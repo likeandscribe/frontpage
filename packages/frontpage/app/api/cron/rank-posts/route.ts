@@ -22,11 +22,11 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    await db.update(schema.Post).set({
-      hotScore: sql`
-          CAST(COALESCE(${schema.Post.voteCount}, 1) AS REAL) / (
+    await db.update(schema.PostAggregates).set({
+      rank: sql`
+          CAST(COALESCE(${schema.PostAggregates.voteCount}, 1) AS REAL) / (
             pow(
-              (JULIANDAY('now') - JULIANDAY(${schema.Post.createdAt})) * 24 + 2,
+              (JULIANDAY('now') - JULIANDAY(${schema.PostAggregates.createdAt})) * 24 + 2,
               1.8
             )
           )
