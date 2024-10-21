@@ -88,17 +88,42 @@ export async function POST(request: Request) {
             );
           }
           //TODO: move this to db folder
-          await tx.insert(schema.Comment).values({
-            cid: comment.cid,
-            rkey,
-            body: comment.content,
-            postId: post.id,
-            authorDid: repo,
-            createdAt: new Date(comment.createdAt),
-            parentCommentId: parentComment?.id ?? null,
+          const [insertedComment] = await tx
+            .insert(schema.Comment)
+            .values({
+              cid: comment.cid,
+              rkey,
+              body: comment.content,
+              postId: post.id,
+              authorDid: repo,
+              createdAt: new Date(comment.createdAt),
+              parentCommentId: parentComment?.id ?? null,
+            })
+            .returning({
+              commentId: schema.Comment.id,
+              postId: schema.Comment.postId,
+            });
+
+          if (!insertedComment) {
+            throw new Error("Failed to insert comment");
+          }
+
+          await tx
+            .update(schema.PostAggregates)
+            .set({
+              commentCount: sql`${schema.PostAggregates.commentCount} + 1`,
+            })
+            .where(eq(schema.PostAggregates.postId, insertedComment.postId));
+
+          await tx.insert(schema.CommentAggregates).values({
+            createdAt: new Date(),
+            commentId: insertedComment?.commentId,
+            voteCount: 1,
+            rank: sql<number>`
+                (CAST(1 AS REAL) / (pow(2,1.8)))`,
           });
         } else if (op.action === "delete") {
-          await tx
+          const [deletedComment] = await tx
             .update(schema.Comment)
             .set({ status: "deleted" })
             .where(
@@ -106,7 +131,21 @@ export async function POST(request: Request) {
                 eq(schema.Comment.rkey, rkey),
                 eq(schema.Comment.authorDid, repo),
               ),
-            );
+            )
+            .returning({
+              postId: schema.Comment.postId,
+            });
+
+          if (!deletedComment) {
+            throw new Error("Failed to delete comment");
+          }
+
+          await tx
+            .update(schema.PostAggregates)
+            .set({
+              commentCount: sql`${schema.PostAggregates.commentCount} - 1`,
+            })
+            .where(eq(schema.PostAggregates.postId, deletedComment.postId));
         }
 
         await tx.insert(schema.ConsumedOffset).values({ offset: seq });
@@ -126,6 +165,7 @@ export async function POST(request: Request) {
             hydratedRecord.value,
           );
 
+          //lookup the collection to see if it is a post or comment vote
           const subjectTable = {
             [atprotoPost.PostCollection]: schema.Post,
             [CommentCollection]: schema.Comment,
@@ -162,10 +202,18 @@ export async function POST(request: Request) {
               rkey,
             });
 
+            console.log("Updating post aggregates");
             await tx
-              .update(schema.Post)
-              .set({ voteCount: sql`${schema.Post.voteCount} + 1` })
-              .where(eq(schema.Post.id, subject.id));
+              .update(schema.PostAggregates)
+              .set({
+                voteCount: sql`${schema.PostAggregates.voteCount} + 1`,
+              })
+              .where(eq(schema.PostAggregates.postId, subject.id));
+
+            await tx.update(schema.PostAggregates).set({
+              rank: sql<number>`
+                (CAST(COALESCE(${schema.PostAggregates.voteCount}, 1) AS REAL) / (pow((JULIANDAY('now') - JULIANDAY(${schema.PostAggregates.createdAt})) * 24 + 2,1.8)))`,
+            });
           } else if (
             hydratedVoteRecordValue.subject.uri.collection === CommentCollection
           ) {
@@ -176,26 +224,72 @@ export async function POST(request: Request) {
               cid: hydratedRecord.cid,
               rkey,
             });
+
+            await tx
+              .update(schema.CommentAggregates)
+              .set({
+                voteCount: sql`${schema.CommentAggregates.voteCount} + 1`,
+              })
+              .where(eq(schema.CommentAggregates.commentId, subject.id));
+
+            await tx.update(schema.PostAggregates).set({
+              rank: sql<number>`
+                (CAST(COALESCE(${schema.CommentAggregates.voteCount}, 1) AS REAL) / (pow((JULIANDAY('now') - JULIANDAY(${schema.CommentAggregates.createdAt})) * 24 + 2,1.8)))`,
+            });
           }
         } else if (op.action === "delete") {
           // Try deleting from both tables. In reality only one will have a record.
           // Relies on sqlite not throwing an error if the record doesn't exist.
-          await tx
+          const [commentTransaction] = await tx
             .delete(schema.CommentVote)
             .where(
               and(
                 eq(schema.CommentVote.rkey, rkey),
                 eq(schema.CommentVote.authorDid, repo),
               ),
-            );
-          await tx
+            )
+            .returning({ commentId: schema.CommentVote.commentId });
+
+          const [postVoteTransaction] = await tx
             .delete(schema.PostVote)
             .where(
               and(
                 eq(schema.PostVote.rkey, rkey),
                 eq(schema.PostVote.authorDid, repo),
               ),
-            );
+            )
+            .returning({ postId: schema.PostVote.postId });
+
+          if (commentTransaction?.commentId != null) {
+            await tx
+              .update(schema.CommentAggregates)
+              .set({
+                voteCount: sql`${schema.CommentAggregates.voteCount} - 1`,
+              })
+              .where(
+                eq(
+                  schema.CommentAggregates.commentId,
+                  commentTransaction.commentId,
+                ),
+              );
+            await tx.update(schema.PostAggregates).set({
+              rank: sql<number>`
+                (CAST(COALESCE(${schema.CommentAggregates.voteCount}, 1) AS REAL) / (pow((JULIANDAY('now') - JULIANDAY(${schema.CommentAggregates.createdAt})) * 24 + 2,1.8)))`,
+            });
+          } else if (postVoteTransaction?.postId != null) {
+            await tx
+              .update(schema.PostAggregates)
+              .set({
+                voteCount: sql`${schema.PostAggregates.voteCount} - 1`,
+              })
+              .where(
+                eq(schema.PostAggregates.postId, postVoteTransaction.postId),
+              );
+            await tx.update(schema.PostAggregates).set({
+              rank: sql<number>`
+                (CAST(COALESCE(${schema.CommentAggregates.voteCount}, 1) AS REAL) / (pow((JULIANDAY('now') - JULIANDAY(${schema.CommentAggregates.createdAt})) * 24 + 2,1.8)))`,
+            });
+          }
         }
 
         await tx.insert(schema.ConsumedOffset).values({ offset: seq });

@@ -48,14 +48,9 @@ export const Post = sqliteTable(
     authorDid: did("author_did").notNull(),
     // TODO: add notNull once this is rolled out
     status: createStatusColumn("status"),
-    voteCount: integer("vote_count"),
-    hotScore: integer("hot_score"),
   },
   (t) => ({
     unique_author_rkey: unique().on(t.authorDid, t.rkey),
-    live_vote_count_index: index("live_vote_count_idx")
-      .on(t.voteCount)
-      .where(sql`status = 'live'`),
   }),
 );
 
@@ -75,6 +70,27 @@ export const PostVote = sqliteTable(
     unique_authr_rkey: unique().on(t.authorDid, t.rkey),
     // Ensures you can only vote once per post
     unique_author_postId: unique().on(t.authorDid, t.postId),
+  }),
+);
+
+export const PostAggregates = sqliteTable(
+  "post_aggregates",
+  {
+    id: integer("id").primaryKey(),
+    postId: integer("post_id")
+      .notNull()
+      .references(() => Post.id),
+    commentCount: integer("comment_count"),
+    voteCount: integer("vote_count"),
+    rank: integer("rank"),
+    createdAt: dateIsoText("created_at")
+      .notNull()
+      .default(sql`(current_timestamp)`),
+  },
+  (t) => ({
+    unique_postId: unique().on(t.postId),
+    post_index: index("post_id_idx").on(t.postId),
+    rank_index: index("rank_idx").on(t.rank),
   }),
 );
 
@@ -103,6 +119,25 @@ export const Comment = sqliteTable(
       name: "parent_comment_id_fkey",
     }),
     unique_author_rkey: unique().on(t.authorDid, t.rkey),
+  }),
+);
+
+export const CommentAggregates = sqliteTable(
+  "comment_aggregates",
+  {
+    id: integer("id").primaryKey(),
+    commentId: integer("comment_id")
+      .notNull()
+      .references(() => Comment.id),
+    voteCount: integer("vote_count"),
+    rank: integer("rank"),
+    createdAt: dateIsoText("created_at")
+      .notNull()
+      .default(sql`(current_timestamp)`),
+  },
+  (t) => ({
+    unique_commentId: unique().on(t.commentId),
+    comment_index: index("comment_id_idx").on(t.commentId),
   }),
 );
 
