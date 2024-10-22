@@ -8,9 +8,11 @@ import { CID } from "multiformats/cid";
 
 export interface Record {
   /** The title of the post. */
-  title?: string;
+  title: string;
   /** The URL of the post. */
-  url?: string;
+  url: string;
+  /** Client-declared timestamp when this post was originally created. */
+  createdAt: string;
   [k: string]: unknown;
 }
 

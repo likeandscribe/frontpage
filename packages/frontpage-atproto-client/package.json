@@ -2,7 +2,15 @@
   "private": true,
   "name": "@repo/frontpage-atproto-client",
   "type": "module",
-  "module": "src/index.ts",
+  "main": "src/index.ts",
+  "exports": {
+    ".": {
+      "import": "./src/index.ts"
+    },
+    "./lexicons": {
+      "import": "./src/lexicons.ts"
+    }
+  },
   "scripts": {
     "format:write": "prettier --write src",
     "fetch-lexicons": "tsx ./fetch-lexicons.mts"

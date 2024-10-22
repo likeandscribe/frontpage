@@ -448,7 +448,7 @@ export async function importDpopJwks({
 }
 
 export async function fetchAuthenticatedAtproto(
-  input: RequestInfo,
+  input: RequestInfo | URL,
   init?: RequestInit,
 ) {
   const session = await getSession();

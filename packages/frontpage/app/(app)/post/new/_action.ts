@@ -1,8 +1,9 @@
 "use server";
 
+import { xrpcClient } from "@/lib/data/atproto";
 import { DID } from "@/lib/data/atproto/did";
 import { getVerifiedHandle } from "@/lib/data/atproto/identity";
-import { createPost } from "@/lib/data/atproto/post";
+import { AtUri } from "@/lib/data/atproto/record";
 import { uncached_doesPostExist } from "@/lib/data/db/post";
 import { DataLayerError } from "@/lib/data/error";
 import { ensureUser } from "@/lib/data/user";
@@ -26,8 +27,18 @@ export async function newPostAction(_prevState: unknown, formData: FormData) {
     return { error: "Invalid URL" };
   }
 
+  const xrpc = await xrpcClient();
+
   try {
-    const { rkey } = await createPost({ title, url });
+    const { uri } = await xrpc.fyi.unravel.frontpage.post.create(
+      { repo: user.did },
+      {
+        title,
+        url,
+        createdAt: new Date().toISOString(),
+      },
+    );
+    const rkey = AtUri.parse(uri).rkey;
     const [handle] = await Promise.all([
       getVerifiedHandle(user.did),
       waitForPost(user.did, rkey),

@@ -770,6 +770,7 @@ export const schemaDict = {
         key: "tid",
         record: {
           type: "object",
+          required: ["title", "url", "createdAt"],
           properties: {
             title: {
               type: "string",
@@ -781,6 +782,12 @@ export const schemaDict = {
               type: "string",
               format: "uri",
               description: "The URL of the post.",
+            },
+            createdAt: {
+              type: "string",
+              format: "datetime",
+              description:
+                "Client-declared timestamp when this post was originally created.",
             },
           },
         },
