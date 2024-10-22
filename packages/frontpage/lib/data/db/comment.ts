@@ -273,3 +273,138 @@ export async function moderateComment({
       ),
     );
 }
+
+export type UnauthedCreateCommentInput = {
+  comment: {
+    cid: string;
+    content: string;
+    createdAt: string;
+  };
+  postId: number;
+  repo: DID;
+  rkey: string;
+  parentCommentId?: number;
+};
+
+export async function unauthed_createComment({
+  comment,
+  postId,
+  repo,
+  rkey,
+  parentCommentId,
+}: UnauthedCreateCommentInput) {
+  await db.transaction(async (tx) => {
+    const [insertedComment] = await tx
+      .insert(schema.Comment)
+      .values({
+        cid: comment.cid,
+        rkey,
+        body: comment.content,
+        postId: postId,
+        authorDid: repo,
+        createdAt: new Date(comment.createdAt),
+        parentCommentId: parentCommentId ?? null,
+      })
+      .returning({
+        commentId: schema.Comment.id,
+        postId: schema.Comment.postId,
+      });
+
+    if (!insertedComment) {
+      throw new Error("Failed to insert comment");
+    }
+
+    await tx
+      .update(schema.PostAggregates)
+      .set({
+        commentCount: sql`${schema.PostAggregates.commentCount} + 1`,
+      })
+      .where(eq(schema.PostAggregates.postId, insertedComment.postId));
+
+    await tx.insert(schema.CommentAggregates).values({
+      createdAt: new Date(),
+      commentId: insertedComment?.commentId,
+      voteCount: 1,
+      rank: sql<number>`
+                (CAST(1 AS REAL) / (pow(2,1.8)))`,
+    });
+  });
+}
+
+export type UnauthedCreateCommentVoteInput = {
+  subject: {
+    id: number;
+  };
+  repo: DID;
+  rkey: string;
+  hydratedVoteRecordValue: {
+    createdAt: string;
+    cid: string;
+  };
+  hydratedRecord: {
+    cid: string;
+  };
+};
+
+export async function unauthed_createCommentVote({
+  subject,
+  repo,
+  rkey,
+  hydratedVoteRecordValue,
+  hydratedRecord,
+}: UnauthedCreateCommentVoteInput) {
+  await db.transaction(async (tx) => {
+    await tx.insert(schema.CommentVote).values({
+      commentId: subject.id,
+      authorDid: repo,
+      createdAt: new Date(hydratedVoteRecordValue.createdAt),
+      cid: hydratedRecord.cid,
+      rkey,
+    });
+
+    await tx
+      .update(schema.CommentAggregates)
+      .set({
+        voteCount: sql`${schema.CommentAggregates.voteCount} + 1`,
+      })
+      .where(eq(schema.CommentAggregates.commentId, subject.id));
+
+    await tx.update(schema.PostAggregates).set({
+      rank: sql<number>`
+                (CAST(COALESCE(${schema.CommentAggregates.voteCount}, 1) AS REAL) / (pow((JULIANDAY('now') - JULIANDAY(${schema.CommentAggregates.createdAt})) * 24 + 2,1.8)))`,
+    });
+  });
+}
+
+export type UnauthedDeleteCommentInput = {
+  rkey: string;
+  repo: DID;
+};
+
+export async function unauthed_deleteComment({
+  rkey,
+  repo,
+}: UnauthedDeleteCommentInput) {
+  await db.transaction(async (tx) => {
+    const [deletedComment] = await tx
+      .update(schema.Comment)
+      .set({ status: "deleted" })
+      .where(
+        and(eq(schema.Comment.rkey, rkey), eq(schema.Comment.authorDid, repo)),
+      )
+      .returning({
+        postId: schema.Comment.postId,
+      });
+
+    if (!deletedComment) {
+      throw new Error("Failed to delete comment");
+    }
+
+    await tx
+      .update(schema.PostAggregates)
+      .set({
+        commentCount: sql`${schema.PostAggregates.commentCount} - 1`,
+      })
+      .where(eq(schema.PostAggregates.postId, deletedComment.postId));
+  });
+}

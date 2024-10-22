@@ -26,15 +26,8 @@
     {
       "idx": 3,
       "version": "6",
-      "when": 1729455718287,
-      "tag": "0003_tranquil_anthem",
-      "breakpoints": true
-    },
-    {
-      "idx": 4,
-      "version": "6",
-      "when": 1729519309992,
-      "tag": "0004_loud_talon",
+      "when": 1729614687721,
+      "tag": "0003_amazing_arclight",
       "breakpoints": true
     }
   ]

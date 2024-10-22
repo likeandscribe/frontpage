@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "95c25c44-a756-480f-b3c7-b2a70938f096",
+  "id": "07740f61-ca30-4450-98be-63b0d4586a5b",
   "prevId": "d5fcf5e1-b731-4ff1-9811-4dbf5002f67e",
   "tables": {
     "admin_users": {
@@ -186,6 +186,80 @@
           "tableTo": "comments",
           "columnsFrom": [
             "parent_comment_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "comment_aggregates": {
+      "name": "comment_aggregates",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "comment_id": {
+          "name": "comment_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "vote_count": {
+          "name": "vote_count",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "rank": {
+          "name": "rank",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(current_timestamp)"
+        }
+      },
+      "indexes": {
+        "comment_id_idx": {
+          "name": "comment_id_idx",
+          "columns": [
+            "comment_id"
+          ],
+          "isUnique": false
+        },
+        "comment_aggregates_comment_id_unique": {
+          "name": "comment_aggregates_comment_id_unique",
+          "columns": [
+            "comment_id"
+          ],
+          "isUnique": true
+        }
+      },
+      "foreignKeys": {
+        "comment_aggregates_comment_id_comments_id_fk": {
+          "name": "comment_aggregates_comment_id_comments_id_fk",
+          "tableFrom": "comment_aggregates",
+          "tableTo": "comments",
+          "columnsFrom": [
+            "comment_id"
           ],
           "columnsTo": [
             "id"
@@ -683,20 +757,6 @@
           "notNull": false,
           "autoincrement": false,
           "default": "'live'"
-        },
-        "vote_count": {
-          "name": "vote_count",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "hot_score": {
-          "name": "hot_score",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
         }
       },
       "indexes": {
@@ -706,14 +766,6 @@
             "cid"
           ],
           "isUnique": true
-        },
-        "live_vote_count_idx": {
-          "name": "live_vote_count_idx",
-          "columns": [
-            "vote_count"
-          ],
-          "isUnique": false,
-          "where": "status = 'live'"
         },
         "posts_author_did_rkey_unique": {
           "name": "posts_author_did_rkey_unique",
@@ -725,6 +777,94 @@
         }
       },
       "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "post_aggregates": {
+      "name": "post_aggregates",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "post_id": {
+          "name": "post_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "comment_count": {
+          "name": "comment_count",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "vote_count": {
+          "name": "vote_count",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "rank": {
+          "name": "rank",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(current_timestamp)"
+        }
+      },
+      "indexes": {
+        "post_id_idx": {
+          "name": "post_id_idx",
+          "columns": [
+            "post_id"
+          ],
+          "isUnique": false
+        },
+        "rank_idx": {
+          "name": "rank_idx",
+          "columns": [
+            "rank"
+          ],
+          "isUnique": false
+        },
+        "post_aggregates_post_id_unique": {
+          "name": "post_aggregates_post_id_unique",
+          "columns": [
+            "post_id"
+          ],
+          "isUnique": true
+        }
+      },
+      "foreignKeys": {
+        "post_aggregates_post_id_posts_id_fk": {
+          "name": "post_aggregates_post_id_posts_id_fk",
+          "tableFrom": "post_aggregates",
+          "tableTo": "posts",
+          "columnsFrom": [
+            "post_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },

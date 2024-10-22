@@ -8,6 +8,12 @@ import * as dbPost from "@/lib/data/db/post";
 import { CommentCollection, getComment } from "@/lib/data/atproto/comment";
 import { VoteRecord } from "@/lib/data/atproto/vote";
 import { getPdsUrl } from "@/lib/data/atproto/did";
+import {
+  unauthed_createComment,
+  unauthed_createCommentVote,
+  unauthed_deleteComment,
+} from "@/lib/data/db/comment";
+import { unauthed_createPostVote } from "@/lib/data/db/vote";
 
 export async function POST(request: Request) {
   const auth = request.headers.get("Authorization");
@@ -87,65 +93,19 @@ export async function POST(request: Request) {
               `[naughty] Cannot comment on deleted post. ${repo}`,
             );
           }
-          //TODO: move this to db folder
-          const [insertedComment] = await tx
-            .insert(schema.Comment)
-            .values({
+          await unauthed_createComment({
+            comment: {
               cid: comment.cid,
-              rkey,
-              body: comment.content,
-              postId: post.id,
-              authorDid: repo,
-              createdAt: new Date(comment.createdAt),
-              parentCommentId: parentComment?.id ?? null,
-            })
-            .returning({
-              commentId: schema.Comment.id,
-              postId: schema.Comment.postId,
-            });
-
-          if (!insertedComment) {
-            throw new Error("Failed to insert comment");
-          }
-
-          await tx
-            .update(schema.PostAggregates)
-            .set({
-              commentCount: sql`${schema.PostAggregates.commentCount} + 1`,
-            })
-            .where(eq(schema.PostAggregates.postId, insertedComment.postId));
-
-          await tx.insert(schema.CommentAggregates).values({
-            createdAt: new Date(),
-            commentId: insertedComment?.commentId,
-            voteCount: 1,
-            rank: sql<number>`
-                (CAST(1 AS REAL) / (pow(2,1.8)))`,
+              content: comment.content,
+              createdAt: comment.createdAt,
+            },
+            postId: post.id,
+            repo,
+            rkey,
+            parentCommentId: parentComment?.id,
           });
         } else if (op.action === "delete") {
-          const [deletedComment] = await tx
-            .update(schema.Comment)
-            .set({ status: "deleted" })
-            .where(
-              and(
-                eq(schema.Comment.rkey, rkey),
-                eq(schema.Comment.authorDid, repo),
-              ),
-            )
-            .returning({
-              postId: schema.Comment.postId,
-            });
-
-          if (!deletedComment) {
-            throw new Error("Failed to delete comment");
-          }
-
-          await tx
-            .update(schema.PostAggregates)
-            .set({
-              commentCount: sql`${schema.PostAggregates.commentCount} - 1`,
-            })
-            .where(eq(schema.PostAggregates.postId, deletedComment.postId));
+          await unauthed_deleteComment({ rkey, repo });
         }
 
         await tx.insert(schema.ConsumedOffset).values({ offset: seq });
@@ -194,47 +154,29 @@ export async function POST(request: Request) {
             hydratedVoteRecordValue.subject.uri.collection ===
             atprotoPost.PostCollection
           ) {
-            await tx.insert(schema.PostVote).values({
+            await unauthed_createPostVote({
               postId: subject.id,
-              authorDid: repo,
-              createdAt: new Date(hydratedVoteRecordValue.createdAt),
-              cid: hydratedRecord.cid,
+              repo,
               rkey,
-            });
-
-            console.log("Updating post aggregates");
-            await tx
-              .update(schema.PostAggregates)
-              .set({
-                voteCount: sql`${schema.PostAggregates.voteCount} + 1`,
-              })
-              .where(eq(schema.PostAggregates.postId, subject.id));
-
-            await tx.update(schema.PostAggregates).set({
-              rank: sql<number>`
-                (CAST(COALESCE(${schema.PostAggregates.voteCount}, 1) AS REAL) / (pow((JULIANDAY('now') - JULIANDAY(${schema.PostAggregates.createdAt})) * 24 + 2,1.8)))`,
+              hydratedVoteRecordValue: {
+                cid: hydratedVoteRecordValue.subject.cid,
+                createdAt: hydratedVoteRecordValue.createdAt,
+              },
+              hydratedRecord,
+              subjectId: subject.id,
             });
           } else if (
             hydratedVoteRecordValue.subject.uri.collection === CommentCollection
           ) {
-            await tx.insert(schema.CommentVote).values({
-              commentId: subject.id,
-              authorDid: repo,
-              createdAt: new Date(hydratedVoteRecordValue.createdAt),
-              cid: hydratedRecord.cid,
+            await unauthed_createCommentVote({
+              hydratedRecord: { cid: hydratedRecord.cid },
+              hydratedVoteRecordValue: {
+                cid: hydratedVoteRecordValue.subject.cid,
+                createdAt: hydratedVoteRecordValue.createdAt,
+              },
+              subject,
+              repo,
               rkey,
-            });
-
-            await tx
-              .update(schema.CommentAggregates)
-              .set({
-                voteCount: sql`${schema.CommentAggregates.voteCount} + 1`,
-              })
-              .where(eq(schema.CommentAggregates.commentId, subject.id));
-
-            await tx.update(schema.PostAggregates).set({
-              rank: sql<number>`
-                (CAST(COALESCE(${schema.CommentAggregates.voteCount}, 1) AS REAL) / (pow((JULIANDAY('now') - JULIANDAY(${schema.CommentAggregates.createdAt})) * 24 + 2,1.8)))`,
             });
           }
         } else if (op.action === "delete") {
