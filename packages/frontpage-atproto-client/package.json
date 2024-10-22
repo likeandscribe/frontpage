@@ -1,0 +1,15 @@
+{
+  "private": true,
+  "name": "@repo/lexicon-schemas",
+  "type": "module",
+  "scripts": {},
+  "devDependencies": {
+    "@atproto/lex-cli": "^0.5.1",
+    "@repo/typescript-config": "workspace:*"
+  },
+  "dependencies": {
+    "@atproto/lexicon": "^0.4.2",
+    "@atproto/xrpc": "^0.6.3",
+    "multiformats": "^13.3.0"
+  }
+}
