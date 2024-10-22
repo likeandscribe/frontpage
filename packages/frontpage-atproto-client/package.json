@@ -13,7 +13,8 @@
   },
   "scripts": {
     "format:write": "prettier --write src",
-    "fetch-lexicons": "tsx ./fetch-lexicons.mts"
+    "fetch-lexicons": "tsx ./fetch-lexicons.mts",
+    "type-check": "tsc --noEmit"
   },
   "dependencies": {
     "@atproto/lexicon": "^0.4.2",
