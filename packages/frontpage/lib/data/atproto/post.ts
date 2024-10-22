@@ -7,7 +7,6 @@ import {
 import { z } from "zod";
 import { DataLayerError } from "../error";
 import { DID, getPdsUrl } from "./did";
-import { XrpcClient } from "@atproto/xrpc";
 
 export const PostCollection = "fyi.unravel.frontpage.post";
 
@@ -23,6 +22,20 @@ type PostInput = {
   title: string;
   url: string;
 };
+
+export async function createPost({ title, url }: PostInput) {
+  const record = { title, url, createdAt: new Date().toISOString() };
+  PostRecord.parse(record);
+
+  const result = await atprotoCreateRecord({
+    record,
+    collection: PostCollection,
+  });
+
+  return {
+    rkey: result.uri.rkey,
+  };
+}
 
 export async function deletePost(rkey: string) {
   await atprotoDeleteRecord({
