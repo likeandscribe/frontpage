@@ -33,7 +33,7 @@ export function InfiniteList<TCursor>({ fallback, ...props }: Props<TCursor>) {
 }
 
 export const InfiniteListContext = createContext({
-  revalidatePage: (): void => {
+  revalidatePage: async (): Promise<void> => {
     throw new Error(
       "Cannot call InfiniteListContext.revalidate when not inside of an InfiniteList",
     );
@@ -73,13 +73,13 @@ function InfinteListInner<TCursor>({
           <Fragment key={String(page.nextCursor)}>
             <InfiniteListContext.Provider
               value={{
-                revalidatePage: () => {
-                  const previousCursor = pages.at(indx - 1)?.nextCursor;
-                  void mutate(data, {
+                revalidatePage: async () => {
+                  const currentCursor = pages[indx - 1]?.nextCursor;
+                  await mutate(data, {
                     revalidate: (_data, args) =>
-                      !previousCursor ||
+                      !currentCursor ||
                       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                      (args as any)[1] === previousCursor,
+                      (args as any)[1] === currentCursor,
                   });
                 },
               }}
