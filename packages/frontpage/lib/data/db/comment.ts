@@ -279,31 +279,64 @@ export type UnauthedCreateCommentInput = {
     cid: string;
     content: string;
     createdAt: string;
+    parent?: {
+      cid: string;
+      uri: object;
+    };
+    post: {
+      cid: string;
+      uri: {
+        authority: string;
+        collection: "fyi.unravel.frontpage.post";
+        rkey: string;
+        value: string;
+      };
+    };
   };
-  postId: number;
   repo: DID;
   rkey: string;
-  parentCommentId?: number;
 };
 
 export async function unauthed_createComment({
   comment,
-  postId,
   repo,
   rkey,
-  parentCommentId,
 }: UnauthedCreateCommentInput) {
   await db.transaction(async (tx) => {
+    const parentComment =
+      comment.parent != null
+        ? (
+            await tx
+              .select()
+              .from(schema.Comment)
+              .where(eq(schema.Comment.cid, comment.parent.cid))
+          )[0]
+        : null;
+
+    const post = (
+      await tx
+        .select()
+        .from(schema.Post)
+        .where(eq(schema.Post.cid, comment.post.cid))
+    )[0];
+
+    if (!post) {
+      throw new Error("Post not found");
+    }
+
+    if (post.status !== "live") {
+      throw new Error(`[naughty] Cannot comment on deleted post. ${repo}`);
+    }
     const [insertedComment] = await tx
       .insert(schema.Comment)
       .values({
         cid: comment.cid,
         rkey,
         body: comment.content,
-        postId: postId,
+        postId: post.id,
         authorDid: repo,
         createdAt: new Date(comment.createdAt),
-        parentCommentId: parentCommentId ?? null,
+        parentCommentId: parentComment?.id ?? null,
       })
       .returning({
         commentId: schema.Comment.id,
@@ -327,51 +360,6 @@ export async function unauthed_createComment({
       voteCount: 1,
       rank: sql<number>`
                 (CAST(1 AS REAL) / (pow(2,1.8)))`,
-    });
-  });
-}
-
-export type UnauthedCreateCommentVoteInput = {
-  subject: {
-    id: number;
-  };
-  repo: DID;
-  rkey: string;
-  hydratedVoteRecordValue: {
-    createdAt: string;
-    cid: string;
-  };
-  hydratedRecord: {
-    cid: string;
-  };
-};
-
-export async function unauthed_createCommentVote({
-  subject,
-  repo,
-  rkey,
-  hydratedVoteRecordValue,
-  hydratedRecord,
-}: UnauthedCreateCommentVoteInput) {
-  await db.transaction(async (tx) => {
-    await tx.insert(schema.CommentVote).values({
-      commentId: subject.id,
-      authorDid: repo,
-      createdAt: new Date(hydratedVoteRecordValue.createdAt),
-      cid: hydratedRecord.cid,
-      rkey,
-    });
-
-    await tx
-      .update(schema.CommentAggregates)
-      .set({
-        voteCount: sql`${schema.CommentAggregates.voteCount} + 1`,
-      })
-      .where(eq(schema.CommentAggregates.commentId, subject.id));
-
-    await tx.update(schema.PostAggregates).set({
-      rank: sql<number>`
-                (CAST(COALESCE(${schema.CommentAggregates.voteCount}, 1) AS REAL) / (pow((JULIANDAY('now') - JULIANDAY(${schema.CommentAggregates.createdAt})) * 24 + 2,1.8)))`,
     });
   });
 }

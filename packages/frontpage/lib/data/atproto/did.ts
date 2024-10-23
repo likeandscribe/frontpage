@@ -25,7 +25,6 @@ export const getDidDoc = cache(async (did: DID) => {
     },
   });
 
-  console.log("getDidDoc", did, response);
   return PlcDocument.parse(await response.json());
 });
 
