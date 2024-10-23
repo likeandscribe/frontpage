@@ -1,7 +1,7 @@
 "use client";
 
 import useSWRInfinite, { unstable_serialize } from "swr/infinite";
-import { Fragment, ReactNode, startTransition } from "react";
+import { createContext, Fragment, ReactNode, startTransition } from "react";
 import { useInView } from "react-intersection-observer";
 import { SWRConfig } from "swr";
 
@@ -32,12 +32,20 @@ export function InfiniteList<TCursor>({ fallback, ...props }: Props<TCursor>) {
   );
 }
 
+export const InfiniteListContext = createContext({
+  revalidatePage: (): void => {
+    throw new Error(
+      "Cannot call InfiniteListContext.revalidate when not inside of an InfiniteList",
+    );
+  },
+});
+
 function InfinteListInner<TCursor>({
   getMoreItemsAction,
   emptyMessage,
   cacheKey,
 }: Omit<Props<TCursor>, "fallback">) {
-  const { data, size, setSize } = useSWRInfinite(
+  const { data, size, setSize, mutate } = useSWRInfinite(
     (_, previousPageData: Page<TCursor> | null) => {
       if (previousPageData && !previousPageData.pageSize) return null; // reached the end
       return [cacheKey, previousPageData?.nextCursor ?? null];
@@ -63,7 +71,21 @@ function InfinteListInner<TCursor>({
       {pages.map((page, indx) => {
         return (
           <Fragment key={String(page.nextCursor)}>
-            {page.content}
+            <InfiniteListContext.Provider
+              value={{
+                revalidatePage: () => {
+                  const previousCursor = pages.at(indx - 1)?.nextCursor;
+                  void mutate(data, {
+                    revalidate: (_data, args) =>
+                      !previousCursor ||
+                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                      (args as any)[1] === previousCursor,
+                  });
+                },
+              }}
+            >
+              {page.content}
+            </InfiniteListContext.Provider>
 
             {indx === pages.length - 1 ? (
               page.pageSize === 0 ? (

@@ -5,7 +5,6 @@ import {
   Cursor,
   getNotifications,
   markAllNotificationsRead,
-  markNotificationRead,
   Notification as NotificationType,
 } from "@/lib/data/db/notification";
 import { InfiniteList, Page } from "@/lib/infinite-list";
@@ -16,6 +15,7 @@ import {
   CheckCircledIcon,
 } from "@radix-ui/react-icons";
 import { revalidatePath } from "next/cache";
+import { MarkAsReadButton } from "./_lib/mark-as-read-button";
 
 export default async function NotificationsPage() {
   return (
@@ -41,7 +41,7 @@ export default async function NotificationsPage() {
         cacheKey="notifications"
         emptyMessage="There are no more notifications."
         getMoreItemsAction={getMoreNotifications}
-        fallback={getMoreNotifications(null)}
+        fallback={await getMoreNotifications(null)}
       />
     </>
   );
@@ -96,12 +96,6 @@ async function getNotificationViewModel(notification: NotificationType) {
   exhaustiveCheck(notification.type);
 }
 
-async function markAsRead(id: number) {
-  "use server";
-  await markNotificationRead(id);
-  revalidatePath("/notifications");
-}
-
 async function Notification({
   notification,
 }: {
@@ -121,14 +115,7 @@ async function Notification({
             <TimeAgo createdAt={model.time} />
           </div>
         </div>
-        {!notification.read && (
-          <form action={markAsRead.bind(null, model.id)}>
-            <Button variant="ghost" size="icon">
-              <CheckCircledIcon className="h-4 w-4" />
-              <span className="sr-only">Mark as read</span>
-            </Button>
-          </form>
-        )}
+        {!notification.read && <MarkAsReadButton notificationId={model.id} />}
       </div>
       <div className="mt-2 text-sm">
         <p>{model.body}</p>
