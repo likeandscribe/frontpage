@@ -28,7 +28,7 @@ export default async function CollectionPage({
       <h1>
         {params.collection} records{" "}
         <Link
-          href={`/collection-rss?u=at://${params.identifier}/${params.collection}</h1>}`}
+          href={`/collection-rss?u=at://${params.identifier}/${params.collection}`}
           title="RSS feed"
         >
           🛜
