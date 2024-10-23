@@ -1,0 +1,32 @@
+{
+  "private": true,
+  "name": "@repo/frontpage-atproto-client",
+  "type": "module",
+  "main": "src/index.ts",
+  "exports": {
+    ".": {
+      "import": "./src/index.ts"
+    },
+    "./lexicons": {
+      "import": "./src/lexicons.ts"
+    }
+  },
+  "scripts": {
+    "format:write": "prettier --write src",
+    "fetch-lexicons": "tsx ./fetch-lexicons.mts",
+    "type-check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@atproto/lexicon": "^0.4.2",
+    "@atproto/xrpc": "^0.6.3",
+    "multiformats": "^13.3.0"
+  },
+  "devDependencies": {
+    "@atproto/lex-cli": "^0.5.1",
+    "@repo/typescript-config": "workspace:*",
+    "@types/adm-zip": "^0.5.5",
+    "@types/node": "^20",
+    "adm-zip": "^0.5.16",
+    "tsx": "^4.16.5"
+  }
+}
