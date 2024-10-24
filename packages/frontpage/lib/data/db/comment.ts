@@ -1,19 +1,16 @@
 import "server-only";
 import { cache } from "react";
 import { db } from "@/lib/db";
-import {
-  eq,
-  sql,
-  count,
-  desc,
-  and,
-  InferSelectModel,
-  isNotNull,
-} from "drizzle-orm";
+import { eq, sql, desc, and, InferSelectModel, isNotNull } from "drizzle-orm";
 import * as schema from "@/lib/schema";
 import { getUser, isAdmin } from "../user";
 import { DID } from "../atproto/did";
+import * as atprotoComment from "../atproto/comment";
 import { Prettify } from "@/lib/utils";
+import {
+  deleteCommentAggregateTrigger,
+  newCommentAggregateTrigger,
+} from "./triggers";
 
 type CommentRow = InferSelectModel<typeof schema.Comment>;
 
@@ -21,8 +18,8 @@ type CommentExtras = {
   children?: CommentModel[];
   userHasVoted: boolean;
   // These properties are returned from some methods but not others
-  rank?: number;
-  voteCount?: number;
+  rank: number;
+  voteCount: number;
   postAuthorDid?: DID;
   postRkey?: string;
 };
@@ -64,26 +61,6 @@ const buildUserHasVotedQuery = cache(async () => {
 //   .as("bannedUser");
 
 export const getCommentsForPost = cache(async (postId: number) => {
-  const votes = db
-    .select({
-      commentId: schema.CommentVote.commentId,
-      voteCount: count(schema.CommentVote.id).as("voteCount"),
-    })
-    .from(schema.CommentVote)
-    .groupBy(schema.CommentVote.commentId)
-    .as("vote");
-
-  const commentRank = sql`
-    CAST(COALESCE(${votes.voteCount}, 1) AS REAL) / (
-    pow(
-      (JULIANDAY('now') - JULIANDAY(${schema.Comment.createdAt})) * 24 + 2,
-      1.8
-    )
-  )
-  `
-    .mapWith(Number)
-    .as("rank");
-
   const hasVoted = await buildUserHasVotedQuery();
 
   const rows = await db
@@ -96,18 +73,19 @@ export const getCommentsForPost = cache(async (postId: number) => {
       createdAt: schema.Comment.createdAt,
       authorDid: schema.Comment.authorDid,
       status: schema.Comment.status,
-      voteCount: sql`coalesce(${votes.voteCount}, 0) + 1`
-        .mapWith(Number)
-        .as("voteCount"),
-      rank: commentRank,
+      voteCount: schema.CommentAggregates.voteCount,
+      rank: schema.CommentAggregates.rank,
       userHasVoted: hasVoted.userHasVoted,
       parentCommentId: schema.Comment.parentCommentId,
     })
     .from(schema.Comment)
     .where(eq(schema.Comment.postId, postId))
-    .leftJoin(votes, eq(votes.commentId, schema.Comment.id))
+    .innerJoin(
+      schema.CommentAggregates,
+      eq(schema.Comment.id, schema.CommentAggregates.id),
+    )
     .leftJoin(hasVoted, eq(hasVoted.commentId, schema.Comment.id))
-    .orderBy(desc(commentRank));
+    .orderBy(desc(schema.CommentAggregates.rank));
 
   return nestCommentRows(rows);
 });
@@ -124,8 +102,8 @@ export const getCommentWithChildren = cache(
 const nestCommentRows = (
   items: (CommentRow & {
     userHasVoted: boolean;
-    voteCount?: number;
-    rank?: number;
+    voteCount: number;
+    rank: number;
   })[],
   id: number | null = null,
 ): CommentModel[] => {
@@ -139,7 +117,8 @@ const nestCommentRows = (
     const children = nestCommentRows(items, item.id);
     const transformed = {
       userHasVoted: item.userHasVoted !== null,
-      voteCount: item.voteCount ?? 0,
+      voteCount: item.voteCount,
+      rank: item.rank,
     };
     if (item.status === "live") {
       comments.push({
@@ -272,4 +251,103 @@ export async function moderateComment({
         eq(schema.Comment.cid, cid),
       ),
     );
+}
+
+export type UnauthedCreateCommentInput = {
+  cid: string;
+  comment: atprotoComment.Comment;
+  repo: DID;
+  rkey: string;
+};
+
+export async function unauthed_createComment({
+  cid,
+  comment,
+  repo,
+  rkey,
+}: UnauthedCreateCommentInput) {
+  await db.transaction(async (tx) => {
+    const parentComment =
+      comment.parent != null
+        ? (
+            await tx
+              .select()
+              .from(schema.Comment)
+              .where(eq(schema.Comment.cid, comment.parent.cid))
+          )[0]
+        : null;
+
+    const post = (
+      await tx
+        .select()
+        .from(schema.Post)
+        .where(eq(schema.Post.cid, comment.post.cid))
+    )[0];
+
+    if (!post) {
+      throw new Error("Post not found");
+    }
+
+    if (post.status !== "live") {
+      throw new Error(`[naughty] Cannot comment on deleted post. ${repo}`);
+    }
+    const [insertedComment] = await tx
+      .insert(schema.Comment)
+      .values({
+        cid,
+        rkey,
+        body: comment.content,
+        postId: post.id,
+        authorDid: repo,
+        createdAt: new Date(comment.createdAt),
+        parentCommentId: parentComment?.id ?? null,
+      })
+      .returning({
+        id: schema.Comment.id,
+        postId: schema.Comment.postId,
+      });
+
+    if (!insertedComment) {
+      throw new Error("Failed to insert comment");
+    }
+
+    await newCommentAggregateTrigger(
+      insertedComment.postId,
+      insertedComment.id,
+      tx,
+    );
+  });
+}
+
+export type UnauthedDeleteCommentInput = {
+  rkey: string;
+  repo: DID;
+};
+
+export async function unauthed_deleteComment({
+  rkey,
+  repo,
+}: UnauthedDeleteCommentInput) {
+  await db.transaction(async (tx) => {
+    const [deletedComment] = await tx
+      .update(schema.Comment)
+      .set({ status: "deleted" })
+      .where(
+        and(eq(schema.Comment.rkey, rkey), eq(schema.Comment.authorDid, repo)),
+      )
+      .returning({
+        id: schema.Comment.id,
+        postId: schema.Comment.postId,
+      });
+
+    if (!deletedComment) {
+      throw new Error("Failed to delete comment");
+    }
+
+    await deleteCommentAggregateTrigger(
+      deletedComment.postId,
+      deletedComment.id,
+      tx,
+    );
+  });
 }

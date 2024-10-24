@@ -5,6 +5,8 @@ import {
   customType,
   unique,
   foreignKey,
+  index,
+  SQLiteColumn,
 } from "drizzle-orm/sqlite-core";
 import type { DID } from "./data/atproto/did";
 import {
@@ -12,7 +14,7 @@ import {
   MAX_POST_TITLE_LENGTH,
   MAX_POST_URL_LENGTH,
 } from "./data/db/constants";
-import { sql } from "drizzle-orm";
+import { ColumnBaseConfig, sql } from "drizzle-orm";
 
 const did = customType<{ data: DID }>({
   dataType() {
@@ -30,6 +32,12 @@ const dateIsoText = customType<{ data: Date; driverData: string }>({
 
 const createStatusColumn = (col: string) =>
   text(col, { enum: ["live", "deleted", "moderator_hidden"] }).default("live");
+
+export type NumberColumn = SQLiteColumn<ColumnBaseConfig<"number", string>>;
+
+export type DateIsoColumn = SQLiteColumn<
+  ColumnBaseConfig<"custom", string> & { data: Date }
+>;
 
 export const Post = sqliteTable(
   "posts",
@@ -72,6 +80,29 @@ export const PostVote = sqliteTable(
   }),
 );
 
+export const PostAggregates = sqliteTable(
+  "post_aggregates",
+  {
+    id: integer("id").primaryKey(),
+    postId: integer("post_id")
+      .notNull()
+      .references(() => Post.id),
+    commentCount: integer("comment_count").notNull().default(0),
+    voteCount: integer("vote_count").notNull().default(0),
+    rank: integer("rank")
+      .notNull()
+      .default(sql`(CAST(1 AS REAL) / (pow(2,1.8)))`),
+    createdAt: dateIsoText("created_at")
+      .notNull()
+      .default(sql`(strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))`),
+  },
+  (t) => ({
+    unique_postId: unique().on(t.postId),
+    post_index: index("post_id_idx").on(t.postId),
+    rank_index: index("rank_idx").on(t.rank),
+  }),
+);
+
 export const Comment = sqliteTable(
   "comments",
   {
@@ -97,6 +128,27 @@ export const Comment = sqliteTable(
       name: "parent_comment_id_fkey",
     }),
     unique_author_rkey: unique().on(t.authorDid, t.rkey),
+  }),
+);
+
+export const CommentAggregates = sqliteTable(
+  "comment_aggregates",
+  {
+    id: integer("id").primaryKey(),
+    commentId: integer("comment_id")
+      .notNull()
+      .references(() => Comment.id)
+      .unique(),
+    voteCount: integer("vote_count").notNull().default(0),
+    rank: integer("rank")
+      .notNull()
+      .default(sql`(CAST(1 AS REAL) / (pow(2,1.8)))`),
+    createdAt: dateIsoText("created_at")
+      .notNull()
+      .default(sql`(strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))`),
+  },
+  (t) => ({
+    comment_index: index("comment_id_idx").on(t.commentId),
   }),
 );
 

@@ -1,6 +1,5 @@
 import { db } from "@/lib/db";
 import * as schema from "@/lib/schema";
-import { and, eq } from "drizzle-orm";
 import { atprotoGetRecord } from "@/lib/data/atproto/record";
 import { Commit } from "@/lib/data/atproto/event";
 import * as atprotoPost from "@/lib/data/atproto/post";
@@ -8,6 +7,15 @@ import * as dbPost from "@/lib/data/db/post";
 import { CommentCollection, getComment } from "@/lib/data/atproto/comment";
 import { VoteRecord } from "@/lib/data/atproto/vote";
 import { getPdsUrl } from "@/lib/data/atproto/did";
+import {
+  unauthed_createComment,
+  unauthed_deleteComment,
+} from "@/lib/data/db/comment";
+import {
+  unauthed_createPostVote,
+  unauthed_deleteVote,
+  unauthed_createCommentVote,
+} from "@/lib/data/db/vote";
 
 export async function POST(request: Request) {
   const auth = request.headers.get("Authorization");
@@ -57,142 +65,59 @@ export async function POST(request: Request) {
     }
     // repo is actually the did of the user
     if (collection === CommentCollection) {
+      if (op.action === "create") {
+        const comment = await getComment({ rkey, repo });
+
+        await unauthed_createComment({
+          cid: comment.cid,
+          comment,
+          repo,
+          rkey,
+        });
+      } else if (op.action === "delete") {
+        await unauthed_deleteComment({ rkey, repo });
+      }
+
       await db.transaction(async (tx) => {
-        if (op.action === "create") {
-          const comment = await getComment({ rkey, repo });
-
-          const parentComment =
-            comment.parent != null
-              ? (
-                  await tx
-                    .select()
-                    .from(schema.Comment)
-                    .where(eq(schema.Comment.cid, comment.parent.cid))
-                )[0]
-              : null;
-
-          const post = (
-            await tx
-              .select()
-              .from(schema.Post)
-              .where(eq(schema.Post.cid, comment.post.cid))
-          )[0];
-
-          if (!post) {
-            throw new Error("Post not found");
-          }
-
-          if (post.status !== "live") {
-            throw new Error(
-              `[naughty] Cannot comment on deleted post. ${repo}`,
-            );
-          }
-          //TODO: move this to db folder
-          await tx.insert(schema.Comment).values({
-            cid: comment.cid,
-            rkey,
-            body: comment.content,
-            postId: post.id,
-            authorDid: repo,
-            createdAt: new Date(comment.createdAt),
-            parentCommentId: parentComment?.id ?? null,
-          });
-        } else if (op.action === "delete") {
-          await tx
-            .update(schema.Comment)
-            .set({ status: "deleted" })
-            .where(
-              and(
-                eq(schema.Comment.rkey, rkey),
-                eq(schema.Comment.authorDid, repo),
-              ),
-            );
-        }
-
         await tx.insert(schema.ConsumedOffset).values({ offset: seq });
       });
     }
 
     if (collection === "fyi.unravel.frontpage.vote") {
-      await db.transaction(async (tx) => {
-        if (op.action === "create") {
-          const hydratedRecord = await atprotoGetRecord({
-            serviceEndpoint: service,
+      if (op.action === "create") {
+        const hydratedRecord = await atprotoGetRecord({
+          serviceEndpoint: service,
+          repo,
+          collection,
+          rkey,
+        });
+        const hydratedVoteRecordValue = VoteRecord.parse(hydratedRecord.value);
+
+        if (
+          hydratedVoteRecordValue.subject.uri.collection ===
+          atprotoPost.PostCollection
+        ) {
+          await unauthed_createPostVote({
             repo,
-            collection,
+            rkey,
+            vote: hydratedVoteRecordValue,
+            cid: hydratedRecord.cid,
+          });
+        } else if (
+          hydratedVoteRecordValue.subject.uri.collection === CommentCollection
+        ) {
+          await unauthed_createCommentVote({
+            cid: hydratedRecord.cid,
+            vote: hydratedVoteRecordValue,
+            repo,
             rkey,
           });
-          const hydratedVoteRecordValue = VoteRecord.parse(
-            hydratedRecord.value,
-          );
-
-          const subjectTable = {
-            [atprotoPost.PostCollection]: schema.Post,
-            [CommentCollection]: schema.Comment,
-          }[hydratedVoteRecordValue.subject.uri.collection];
-
-          const subject = (
-            await tx
-              .select()
-              .from(subjectTable)
-              .where(
-                eq(subjectTable.rkey, hydratedVoteRecordValue.subject.uri.rkey),
-              )
-          )[0];
-
-          if (!subject) {
-            throw new Error(
-              `Subject not found with uri: ${hydratedVoteRecordValue.subject.uri.value}`,
-            );
-          }
-
-          if (subject.authorDid === repo) {
-            throw new Error(`[naughty] Cannot vote on own content ${repo}`);
-          }
-
-          if (
-            hydratedVoteRecordValue.subject.uri.collection ===
-            atprotoPost.PostCollection
-          ) {
-            await tx.insert(schema.PostVote).values({
-              postId: subject.id,
-              authorDid: repo,
-              createdAt: new Date(hydratedVoteRecordValue.createdAt),
-              cid: hydratedRecord.cid,
-              rkey,
-            });
-          } else if (
-            hydratedVoteRecordValue.subject.uri.collection === CommentCollection
-          ) {
-            await tx.insert(schema.CommentVote).values({
-              commentId: subject.id,
-              authorDid: repo,
-              createdAt: new Date(hydratedVoteRecordValue.createdAt),
-              cid: hydratedRecord.cid,
-              rkey,
-            });
-          }
-        } else if (op.action === "delete") {
-          // Try deleting from both tables. In reality only one will have a record.
-          // Relies on sqlite not throwing an error if the record doesn't exist.
-          await tx
-            .delete(schema.CommentVote)
-            .where(
-              and(
-                eq(schema.CommentVote.rkey, rkey),
-                eq(schema.CommentVote.authorDid, repo),
-              ),
-            );
-          await tx
-            .delete(schema.PostVote)
-            .where(
-              and(
-                eq(schema.PostVote.rkey, rkey),
-                eq(schema.PostVote.authorDid, repo),
-              ),
-            );
         }
+      } else if (op.action === "delete") {
+        await unauthed_deleteVote(rkey, repo);
+      }
 
+      await db.transaction(async (tx) => {
         await tx.insert(schema.ConsumedOffset).values({ offset: seq });
       });
     }
