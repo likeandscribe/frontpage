@@ -7,6 +7,8 @@ import Link from "@/lib/link";
 import { Suspense, useState } from "react";
 import useSWR from "swr";
 
+import { FETCH_LIMIT } from "@/app/consts";
+
 export function CollectionItems({
   repo,
   collection,
@@ -49,7 +51,7 @@ export function CollectionItems({
             fetchKey={`listCollections/collection:${collection}/cursor:${data.cursor!}`}
           />
         </Suspense>
-      ) : data.cursor !== "self" && data.records.length > 0 ? (
+      ) : data.cursor !== "self" && data.records.length > 0 && data.records.length == FETCH_LIMIT ? (
         <button type="button" onClick={() => setMore(true)}>
           Load more
         </button>
