@@ -11,7 +11,7 @@ type VoteButtonProps = {
   voteAction: () => Promise<void>;
   unvoteAction: () => Promise<void>;
   initialState: VoteButtonState;
-  votes: number;
+  votes?: number;
 };
 
 export function VoteButton({
@@ -58,9 +58,10 @@ export function VoteButton({
         />
       </Button>
       <span className="font-medium">
-        {votes +
-          Number(initialState === "authored") +
-          Number(hasOptimisticallyVoted && initialState !== "voted" ? 1 : -1)}
+        {votes !== undefined &&
+          votes +
+            Number(initialState === "authored") +
+            Number(hasOptimisticallyVoted && initialState !== "voted" ? 1 : -1)}
       </span>
     </form>
   );
