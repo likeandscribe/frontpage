@@ -17,7 +17,7 @@ type Transaction = SQLiteTransaction<
   ExtractTablesWithRelations<typeof schema>
 >;
 
-const updateColumnValue = (column: schema.NumberColumn, value: number) => {
+const add = (column: schema.NumberColumn, value: number) => {
   return sql`${column} + ${value}`;
 };
 const newRankSql = sql`(CAST(1 AS REAL) / (pow(2,1.8)))`;
@@ -57,7 +57,7 @@ export const newPostVoteAggregateTrigger = async (
   await tx
     .update(schema.PostAggregates)
     .set({
-      voteCount: updateColumnValue(schema.PostAggregates.voteCount, 1),
+      voteCount: add(schema.PostAggregates.voteCount, 1),
     })
     .where(eq(schema.PostAggregates.postId, postId));
 
@@ -72,7 +72,7 @@ export const deletePostVoteAggregateTrigger = async (
   await tx
     .update(schema.PostAggregates)
     .set({
-      voteCount: updateColumnValue(schema.PostAggregates.voteCount, -1),
+      voteCount: add(schema.PostAggregates.voteCount, -1),
     })
     .where(eq(schema.PostAggregates.postId, postId));
 
@@ -97,7 +97,7 @@ export const newCommentAggregateTrigger = async (
   await tx
     .update(schema.PostAggregates)
     .set({
-      commentCount: updateColumnValue(schema.PostAggregates.commentCount, 1),
+      commentCount: add(schema.PostAggregates.commentCount, 1),
     })
     .where(eq(schema.PostAggregates.postId, postId));
 
@@ -113,7 +113,7 @@ export const newCommentVoteAggregateTrigger = async (
   await tx
     .update(schema.CommentAggregates)
     .set({
-      voteCount: updateColumnValue(schema.CommentAggregates.voteCount, 1),
+      voteCount: add(schema.CommentAggregates.voteCount, 1),
     })
     .where(eq(schema.CommentAggregates.commentId, commentId));
 
@@ -129,7 +129,7 @@ export const deleteCommentAggregateTrigger = async (
   await tx
     .update(schema.PostAggregates)
     .set({
-      commentCount: updateColumnValue(schema.PostAggregates.commentCount, -1),
+      commentCount: add(schema.PostAggregates.commentCount, -1),
     })
     .where(eq(schema.PostAggregates.postId, postId));
 
@@ -145,7 +145,7 @@ export const deleteCommentVoteAggregateTrigger = async (
   await tx
     .update(schema.CommentAggregates)
     .set({
-      voteCount: updateColumnValue(schema.CommentAggregates.voteCount, -1),
+      voteCount: add(schema.CommentAggregates.voteCount, -1),
     })
     .where(eq(schema.CommentAggregates.commentId, commentId));
 
