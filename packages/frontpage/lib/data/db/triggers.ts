@@ -1,7 +1,6 @@
 import * as schema from "@/lib/schema";
 import { ResultSet } from "@libsql/client";
 import {
-  AnyColumn,
   ExtractTablesWithRelations,
   and,
   eq,
@@ -11,14 +10,14 @@ import {
 } from "drizzle-orm";
 import { SQLiteTransaction } from "drizzle-orm/sqlite-core";
 
-const updateColumnValue = (column: AnyColumn, value: number) => {
+const updateColumnValue = (column: schema.NumberColumn, value: number) => {
   return sql`${column} + ${value}`;
 };
 const newRankSql = sql`(CAST(1 AS REAL) / (pow(2,1.8)))`;
 
 export const calculateRankSql = (
-  voteCountColumn: AnyColumn,
-  createdAtColumn: AnyColumn,
+  voteCountColumn: schema.NumberColumn,
+  createdAtColumn: schema.DateIsoColumn,
 ) => {
   return sql<number>`
     (CAST(COALESCE(${voteCountColumn}, 1) AS REAL) / (pow((JULIANDAY('now') - JULIANDAY(${createdAtColumn})) * 24 + 2, 1.8)))`;

@@ -6,6 +6,7 @@ import {
   unique,
   foreignKey,
   index,
+  SQLiteColumn,
 } from "drizzle-orm/sqlite-core";
 import type { DID } from "./data/atproto/did";
 import {
@@ -13,7 +14,7 @@ import {
   MAX_POST_TITLE_LENGTH,
   MAX_POST_URL_LENGTH,
 } from "./data/db/constants";
-import { sql } from "drizzle-orm";
+import { ColumnBaseConfig, sql } from "drizzle-orm";
 
 const did = customType<{ data: DID }>({
   dataType() {
@@ -31,6 +32,12 @@ const dateIsoText = customType<{ data: Date; driverData: string }>({
 
 const createStatusColumn = (col: string) =>
   text(col, { enum: ["live", "deleted", "moderator_hidden"] }).default("live");
+
+export type NumberColumn = SQLiteColumn<ColumnBaseConfig<"number", string>>;
+
+export type DateIsoColumn = SQLiteColumn<
+  ColumnBaseConfig<"custom", string> & { data: Date }
+>;
 
 export const Post = sqliteTable(
   "posts",
