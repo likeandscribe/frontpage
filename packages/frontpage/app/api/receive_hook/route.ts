@@ -101,13 +101,13 @@ export async function POST(request: Request) {
             repo,
             rkey,
             vote: hydratedVoteRecordValue,
-            hydratedRecord,
+            cid: hydratedRecord.cid,
           });
         } else if (
           hydratedVoteRecordValue.subject.uri.collection === CommentCollection
         ) {
           await unauthed_createCommentVote({
-            hydratedRecord,
+            cid: hydratedRecord.cid,
             vote: hydratedVoteRecordValue,
             repo,
             rkey,

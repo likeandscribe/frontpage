@@ -53,16 +53,14 @@ export type UnauthedCreatePostVoteInput = {
   repo: DID;
   rkey: string;
   vote: atprotoVote.Vote;
-  hydratedRecord: {
-    cid: string;
-  };
+  cid: string;
 };
 
 export const unauthed_createPostVote = async ({
   repo,
   rkey,
   vote,
-  hydratedRecord,
+  cid,
 }: UnauthedCreatePostVoteInput) => {
   await db.transaction(async (tx) => {
     const subject = (
@@ -83,7 +81,7 @@ export const unauthed_createPostVote = async ({
       postId: subject.id,
       authorDid: repo,
       createdAt: new Date(vote.createdAt),
-      cid: hydratedRecord.cid,
+      cid,
       rkey,
     });
 
@@ -95,16 +93,15 @@ export type UnauthedCreateCommentVoteInput = {
   repo: DID;
   rkey: string;
   vote: atprotoVote.Vote;
-  hydratedRecord: {
-    cid: string;
-  };
+
+  cid: string;
 };
 
 export async function unauthed_createCommentVote({
   repo,
   rkey,
   vote,
-  hydratedRecord,
+  cid,
 }: UnauthedCreateCommentVoteInput) {
   await db.transaction(async (tx) => {
     const subject = (
@@ -126,7 +123,7 @@ export async function unauthed_createCommentVote({
       commentId: subject.id,
       authorDid: repo,
       createdAt: new Date(vote.createdAt),
-      cid: hydratedRecord.cid,
+      cid: cid,
       rkey,
     });
 
