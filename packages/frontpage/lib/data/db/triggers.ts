@@ -39,7 +39,7 @@ export const newPostAggregateTrigger = async (
   await tx.insert(schema.PostAggregates).values({
     postId,
     commentCount: 0,
-    voteCount: 1,
+    voteCount: 0,
     rank: newRankSql,
     createdAt: new Date(),
   });
@@ -103,7 +103,7 @@ export const newCommentAggregateTrigger = async (
 ) => {
   await tx.insert(schema.CommentAggregates).values({
     commentId,
-    voteCount: 1,
+    voteCount: 0,
     rank: newRankSql,
     createdAt: new Date(),
   });
@@ -134,7 +134,7 @@ export const newCommentVoteAggregateTrigger = async (
     .set({
       voteCount: updateColumnValue(schema.CommentAggregates.voteCount, 1),
     })
-    .where(eq(schema.CommentAggregates.commentId, postId));
+    .where(eq(schema.CommentAggregates.commentId, commentId));
 
   await updateSiblingCommentRanksOnPost(postId, commentId, tx);
 };
