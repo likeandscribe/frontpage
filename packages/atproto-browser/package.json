@@ -14,6 +14,7 @@
     "@atproto/identity": "^0.4.1",
     "@atproto/repo": "^0.4.3",
     "@atproto/syntax": "^0.3.0",
+    "@picocss/pico": "^2.0.6",
     "hls.js": "^1.5.15",
     "next": "15.0.0-rc.0",
     "parse-hls": "^1.0.7",

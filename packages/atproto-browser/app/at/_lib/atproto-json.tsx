@@ -1,6 +1,6 @@
 import { isDid } from "@atproto/did";
 import Link from "@/lib/link";
-import { AtBlob } from "../../../lib/at-blob";
+import { AtBlob } from "@/lib/at-blob";
 import { getAtUriPath } from "@/lib/util";
 import { AtUri } from "@atproto/syntax";
 import { VideoEmbed } from "./video-embed";
@@ -18,11 +18,7 @@ function naiveAtUriCheck(atUri: string) {
 
 function JSONString({ data }: { data: string }) {
   return (
-    <pre
-      style={{
-        color: "darkgreen",
-      }}
-    >
+    <pre>
       {naiveAtUriCheck(data) ? (
         <>
           &quot;<Link href={getAtUriPath(new AtUri(data))}>{data}</Link>
