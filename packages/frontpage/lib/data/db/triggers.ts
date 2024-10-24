@@ -10,6 +10,13 @@ import {
 } from "drizzle-orm";
 import { SQLiteTransaction } from "drizzle-orm/sqlite-core";
 
+type Transaction = SQLiteTransaction<
+  "async",
+  ResultSet,
+  typeof schema,
+  ExtractTablesWithRelations<typeof schema>
+>;
+
 const updateColumnValue = (column: schema.NumberColumn, value: number) => {
   return sql`${column} + ${value}`;
 };
@@ -28,12 +35,7 @@ export const calculateRankSql = (
 //  - on new post create new aggregate, upadte all post ranks
 export const newPostAggregateTrigger = async (
   postId: number,
-  tx: SQLiteTransaction<
-    "async",
-    ResultSet,
-    typeof schema,
-    ExtractTablesWithRelations<typeof schema>
-  >,
+  tx: Transaction,
 ) => {
   await tx.insert(schema.PostAggregates).values({
     postId,
@@ -50,12 +52,7 @@ export const newPostAggregateTrigger = async (
 // - on new vote update post aggregate with vote count +1 and recalculate rank for all posts
 export const newPostVoteAggregateTrigger = async (
   postId: number,
-  tx: SQLiteTransaction<
-    "async",
-    ResultSet,
-    typeof schema,
-    ExtractTablesWithRelations<typeof schema>
-  >,
+  tx: Transaction,
 ) => {
   await tx
     .update(schema.PostAggregates)
@@ -70,12 +67,7 @@ export const newPostVoteAggregateTrigger = async (
 // - on delete vote update post aggregate with vote count -1 and recalculate rank for all posts
 export const deletePostVoteAggregateTrigger = async (
   postId: number,
-  tx: SQLiteTransaction<
-    "async",
-    ResultSet,
-    typeof schema,
-    ExtractTablesWithRelations<typeof schema>
-  >,
+  tx: Transaction,
 ) => {
   await tx
     .update(schema.PostAggregates)
@@ -93,12 +85,7 @@ export const deletePostVoteAggregateTrigger = async (
 export const newCommentAggregateTrigger = async (
   postId: number,
   commentId: number,
-  tx: SQLiteTransaction<
-    "async",
-    ResultSet,
-    typeof schema,
-    ExtractTablesWithRelations<typeof schema>
-  >,
+  tx: Transaction,
 ) => {
   await tx.insert(schema.CommentAggregates).values({
     commentId,
@@ -121,12 +108,7 @@ export const newCommentAggregateTrigger = async (
 export const newCommentVoteAggregateTrigger = async (
   postId: number,
   commentId: number,
-  tx: SQLiteTransaction<
-    "async",
-    ResultSet,
-    typeof schema,
-    ExtractTablesWithRelations<typeof schema>
-  >,
+  tx: Transaction,
 ) => {
   await tx
     .update(schema.CommentAggregates)
@@ -142,12 +124,7 @@ export const newCommentVoteAggregateTrigger = async (
 export const deleteCommentAggregateTrigger = async (
   postId: number,
   commentId: number,
-  tx: SQLiteTransaction<
-    "async",
-    ResultSet,
-    typeof schema,
-    ExtractTablesWithRelations<typeof schema>
-  >,
+  tx: Transaction,
 ) => {
   await tx
     .update(schema.PostAggregates)
@@ -163,12 +140,7 @@ export const deleteCommentAggregateTrigger = async (
 export const deleteCommentVoteAggregateTrigger = async (
   postId: number,
   commentId: number,
-  tx: SQLiteTransaction<
-    "async",
-    ResultSet,
-    typeof schema,
-    ExtractTablesWithRelations<typeof schema>
-  >,
+  tx: Transaction,
 ) => {
   await tx
     .update(schema.CommentAggregates)
@@ -180,14 +152,7 @@ export const deleteCommentVoteAggregateTrigger = async (
   await updateSiblingCommentRanksOnPost(postId, commentId, tx);
 };
 
-export const updateAllPostRanks = async (
-  tx: SQLiteTransaction<
-    "async",
-    ResultSet,
-    typeof schema,
-    ExtractTablesWithRelations<typeof schema>
-  >,
-) => {
+export const updateAllPostRanks = async (tx: Transaction) => {
   await tx.update(schema.PostAggregates).set({
     rank: calculateRankSql(
       schema.PostAggregates.voteCount,
