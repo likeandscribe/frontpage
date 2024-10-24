@@ -35,7 +35,7 @@ export const getFrontpagePosts = cache(async (offset: number) => {
 
   const rows = await db
     .select({
-      id: schema.PostAggregates.id,
+      id: schema.PostAggregates.postId,
       rkey: schema.Post.rkey,
       cid: schema.Post.cid,
       title: schema.Post.title,
@@ -44,7 +44,7 @@ export const getFrontpagePosts = cache(async (offset: number) => {
       authorDid: schema.Post.authorDid,
       voteCount: schema.PostAggregates.voteCount,
       commentCount: schema.PostAggregates.commentCount,
-      rank: schema.PostAggregates.rank ?? 0,
+      rank: schema.PostAggregates.rank,
       userHasVoted: userHasVoted.postId,
       status: schema.Post.status,
     })

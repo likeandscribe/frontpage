@@ -17,7 +17,7 @@ CREATE TABLE `post_aggregates` (
 	FOREIGN KEY (`post_id`) REFERENCES `posts`(`id`) ON UPDATE no action ON DELETE no action
 ); --> statement-breakpoint
 
-INSERT INTO `comment_aggregates` (`comment_id`, `vote_count`, `rank`, `created_at`) SELECT `id`, 1, null, `created_at` FROM `comments`; --> statement-breakpoint
+INSERT INTO `comment_aggregates` (`comment_id`, `vote_count`, `rank`, `created_at`) SELECT `id`, 0, null, `created_at` FROM `comments`; --> statement-breakpoint
 
 UPDATE `comment_aggregates` SET `vote_count` = (
   SELECT COUNT(*)
@@ -34,7 +34,7 @@ UPDATE `comment_aggregates` SET `created_at` = (
 UPDATE `comment_aggregates` SET `rank` = (
 	CAST(COALESCE(`vote_count`, 1) AS REAL) / (pow((JULIANDAY('now') - JULIANDAY(`created_at`)) * 24 + 2,1.8)));--> statement-breakpoint
 
-INSERT INTO `post_aggregates` (`post_id`, `comment_count`, `vote_count`, `rank`, `created_at`) SELECT `id`, 0, 1, null, current_timestamp FROM `posts`;--> statement-breakpoint
+INSERT INTO `post_aggregates` (`post_id`, `comment_count`, `vote_count`, `rank`, `created_at`) SELECT `id`, 0, 0, null, current_timestamp FROM `posts`;--> statement-breakpoint
 
 UPDATE `post_aggregates` SET `comment_count` = (SELECT COUNT(*) FROM `comments` WHERE `comments`.`post_id` = `post_aggregates`.`post_id`); --> statement-breakpoint
 
@@ -43,6 +43,9 @@ UPDATE `post_aggregates` SET `vote_count` = (
   FROM `post_votes`
   WHERE `post_votes`.`post_id` = `post_aggregates`.`post_id`
 ); --> statement-breakpoint
+
+UPDATE `post_aggregates` SET `rank` = (
+	CAST(COALESCE(`vote_count`, 1) AS REAL) / (pow((JULIANDAY('now') - JULIANDAY(`created_at`)) * 24 + 2,1.8)));--> statement-breakpoint
 
 UPDATE `post_aggregates` SET `created_at` = (SELECT `created_at` FROM `posts` WHERE `posts`.`id` = `post_aggregates`.`post_id`); --> statement-breakpoint
 
