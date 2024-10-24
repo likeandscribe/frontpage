@@ -134,7 +134,7 @@ export const getPost = cache(async (authorDid: DID, rkey: string) => {
     .where(
       and(eq(schema.Post.authorDid, authorDid), eq(schema.Post.rkey, rkey)),
     )
-    .leftJoin(
+    .innerJoin(
       schema.PostAggregates,
       eq(schema.PostAggregates.postId, schema.Post.id),
     )
@@ -146,8 +146,8 @@ export const getPost = cache(async (authorDid: DID, rkey: string) => {
 
   return {
     ...row.posts,
-    commentCount: row.post_aggregates?.commentCount,
-    voteCount: row.post_aggregates?.voteCount,
+    commentCount: row.post_aggregates.commentCount,
+    voteCount: row.post_aggregates.voteCount,
     userHasVoted: Boolean(row.hasVoted),
   };
 });

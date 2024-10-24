@@ -17,7 +17,7 @@ export async function getMorePostsAction(cursor: number) {
             id={post.id}
             title={post.title}
             url={post.url}
-            votes={post.voteCount + 1}
+            votes={post.voteCount}
             commentCount={post.commentCount}
             cid={post.cid}
             rkey={post.rkey}

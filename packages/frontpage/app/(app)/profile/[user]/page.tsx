@@ -109,7 +109,7 @@ export default async function Profile(props: { params: Promise<Params> }) {
                     id={entity.id}
                     title={entity.title}
                     url={entity.url}
-                    votes={entity.voteCount == 0 ? 1 : entity.voteCount}
+                    votes={entity.voteCount}
                     commentCount={entity.commentCount}
                     cid={entity.cid}
                     rkey={entity.rkey}
@@ -142,7 +142,7 @@ export default async function Profile(props: { params: Promise<Params> }) {
                     id={post.id}
                     title={post.title}
                     url={post.url}
-                    votes={post.voteCount == 0 ? 1 : post.voteCount}
+                    votes={post.voteCount}
                     commentCount={post.commentCount}
                     cid={post.cid}
                     rkey={post.rkey}

@@ -11,7 +11,7 @@ type VoteButtonProps = {
   voteAction: () => Promise<void>;
   unvoteAction: () => Promise<void>;
   initialState: VoteButtonState;
-  votes?: number;
+  votes: number;
 };
 
 export function VoteButton({
@@ -21,9 +21,13 @@ export function VoteButton({
   votes,
 }: VoteButtonProps) {
   // TODO: useOptimistic here to fix cached vote count bug
-  const [hasVoted, setHasVoted] = useState(
-    initialState === "voted" || initialState === "authored",
-  );
+  const [hasOptimisticallyVoted, setHasOptimisticallyVoted] = useState(false);
+
+  const hasVoted =
+    initialState === "voted" ||
+    initialState === "authored" ||
+    hasOptimisticallyVoted;
+
   return (
     <form
       // Action or unSubmit won't be triggered if you're an author because the button is disabled in that case
@@ -32,10 +36,10 @@ export function VoteButton({
         e.preventDefault();
         if (hasVoted) {
           void unvoteAction();
-          setHasVoted(false);
+          setHasOptimisticallyVoted(false);
         } else {
           void voteAction();
-          setHasVoted(true);
+          setHasOptimisticallyVoted(true);
         }
       }}
       className="contents"
@@ -53,11 +57,11 @@ export function VoteButton({
           )}
         />
       </Button>
-      {votes !== undefined && (
-        <span className="font-medium">
-          {votes + Number(initialState !== "authored" && hasVoted)}
-        </span>
-      )}
+      <span className="font-medium">
+        {votes +
+          Number(initialState === "authored") +
+          Number(hasOptimisticallyVoted && initialState !== "voted" ? 1 : -1)}
+      </span>
     </form>
   );
 }

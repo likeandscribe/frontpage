@@ -36,7 +36,7 @@ export default async function Post(props: {
         commentCount={post.commentCount}
         title={post.title}
         url={post.url}
-        votes={post.voteCount == 0 ? 1 : post.voteCount}
+        votes={post.voteCount}
         rkey={post.rkey}
         cid={post.cid}
         isUpvoted={post.userHasVoted}
