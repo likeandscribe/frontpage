@@ -27,6 +27,8 @@ export const CommentRecord = z.object({
   createdAt: z.string(),
 });
 
+export type Comment = z.infer<typeof CommentRecord>;
+
 type CommentInput = {
   parent?: { cid: string; rkey: string; authorDid: DID };
   post: { cid: string; rkey: string; authorDid: DID };

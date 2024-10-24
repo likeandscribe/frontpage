@@ -2,6 +2,7 @@ import "server-only";
 import { getUser } from "../user";
 import { db } from "@/lib/db";
 import * as schema from "@/lib/schema";
+import * as atprotoVote from "../atproto/vote";
 import { and, eq } from "drizzle-orm";
 import { cache } from "react";
 import { DID } from "../atproto/did";
@@ -51,18 +52,7 @@ export const getVoteForComment = cache(async (commentId: number) => {
 export type UnauthedCreatePostVoteInput = {
   repo: DID;
   rkey: string;
-  hydratedVoteRecordValue: {
-    createdAt: string;
-    subject: {
-      cid: string;
-      uri: {
-        rkey: string;
-        value: string;
-        authority: string;
-        collection: string;
-      };
-    };
-  };
+  vote: atprotoVote.Vote;
   hydratedRecord: {
     cid: string;
   };
@@ -71,7 +61,7 @@ export type UnauthedCreatePostVoteInput = {
 export const unauthed_createPostVote = async ({
   repo,
   rkey,
-  hydratedVoteRecordValue,
+  vote,
   hydratedRecord,
 }: UnauthedCreatePostVoteInput) => {
   await db.transaction(async (tx) => {
@@ -79,13 +69,11 @@ export const unauthed_createPostVote = async ({
       await tx
         .select()
         .from(schema.Post)
-        .where(eq(schema.Post.rkey, hydratedVoteRecordValue.subject.uri.rkey))
+        .where(eq(schema.Post.rkey, vote.subject.uri.rkey))
     )[0];
 
     if (!subject) {
-      throw new Error(
-        `Subject not found with uri: ${hydratedVoteRecordValue.subject.uri.value}`,
-      );
+      throw new Error(`Subject not found with uri: ${vote.subject.uri.value}`);
     }
 
     if (subject.authorDid === repo) {
@@ -94,7 +82,7 @@ export const unauthed_createPostVote = async ({
     await tx.insert(schema.PostVote).values({
       postId: subject.id,
       authorDid: repo,
-      createdAt: new Date(hydratedVoteRecordValue.createdAt),
+      createdAt: new Date(vote.createdAt),
       cid: hydratedRecord.cid,
       rkey,
     });
@@ -106,17 +94,7 @@ export const unauthed_createPostVote = async ({
 export type UnauthedCreateCommentVoteInput = {
   repo: DID;
   rkey: string;
-  hydratedVoteRecordValue: {
-    createdAt: string;
-    subject: {
-      uri: {
-        authority: string;
-        collection: string;
-        rkey: string;
-        value: string;
-      };
-    };
-  };
+  vote: atprotoVote.Vote;
   hydratedRecord: {
     cid: string;
   };
@@ -125,7 +103,7 @@ export type UnauthedCreateCommentVoteInput = {
 export async function unauthed_createCommentVote({
   repo,
   rkey,
-  hydratedVoteRecordValue,
+  vote,
   hydratedRecord,
 }: UnauthedCreateCommentVoteInput) {
   await db.transaction(async (tx) => {
@@ -133,15 +111,11 @@ export async function unauthed_createCommentVote({
       await tx
         .select()
         .from(schema.Comment)
-        .where(
-          eq(schema.Comment.rkey, hydratedVoteRecordValue.subject.uri.rkey),
-        )
+        .where(eq(schema.Comment.rkey, vote.subject.uri.rkey))
     )[0];
 
     if (!subject) {
-      throw new Error(
-        `Subject not found with uri: ${hydratedVoteRecordValue.subject.uri.value}`,
-      );
+      throw new Error(`Subject not found with uri: ${vote.subject.uri.value}`);
     }
 
     if (subject.authorDid === repo) {
@@ -151,7 +125,7 @@ export async function unauthed_createCommentVote({
     await tx.insert(schema.CommentVote).values({
       commentId: subject.id,
       authorDid: repo,
-      createdAt: new Date(hydratedVoteRecordValue.createdAt),
+      createdAt: new Date(vote.createdAt),
       cid: hydratedRecord.cid,
       rkey,
     });

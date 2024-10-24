@@ -13,6 +13,7 @@ import {
 import * as schema from "@/lib/schema";
 import { getUser, isAdmin } from "../user";
 import { DID } from "../atproto/did";
+import * as atprotoComment from "../atproto/comment";
 import { Prettify } from "@/lib/utils";
 import {
   deleteCommentAggregateTrigger,
@@ -279,29 +280,14 @@ export async function moderateComment({
 }
 
 export type UnauthedCreateCommentInput = {
-  comment: {
-    cid: string;
-    content: string;
-    createdAt: string;
-    parent?: {
-      cid: string;
-      uri: object;
-    };
-    post: {
-      cid: string;
-      uri: {
-        authority: string;
-        collection: "fyi.unravel.frontpage.post";
-        rkey: string;
-        value: string;
-      };
-    };
-  };
+  cid: string;
+  comment: atprotoComment.Comment;
   repo: DID;
   rkey: string;
 };
 
 export async function unauthed_createComment({
+  cid,
   comment,
   repo,
   rkey,
@@ -334,7 +320,7 @@ export async function unauthed_createComment({
     const [insertedComment] = await tx
       .insert(schema.Comment)
       .values({
-        cid: comment.cid,
+        cid,
         rkey,
         body: comment.content,
         postId: post.id,

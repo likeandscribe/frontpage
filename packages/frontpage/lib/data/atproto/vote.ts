@@ -23,6 +23,8 @@ export const VoteRecord = z.object({
   }),
 });
 
+export type Vote = z.infer<typeof VoteRecord>;
+
 type VoteInput = {
   subjectRkey: string;
   subjectCid: string;

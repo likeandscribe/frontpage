@@ -69,6 +69,7 @@ export async function POST(request: Request) {
         const comment = await getComment({ rkey, repo });
 
         await unauthed_createComment({
+          cid: comment.cid,
           comment,
           repo,
           rkey,
@@ -99,7 +100,7 @@ export async function POST(request: Request) {
           await unauthed_createPostVote({
             repo,
             rkey,
-            hydratedVoteRecordValue,
+            vote: hydratedVoteRecordValue,
             hydratedRecord,
           });
         } else if (
@@ -107,7 +108,7 @@ export async function POST(request: Request) {
         ) {
           await unauthed_createCommentVote({
             hydratedRecord,
-            hydratedVoteRecordValue,
+            vote: hydratedVoteRecordValue,
             repo,
             rkey,
           });
