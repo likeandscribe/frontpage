@@ -1,13 +1,12 @@
 import Link from "@/lib/link";
 import { AtUriForm } from "./aturi-form";
 import type { Metadata } from "next";
+import { EXAMPLE_PATH } from "@/app/consts";
 
 export const metadata: Metadata = {
   title: "ATProto Browser",
   description: "Browse the atmosphere.",
 };
-
-const EXAMPLE_PATH = "tom-sherman.com/app.bsky.feed.like/3kyutnrmg3s2r";
 
 export default function Home() {
   return (
@@ -27,7 +26,7 @@ export default function Home() {
             @tom-sherman.com
           </Link>
           .{" "}
-          <a href="https://github.com/likeandscribe/unravel/tree/main/packages/atproto-browser">
+          <a href="https://github.com/likeandscribe/frontpage/tree/main/packages/atproto-browser">
             Source code
           </a>
         </p>

@@ -1,6 +1,8 @@
 import { cache } from "react";
 import { z } from "zod";
 
+import { FETCH_LIMIT } from "@/app/consts";
+
 const ListRecordsResponse = z.object({
   records: z.array(
     z.object({
@@ -16,6 +18,7 @@ export const listRecords = cache(
     const listRecordsUrl = new URL(`${pds}/xrpc/com.atproto.repo.listRecords`);
     listRecordsUrl.searchParams.set("repo", repo);
     listRecordsUrl.searchParams.set("collection", collection);
+    listRecordsUrl.searchParams.set("limit", FETCH_LIMIT);
     if (cursor) {
       listRecordsUrl.searchParams.set("cursor", cursor);
     }
