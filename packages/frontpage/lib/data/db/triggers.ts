@@ -6,6 +6,7 @@ import {
   and,
   eq,
   inArray,
+  isNull,
   sql,
 } from "drizzle-orm";
 import { SQLiteTransaction } from "drizzle-orm/sqlite-core";
@@ -213,8 +214,8 @@ export const updateSiblingCommentRanksOnPost = async (
       and(eq(schema.Comment.id, commentId), eq(schema.Comment.postId, postId)),
     );
 
-  if (!comment?.parentCommentId) {
-    throw new Error("Parent comment id not found");
+  if (!comment) {
+    throw new Error("Comment not found");
   }
 
   const commentIds = tx
@@ -222,7 +223,9 @@ export const updateSiblingCommentRanksOnPost = async (
     .from(schema.Comment)
     .where(
       and(
-        eq(schema.Comment.parentCommentId, comment.parentCommentId),
+        comment.parentCommentId === null
+          ? isNull(schema.Comment.parentCommentId)
+          : eq(schema.Comment.parentCommentId, comment.parentCommentId),
         eq(schema.Comment.postId, postId),
       ),
     );
