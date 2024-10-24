@@ -1,3 +1,5 @@
+import './water.min.css';
+
 export default function RootLayout({
   children,
 }: Readonly<{
