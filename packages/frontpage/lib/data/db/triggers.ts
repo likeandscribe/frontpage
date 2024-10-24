@@ -20,8 +20,6 @@ type Transaction = SQLiteTransaction<
 const add = (column: schema.NumberColumn, value: number) => {
   return sql`${column} + ${value}`;
 };
-const newRankSql = sql`(CAST(1 AS REAL) / (pow(2,1.8)))`;
-
 export const calculateRankSql = (
   voteCountColumn: schema.NumberColumn,
   createdAtColumn: schema.DateIsoColumn,
@@ -41,8 +39,6 @@ export const newPostAggregateTrigger = async (
     postId,
     commentCount: 0,
     voteCount: 0,
-    rank: newRankSql,
-    createdAt: new Date(),
   });
 
   await updateAllPostRanks(tx);
@@ -90,8 +86,6 @@ export const newCommentAggregateTrigger = async (
   await tx.insert(schema.CommentAggregates).values({
     commentId,
     voteCount: 0,
-    rank: newRankSql,
-    createdAt: new Date(),
   });
 
   await tx

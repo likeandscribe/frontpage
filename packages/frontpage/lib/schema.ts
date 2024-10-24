@@ -87,12 +87,14 @@ export const PostAggregates = sqliteTable(
     postId: integer("post_id")
       .notNull()
       .references(() => Post.id),
-    commentCount: integer("comment_count"),
-    voteCount: integer("vote_count"),
-    rank: integer("rank"),
+    commentCount: integer("comment_count").notNull().default(0),
+    voteCount: integer("vote_count").notNull().default(0),
+    rank: integer("rank")
+      .notNull()
+      .default(sql`(CAST(1 AS REAL) / (pow(2,1.8)))`),
     createdAt: dateIsoText("created_at")
       .notNull()
-      .default(sql`(current_timestamp)`),
+      .default(sql`(strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))`),
   },
   (t) => ({
     unique_postId: unique().on(t.postId),
@@ -137,11 +139,13 @@ export const CommentAggregates = sqliteTable(
       .notNull()
       .references(() => Comment.id)
       .unique(),
-    voteCount: integer("vote_count"),
-    rank: integer("rank"),
+    voteCount: integer("vote_count").notNull().default(0),
+    rank: integer("rank")
+      .notNull()
+      .default(sql`(CAST(1 AS REAL) / (pow(2,1.8)))`),
     createdAt: dateIsoText("created_at")
       .notNull()
-      .default(sql`(current_timestamp)`),
+      .default(sql`(strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))`),
   },
   (t) => ({
     comment_index: index("comment_id_idx").on(t.commentId),

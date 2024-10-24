@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "07740f61-ca30-4450-98be-63b0d4586a5b",
+  "id": "e4b9af31-4578-4966-9d9d-4720cab3e43a",
   "prevId": "d5fcf5e1-b731-4ff1-9811-4dbf5002f67e",
   "tables": {
     "admin_users": {
@@ -218,15 +218,17 @@
           "name": "vote_count",
           "type": "integer",
           "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
+          "notNull": true,
+          "autoincrement": false,
+          "default": 0
         },
         "rank": {
           "name": "rank",
           "type": "integer",
           "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(CAST(1 AS REAL) / (pow(2,1.8)))"
         },
         "created_at": {
           "name": "created_at",
@@ -234,23 +236,23 @@
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false,
-          "default": "(current_timestamp)"
+          "default": "(strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))"
         }
       },
       "indexes": {
-        "comment_id_idx": {
-          "name": "comment_id_idx",
-          "columns": [
-            "comment_id"
-          ],
-          "isUnique": false
-        },
         "comment_aggregates_comment_id_unique": {
           "name": "comment_aggregates_comment_id_unique",
           "columns": [
             "comment_id"
           ],
           "isUnique": true
+        },
+        "comment_id_idx": {
+          "name": "comment_id_idx",
+          "columns": [
+            "comment_id"
+          ],
+          "isUnique": false
         }
       },
       "foreignKeys": {
@@ -801,22 +803,25 @@
           "name": "comment_count",
           "type": "integer",
           "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
+          "notNull": true,
+          "autoincrement": false,
+          "default": 0
         },
         "vote_count": {
           "name": "vote_count",
           "type": "integer",
           "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
+          "notNull": true,
+          "autoincrement": false,
+          "default": 0
         },
         "rank": {
           "name": "rank",
           "type": "integer",
           "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(CAST(1 AS REAL) / (pow(2,1.8)))"
         },
         "created_at": {
           "name": "created_at",
@@ -824,7 +829,7 @@
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false,
-          "default": "(current_timestamp)"
+          "default": "(strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))"
         }
       },
       "indexes": {

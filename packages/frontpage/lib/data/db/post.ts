@@ -76,8 +76,8 @@ export const getFrontpagePosts = cache(async (offset: number) => {
     url: row.url,
     createdAt: row.createdAt,
     authorDid: row.authorDid,
-    voteCount: row.voteCount ?? 0,
-    commentCount: row.commentCount ?? 0,
+    voteCount: row.voteCount,
+    commentCount: row.commentCount,
     userHasVoted: Boolean(row.userHasVoted),
   }));
 
@@ -119,8 +119,8 @@ export const getUserPosts = cache(async (userDid: DID) => {
     url: row.url,
     createdAt: row.createdAt,
     authorDid: row.authorDid,
-    voteCount: row.voteCount ?? 0,
-    commentCount: row.commentCount ?? 0,
+    voteCount: row.voteCount,
+    commentCount: row.commentCount,
     userHasVoted: Boolean(row.userHasVoted),
   }));
 });
@@ -146,8 +146,8 @@ export const getPost = cache(async (authorDid: DID, rkey: string) => {
 
   return {
     ...row.posts,
-    commentCount: row.post_aggregates?.commentCount ?? 0,
-    voteCount: row.post_aggregates?.voteCount ?? 0,
+    commentCount: row.post_aggregates?.commentCount,
+    voteCount: row.post_aggregates?.voteCount,
     userHasVoted: Boolean(row.hasVoted),
   };
 });

@@ -1,15 +1,7 @@
 import "server-only";
 import { cache } from "react";
 import { db } from "@/lib/db";
-import {
-  eq,
-  sql,
-  count,
-  desc,
-  and,
-  InferSelectModel,
-  isNotNull,
-} from "drizzle-orm";
+import { eq, sql, desc, and, InferSelectModel, isNotNull } from "drizzle-orm";
 import * as schema from "@/lib/schema";
 import { getUser, isAdmin } from "../user";
 import { DID } from "../atproto/did";
@@ -26,8 +18,8 @@ type CommentExtras = {
   children?: CommentModel[];
   userHasVoted: boolean;
   // These properties are returned from some methods but not others
-  rank?: number;
-  voteCount?: number;
+  rank: number;
+  voteCount: number;
   postAuthorDid?: DID;
   postRkey?: string;
 };
@@ -69,26 +61,6 @@ const buildUserHasVotedQuery = cache(async () => {
 //   .as("bannedUser");
 
 export const getCommentsForPost = cache(async (postId: number) => {
-  const votes = db
-    .select({
-      commentId: schema.CommentVote.commentId,
-      voteCount: count(schema.CommentVote.id).as("voteCount"),
-    })
-    .from(schema.CommentVote)
-    .groupBy(schema.CommentVote.commentId)
-    .as("vote");
-
-  const commentRank = sql`
-    CAST(COALESCE(${votes.voteCount}, 1) AS REAL) / (
-    pow(
-      (JULIANDAY('now') - JULIANDAY(${schema.Comment.createdAt})) * 24 + 2,
-      1.8
-    )
-  )
-  `
-    .mapWith(Number)
-    .as("rank");
-
   const hasVoted = await buildUserHasVotedQuery();
 
   const rows = await db
@@ -101,18 +73,19 @@ export const getCommentsForPost = cache(async (postId: number) => {
       createdAt: schema.Comment.createdAt,
       authorDid: schema.Comment.authorDid,
       status: schema.Comment.status,
-      voteCount: sql`coalesce(${votes.voteCount}, 0) + 1`
-        .mapWith(Number)
-        .as("voteCount"),
-      rank: commentRank,
+      voteCount: schema.CommentAggregates.voteCount,
+      rank: schema.CommentAggregates.rank,
       userHasVoted: hasVoted.userHasVoted,
       parentCommentId: schema.Comment.parentCommentId,
     })
     .from(schema.Comment)
     .where(eq(schema.Comment.postId, postId))
-    .leftJoin(votes, eq(votes.commentId, schema.Comment.id))
+    .innerJoin(
+      schema.CommentAggregates,
+      eq(schema.Comment.id, schema.CommentAggregates.id),
+    )
     .leftJoin(hasVoted, eq(hasVoted.commentId, schema.Comment.id))
-    .orderBy(desc(commentRank));
+    .orderBy(desc(schema.CommentAggregates.rank));
 
   return nestCommentRows(rows);
 });
@@ -129,8 +102,8 @@ export const getCommentWithChildren = cache(
 const nestCommentRows = (
   items: (CommentRow & {
     userHasVoted: boolean;
-    voteCount?: number;
-    rank?: number;
+    voteCount: number;
+    rank: number;
   })[],
   id: number | null = null,
 ): CommentModel[] => {
@@ -144,7 +117,8 @@ const nestCommentRows = (
     const children = nestCommentRows(items, item.id);
     const transformed = {
       userHasVoted: item.userHasVoted !== null,
-      voteCount: item.voteCount ?? 0,
+      voteCount: item.voteCount,
+      rank: item.rank,
     };
     if (item.status === "live") {
       comments.push({
