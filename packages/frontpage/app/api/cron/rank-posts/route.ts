@@ -1,8 +1,7 @@
 import { db } from "@/lib/db";
 import { sendDiscordMessage } from "@/lib/discord";
 import type { NextRequest } from "next/server";
-import * as schema from "@/lib/schema";
-import { sql } from "drizzle-orm";
+import { updateAllPostRanks } from "@/lib/data/db/triggers";
 
 export async function GET(request: NextRequest) {
   const authHeader = request.headers.get("authorization");
@@ -22,15 +21,8 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    await db.update(schema.PostAggregates).set({
-      rank: sql`
-          CAST(COALESCE(${schema.PostAggregates.voteCount}, 1) AS REAL) / (
-            pow(
-              (JULIANDAY('now') - JULIANDAY(${schema.PostAggregates.createdAt})) * 24 + 2,
-              1.8
-            )
-          )
-        `,
+    await db.transaction(async (tx) => {
+      await updateAllPostRanks(tx);
     });
   } catch (e) {
     await sendDiscordMessage({

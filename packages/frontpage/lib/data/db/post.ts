@@ -8,6 +8,7 @@ import { getBlueskyProfile, getUser, isAdmin } from "../user";
 import * as atprotoPost from "../atproto/post";
 import { DID } from "../atproto/did";
 import { sendDiscordMessage } from "@/lib/discord";
+import { newPostAggregateTrigger } from "./triggers";
 
 const buildUserHasVotedQuery = cache(async () => {
   const user = await getUser();
@@ -179,7 +180,7 @@ export async function unauthed_createPost({
   offset,
 }: CreatePostInput) {
   await db.transaction(async (tx) => {
-    const [insertedPost] = await tx
+    const [insertedPostRow] = await tx
       .insert(schema.Post)
       .values({
         rkey,
@@ -191,19 +192,11 @@ export async function unauthed_createPost({
       })
       .returning({ postId: schema.Post.id });
 
-    if (!insertedPost) {
+    if (!insertedPostRow) {
       throw new Error("Failed to insert post");
     }
 
-    const rankSql = sql`(CAST(1 AS REAL) / (pow(2,1.8)))`;
-
-    await tx.insert(schema.PostAggregates).values({
-      postId: insertedPost?.postId,
-      commentCount: 0,
-      voteCount: 1,
-      rank: rankSql,
-      createdAt: new Date(),
-    });
+    await newPostAggregateTrigger(insertedPostRow.postId, tx);
 
     await tx.insert(schema.ConsumedOffset).values({ offset });
   });

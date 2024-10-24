@@ -14,6 +14,10 @@ import * as schema from "@/lib/schema";
 import { getUser, isAdmin } from "../user";
 import { DID } from "../atproto/did";
 import { Prettify } from "@/lib/utils";
+import {
+  deleteCommentAggregateTrigger,
+  newCommentAggregateTrigger,
+} from "./triggers";
 
 type CommentRow = InferSelectModel<typeof schema.Comment>;
 
@@ -339,7 +343,7 @@ export async function unauthed_createComment({
         parentCommentId: parentComment?.id ?? null,
       })
       .returning({
-        commentId: schema.Comment.id,
+        id: schema.Comment.id,
         postId: schema.Comment.postId,
       });
 
@@ -347,20 +351,11 @@ export async function unauthed_createComment({
       throw new Error("Failed to insert comment");
     }
 
-    await tx
-      .update(schema.PostAggregates)
-      .set({
-        commentCount: sql`${schema.PostAggregates.commentCount} + 1`,
-      })
-      .where(eq(schema.PostAggregates.postId, insertedComment.postId));
-
-    await tx.insert(schema.CommentAggregates).values({
-      createdAt: new Date(),
-      commentId: insertedComment?.commentId,
-      voteCount: 1,
-      rank: sql<number>`
-                (CAST(1 AS REAL) / (pow(2,1.8)))`,
-    });
+    await newCommentAggregateTrigger(
+      insertedComment.postId,
+      insertedComment.id,
+      tx,
+    );
   });
 }
 
@@ -381,6 +376,7 @@ export async function unauthed_deleteComment({
         and(eq(schema.Comment.rkey, rkey), eq(schema.Comment.authorDid, repo)),
       )
       .returning({
+        id: schema.Comment.id,
         postId: schema.Comment.postId,
       });
 
@@ -388,11 +384,10 @@ export async function unauthed_deleteComment({
       throw new Error("Failed to delete comment");
     }
 
-    await tx
-      .update(schema.PostAggregates)
-      .set({
-        commentCount: sql`${schema.PostAggregates.commentCount} - 1`,
-      })
-      .where(eq(schema.PostAggregates.postId, deletedComment.postId));
+    await deleteCommentAggregateTrigger(
+      deletedComment.postId,
+      deletedComment.id,
+      tx,
+    );
   });
 }

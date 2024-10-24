@@ -128,7 +128,8 @@ export const CommentAggregates = sqliteTable(
     id: integer("id").primaryKey(),
     commentId: integer("comment_id")
       .notNull()
-      .references(() => Comment.id),
+      .references(() => Comment.id)
+      .unique(),
     voteCount: integer("vote_count"),
     rank: integer("rank"),
     createdAt: dateIsoText("created_at")
@@ -136,7 +137,6 @@ export const CommentAggregates = sqliteTable(
       .default(sql`(current_timestamp)`),
   },
   (t) => ({
-    unique_commentId: unique().on(t.commentId),
     comment_index: index("comment_id_idx").on(t.commentId),
   }),
 );

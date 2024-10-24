@@ -2,9 +2,15 @@ import "server-only";
 import { getUser } from "../user";
 import { db } from "@/lib/db";
 import * as schema from "@/lib/schema";
-import { and, eq, inArray, sql } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { cache } from "react";
 import { DID } from "../atproto/did";
+import {
+  deleteCommentVoteAggregateTrigger,
+  deletePostVoteAggregateTrigger,
+  newCommentVoteAggregateTrigger,
+  newPostVoteAggregateTrigger,
+} from "./triggers";
 
 export const getVoteForPost = cache(async (postId: number) => {
   const user = await getUser();
@@ -93,17 +99,7 @@ export const unauthed_createPostVote = async ({
       rkey,
     });
 
-    await tx
-      .update(schema.PostAggregates)
-      .set({
-        voteCount: sql`${schema.PostAggregates.voteCount} + 1`,
-      })
-      .where(eq(schema.PostAggregates.postId, subject.id));
-
-    await tx.update(schema.PostAggregates).set({
-      rank: sql<number>`
-                (CAST(COALESCE(${schema.PostAggregates.voteCount}, 1) AS REAL) / (pow((JULIANDAY('now') - JULIANDAY(${schema.PostAggregates.createdAt})) * 24 + 2,1.8)))`,
-    });
+    await newPostVoteAggregateTrigger(subject.id, tx);
   });
 };
 
@@ -160,25 +156,7 @@ export async function unauthed_createCommentVote({
       rkey,
     });
 
-    const commentIds = tx
-      .select({ commentId: schema.Comment.id })
-      .from(schema.Comment)
-      .where(eq(schema.Comment.postId, subject.postId));
-
-    await tx
-      .update(schema.CommentAggregates)
-      .set({
-        voteCount: sql`${schema.CommentAggregates.voteCount} + 1`,
-      })
-      .where(eq(schema.CommentAggregates.commentId, subject.id));
-
-    await tx
-      .update(schema.CommentAggregates)
-      .set({
-        rank: sql<number>`
-                (CAST(COALESCE(${schema.CommentAggregates.voteCount}, 1) AS REAL) / (pow((JULIANDAY('now') - JULIANDAY(${schema.CommentAggregates.createdAt})) * 24 + 2,1.8)))`,
-      })
-      .where(inArray(schema.CommentAggregates.commentId, commentIds));
+    await newCommentVoteAggregateTrigger(subject.postId, subject.id, tx);
   });
 }
 
@@ -186,7 +164,7 @@ export async function unauthed_createCommentVote({
 // Relies on sqlite not throwing an error if the record doesn't exist.
 export const unauthed_deleteVote = async (rkey: string, repo: DID) => {
   await db.transaction(async (tx) => {
-    const [commentTransaction] = await tx
+    const [deletedCommentVoteRow] = await tx
       .delete(schema.CommentVote)
       .where(
         and(
@@ -198,7 +176,7 @@ export const unauthed_deleteVote = async (rkey: string, repo: DID) => {
         commentId: schema.CommentVote.commentId,
       });
 
-    const [postVoteTransaction] = await tx
+    const [deletedPostVoteRow] = await tx
       .delete(schema.PostVote)
       .where(
         and(
@@ -208,47 +186,26 @@ export const unauthed_deleteVote = async (rkey: string, repo: DID) => {
       )
       .returning({ postId: schema.PostVote.postId });
 
-    if (commentTransaction?.commentId != null) {
+    if (deletedCommentVoteRow?.commentId != null) {
       //the vote is a comment vote
 
-      const postId = tx
+      const [deletedCommentVoteCommentRow] = await tx
         .select({ postId: schema.Comment.postId })
         .from(schema.Comment)
-        .where(eq(schema.Comment.id, commentTransaction.commentId));
+        .where(eq(schema.Comment.id, deletedCommentVoteRow.commentId));
 
-      const commentIds = tx
-        .select({ commentId: schema.Comment.id })
-        .from(schema.Comment)
-        .where(eq(schema.Comment.postId, postId));
+      if (!deletedCommentVoteCommentRow?.postId) {
+        throw new Error("Post id not found");
+      }
 
-      await tx
-        .update(schema.CommentAggregates)
-        .set({
-          voteCount: sql`${schema.CommentAggregates.voteCount} - 1`,
-        })
-        .where(
-          eq(schema.CommentAggregates.commentId, commentTransaction.commentId),
-        );
-
-      await tx
-        .update(schema.CommentAggregates)
-        .set({
-          rank: sql<number>`
-                (CAST(COALESCE(${schema.CommentAggregates.voteCount}, 1) AS REAL) / (pow((JULIANDAY('now') - JULIANDAY(${schema.CommentAggregates.createdAt})) * 24 + 2,1.8)))`,
-        })
-        .where(inArray(schema.CommentAggregates.commentId, commentIds));
-    } else if (postVoteTransaction?.postId != null) {
+      await deleteCommentVoteAggregateTrigger(
+        deletedCommentVoteCommentRow.postId,
+        deletedCommentVoteRow.commentId,
+        tx,
+      );
+    } else if (deletedPostVoteRow?.postId != null) {
       //the vote is a post vote
-      await tx
-        .update(schema.PostAggregates)
-        .set({
-          voteCount: sql`${schema.PostAggregates.voteCount} - 1`,
-        })
-        .where(eq(schema.PostAggregates.postId, postVoteTransaction.postId));
-      await tx.update(schema.PostAggregates).set({
-        rank: sql<number>`
-                (CAST(COALESCE(${schema.PostAggregates.voteCount}, 1) AS REAL) / (pow((JULIANDAY('now') - JULIANDAY(${schema.PostAggregates.createdAt})) * 24 + 2,1.8)))`,
-      });
+      await deletePostVoteAggregateTrigger(deletedPostVoteRow.postId, tx);
     }
   });
 };
