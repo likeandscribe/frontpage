@@ -30,7 +30,7 @@ export default async function Layout({
 }) {
   const session = await getSession();
   return (
-    <div className="container mx-auto px-4 md:px-6 pt-4 md:py-12 max-w-3xl">
+    <div className="container mx-auto px-4 md:px-6 pt-4 pb-8 md:py-12 max-w-3xl">
       <div className="flex place-content-between items-center mb-8">
         <Link href="/">
           {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -59,7 +59,7 @@ export default async function Layout({
             href={`https://bsky.app/profile/${FRONTPAGE_ATPROTO_HANDLE}`}
             className="font-medium text-indigo-600 hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300"
           >
-            @unravel.fyi <OpenInNewWindowIcon className="inline" />
+            @frontpage.fyi <OpenInNewWindowIcon className="inline" />
           </a>
         </p>
       </footer>
