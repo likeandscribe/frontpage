@@ -1,0 +1,7 @@
+{
+  "name": "Frontpage",
+  "short_name": "Frontpage",
+  "theme_color": "#020617",
+  "background_color": "#020617",
+  "display": "standalone"
+}
