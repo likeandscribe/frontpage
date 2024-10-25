@@ -52,6 +52,10 @@ export default async function RkeyPage({
 
   return (
     <>
+      <link
+        rel="alternate"
+        href={`at://${params.identifier}/${params.collection}/${params.rkey}`}
+      />
       <h2>
         Record
         <Suspense

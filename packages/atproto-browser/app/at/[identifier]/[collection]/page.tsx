@@ -25,6 +25,10 @@ export default async function CollectionPage({
 
   return (
     <div>
+      <link
+        rel="alternate"
+        href={`at://${params.identifier}/${params.collection}`}
+      />
       <h1>
         {params.collection} records{" "}
         <Link

@@ -28,6 +28,7 @@ export default async function IdentifierPage({
 
   return (
     <>
+      <link rel="alternate" href={`at://${params.identifier}`} />
       <h1>
         <DidHandle did={identityResult.didDocument.id} />
       </h1>
