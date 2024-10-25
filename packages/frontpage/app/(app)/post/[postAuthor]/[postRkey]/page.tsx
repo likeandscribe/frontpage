@@ -5,6 +5,8 @@ import { getCommentsForPost } from "@/lib/data/db/comment";
 import { Metadata } from "next";
 import { getVerifiedHandle } from "@/lib/data/atproto/identity";
 import { PostPageParams, getPostPageData } from "./_lib/page-data";
+import { LinkAlternateAtUri } from "@/lib/components/link-alternate-at";
+import { PostCollection } from "@/lib/data/atproto/post";
 
 export async function generateMetadata(props: {
   params: Promise<PostPageParams>;
@@ -44,6 +46,11 @@ export default async function Post(props: { params: Promise<PostPageParams> }) {
 
   return (
     <>
+      <LinkAlternateAtUri
+        authority={authorDid}
+        collection={PostCollection}
+        rkey={post.rkey}
+      />
       {post.status === "live" ? (
         <NewComment postRkey={post.rkey} postAuthorDid={authorDid} />
       ) : (

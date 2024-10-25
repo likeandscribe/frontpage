@@ -3,6 +3,8 @@ import Link from "next/link";
 import { Metadata } from "next";
 import { getVerifiedHandle } from "@/lib/data/atproto/identity";
 import { CommentPageParams, getCommentPageData } from "./_lib/page-data";
+import { LinkAlternateAtUri } from "@/lib/components/link-alternate-at";
+import { CommentCollection } from "@/lib/data/atproto/comment";
 
 function truncateText(text: string, maxLength: number) {
   if (text.length > maxLength) {
@@ -57,6 +59,11 @@ export default async function CommentPage(props: {
 
   return (
     <>
+      <LinkAlternateAtUri
+        authority={comment.authorDid}
+        collection={CommentCollection}
+        rkey={comment.rkey}
+      />
       <div className="flex justify-end">
         <Link
           href={`/post/${params.postAuthor}/${params.postRkey}`}

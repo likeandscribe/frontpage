@@ -22,6 +22,7 @@ import { EllipsisDropdown } from "../../_components/ellipsis-dropdown";
 import { ReportDialogDropdownButton } from "../../_components/report-dialog";
 import { reportUserAction } from "@/lib/components/user-hover-card";
 import { Metadata } from "next";
+import { LinkAlternateAtUri } from "@/lib/components/link-alternate-at";
 
 type Params = {
   user: string;
@@ -78,6 +79,7 @@ export default async function Profile(props: { params: Promise<Params> }) {
 
   return (
     <>
+      <LinkAlternateAtUri authority={did} />
       <div className="flex items-center space-x-4 mb-4">
         <UserAvatar did={did} size="medium" />
         <div className="flex flex-wrap items-center gap-2">
