@@ -25,7 +25,7 @@ export const calculateRankSql = (
   createdAtColumn: schema.DateIsoColumn,
 ) => {
   return sql<number>`
-    (CAST(COALESCE(${voteCountColumn}, 1) AS REAL) / (pow((JULIANDAY('now') - JULIANDAY(${createdAtColumn})) * 24 + 2, 1.8)))`;
+    (CAST(COALESCE(${voteCountColumn} + 1, 1) AS REAL) / (pow((JULIANDAY('now') - JULIANDAY(${createdAtColumn})) * 24 + 2, 1.8)))`;
 };
 
 //Post flow:
