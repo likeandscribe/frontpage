@@ -1,6 +1,10 @@
 import slugify from "slugify";
 import { z } from "zod";
 
+const FRONTPAGE_PDS_URL = "https://hydnum.us-west.host.bsky.network/xrpc";
+export const FRONTPAGE_DID = "did:plc:klmr76mpewpv7rtm3xgpzd7x";
+export const WHTWND_BLOG_COLLECTION = "com.whtwnd.blog.entry";
+
 // TODO: Extract into shared lib (it currently also exists in frontpage)
 const AtUri = z.string().transform((value, ctx) => {
   const match = value.match(/^at:\/\/(.+?)(\/.+?)?(\/.+?)?$/);
@@ -44,18 +48,15 @@ const BlogArray = z.object({
 });
 
 // Functions
-const serviceUri = "https://hydnum.us-west.host.bsky.network/xrpc";
-const repo = "did:plc:klmr76mpewpv7rtm3xgpzd7x";
-const collection = "com.whtwnd.blog.entry";
 
 export async function listBlogs() {
   const queryParams = new URLSearchParams({
-    repo: repo,
-    collection: collection,
+    repo: FRONTPAGE_DID,
+    collection: WHTWND_BLOG_COLLECTION,
   });
 
   const blogList = await fetch(
-    `${serviceUri}/com.atproto.repo.listRecords?${queryParams}`,
+    `${FRONTPAGE_PDS_URL}/com.atproto.repo.listRecords?${queryParams}`,
     {
       method: "GET",
       headers: {
@@ -73,13 +74,13 @@ export async function listBlogs() {
 
 export async function getBlog(rkey: string) {
   const queryParams = new URLSearchParams({
-    repo: repo,
-    collection: collection,
+    repo: FRONTPAGE_DID,
+    collection: WHTWND_BLOG_COLLECTION,
     rkey: rkey,
   });
 
   const response = await fetch(
-    `${serviceUri}/com.atproto.repo.getRecord?${queryParams}`,
+    `${FRONTPAGE_PDS_URL}/com.atproto.repo.getRecord?${queryParams}`,
     {
       method: "GET",
       headers: {

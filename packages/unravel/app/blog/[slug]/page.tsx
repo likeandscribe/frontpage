@@ -14,6 +14,10 @@ export default async function BlogPost({ params: { slug } }: Props) {
 
   return (
     <>
+      <link
+        rel="alternate"
+        href={`at://${blog.uri.authority}/${blog.uri.collection}/${blog.uri.rkey}`}
+      />
       <title>{blog.value.title}</title>
       <link rel="canonical" href={`/blog/${blog.slug}`} />
       <h1 className="text-4xl mb-8 mt-32">{blog.value.title}</h1>
