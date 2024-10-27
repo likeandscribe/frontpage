@@ -2,6 +2,13 @@ name: PR
 on: pull_request
 
 jobs:
+  labeller:
+    permissions:
+      contents: read
+      pull-requests: write
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/labeler@v5
   test:
     runs-on: ubuntu-latest
     steps:

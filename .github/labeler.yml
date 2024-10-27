@@ -1,0 +1,20 @@
+atproto-browser
+- any:
+  - changed-files:
+    - any-glob-to-any-file: '/packages/atproto-browser/**'
+
+frontpage
+- any:
+  - changed-files:
+    - any-glob-to-any-file: '/packages/frontpage/**'
+
+drainpipe
+- any:
+  - changed-files:
+    - any-glob-to-any-file: '/packages-rs/**'
+
+# Add 'Documentation' label to any change to .md files within the entire repository 
+documentation:
+- any:
+  - changed-files:
+    - any-glob-to-any-file: '**/*.md'
