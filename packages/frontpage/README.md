@@ -14,10 +14,5 @@ If you need to login, you need to setup some additional env vars and serve your 
 
 ```bash
 pnpm exec tsx ./scripts/generate-jwk.mts # Copy this output into .env.local
-
-# In one terminal, start the dev server
-pnpm run dev
-
-# In another terminal, open the tunnel. This example uses `cloudflared`
-cloudflared tunnel --url http://localhost:3000
 ```
+You'll now need to follow the documentation [here](https://github.com/likeandscribe/frontpage/blob/main/packages/frontpage/local-infra/README.md)
