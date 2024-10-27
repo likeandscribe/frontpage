@@ -1,68 +1,12 @@
-use db::{record_dead_letter, update_seq};
-use debug_ignore::DebugIgnore;
-use diesel::{
-    backend::Backend,
-    deserialize::{FromSql, FromSqlRow},
-    expression::AsExpression,
-    serialize::ToSql,
-    sql_types::Integer,
-    sqlite::SqliteConnection,
+use diesel::SqliteConnection;
+use drainpipe::{
+    db::{self, record_dead_letter, update_seq},
+    firehose, ProcessError, ProcessErrorKind,
 };
 use futures::{StreamExt as _, TryFutureExt};
 use serde::Serialize;
 use std::{path::PathBuf, process::ExitCode, time::Duration};
 use tokio_tungstenite::tungstenite::{client::IntoClientRequest, protocol::Message};
-
-mod db;
-mod firehose;
-mod schema;
-
-#[repr(i32)]
-#[derive(Debug, AsExpression, PartialEq, FromSqlRow)]
-#[diesel(sql_type = Integer)]
-pub enum ProcessErrorKind {
-    DecodeError,
-    ProcessError,
-}
-
-impl<DB> ToSql<Integer, DB> for ProcessErrorKind
-where
-    i32: ToSql<Integer, DB>,
-    DB: Backend,
-{
-    fn to_sql<'b>(
-        &'b self,
-        out: &mut diesel::serialize::Output<'b, '_, DB>,
-    ) -> diesel::serialize::Result {
-        match self {
-            ProcessErrorKind::DecodeError => 0.to_sql(out),
-            ProcessErrorKind::ProcessError => 1.to_sql(out),
-        }
-    }
-}
-
-impl<DB> FromSql<Integer, DB> for ProcessErrorKind
-where
-    DB: Backend,
-    i32: FromSql<Integer, DB>,
-{
-    fn from_sql(bytes: <DB as Backend>::RawValue<'_>) -> diesel::deserialize::Result<Self> {
-        match i32::from_sql(bytes)? {
-            0 => Ok(ProcessErrorKind::DecodeError),
-            1 => Ok(ProcessErrorKind::ProcessError),
-            x => Err(format!("Unrecognized variant {}", x).into()),
-        }
-    }
-}
-
-#[derive(Debug)]
-struct ProcessError {
-    seq: i64,
-    inner: anyhow::Error,
-    source: DebugIgnore<Vec<u8>>,
-    kind: ProcessErrorKind,
-}
-
 /// Process a message from the firehose. Returns the sequence number of the message or an error.
 async fn process(message: Vec<u8>, ctx: &mut Context) -> Result<i64, ProcessError> {
     let (_header, data) = firehose::read(&message).map_err(|e| ProcessError {
