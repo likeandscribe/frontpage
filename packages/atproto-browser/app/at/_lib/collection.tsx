@@ -51,7 +51,9 @@ export function CollectionItems({
             fetchKey={`listCollections/collection:${collection}/cursor:${data.cursor!}`}
           />
         </Suspense>
-      ) : data.cursor !== "self" && data.records.length > 0 && data.records.length == FETCH_LIMIT ? (
+      ) : data.cursor !== "self" &&
+        data.records.length > 0 &&
+        data.records.length == Number(FETCH_LIMIT) ? (
         <button type="button" onClick={() => setMore(true)}>
           Load more
         </button>
