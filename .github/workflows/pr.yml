@@ -12,6 +12,8 @@ jobs:
       with:
         fetch-depth: 2
     - uses: actions/labeler@v5
+      with:
+        sync-labels: true
   test:
     runs-on: ubuntu-latest
     steps:
