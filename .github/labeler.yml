@@ -1,14 +1,13 @@
-atproto-browser
-- any:
+atproto-browser:
   - changed-files:
     - any-glob-to-any-file: /packages/atproto-browser/**
 
-frontpage
+frontpage:
 - any:
   - changed-files:
     - any-glob-to-any-file: /packages/frontpage/**
 
-drainpipe
+drainpipe:
 - any:
   - changed-files:
     - any-glob-to-any-file: /packages-rs/**
