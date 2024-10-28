@@ -267,3 +267,41 @@ export const Report = sqliteTable("reports", {
     enum: ["pending", "accepted", "rejected"],
   }).default("pending"),
 });
+
+export const TempLabels = sqliteTable("temp_labels", {
+  id: integer("id").primaryKey(),
+  label: text("label").notNull(),
+  createdAt: dateIsoText("created_at")
+    .notNull()
+    .default(sql`(strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))`),
+});
+
+export const PostPostLabels = sqliteTable("post_temp_labels", {
+  id: integer("id").primaryKey(),
+  postId: integer("post_id")
+    .notNull()
+    .references(() => Post.id),
+  postLabelId: integer("post_label_id")
+    .notNull()
+    .references(() => TempLabels.id),
+  createdAt: dateIsoText("created_at")
+    .notNull()
+    .default(sql`(strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))`),
+  updatedAt: dateIsoText("created_at")
+    .notNull()
+    .default(sql`(strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))`),
+});
+
+export const UserPostLabelPreferences = sqliteTable(
+  "user_post_label_preferences",
+  {
+    id: integer("id").primaryKey(),
+    did: text("did").notNull(),
+    postLabelId: integer("post_label_id")
+      .notNull()
+      .references(() => TempLabels.id),
+    createdAt: dateIsoText("created_at")
+      .notNull()
+      .default(sql`(strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))`),
+  },
+);
