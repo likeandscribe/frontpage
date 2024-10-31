@@ -9,6 +9,7 @@ import { cache } from "react";
 import { unstable_cache as nextCache } from "next/cache";
 import { isValidHandle } from "@atproto/syntax";
 import { isDid } from "@atproto/did";
+import { z } from "zod";
 
 function timeoutWith<T>(
   timeout: number,
@@ -23,11 +24,38 @@ function timeoutWith<T>(
   ]);
 }
 
+const PlcDocument = z.object({
+  id: z.string(),
+  alsoKnownAs: z.array(z.string()),
+  service: z.array(
+    z.object({
+      id: z.string(),
+      type: z.string(),
+      serviceEndpoint: z.string(),
+    }),
+  ),
+});
+
+export const getDidDoc = cache(async (did: string) => {
+  const url = process.env.PLC_DIRECTORY_URL ?? "https://plc.directory";
+  const response = await fetch(`${url}/${did}`, {
+    next: {
+      // TODO: Also revalidate this when we receive an identity change event
+      // That would allow us to extend the revalidation time to 1 day
+      revalidate: 60 * 60, // 1 hour
+    },
+  });
+
+  return PlcDocument.parse(await response.json());
+});
+
 const didResolver = new DidResolver({});
 const resolveDid = cache(
   nextCache(
     cache((did: string) =>
-      timeoutWith(1000, didResolver.resolve(did), "DID timeout"),
+      // this uses atproto lib, lets use our own func
+      // timeoutWith(1000, didResolver.resolve(did), "DID timeout"),
+      timeoutWith(1000, getDidDoc(did), "DID timeout"),
     ),
     ["did-doc"],
     {
