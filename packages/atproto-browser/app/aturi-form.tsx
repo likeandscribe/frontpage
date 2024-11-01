@@ -1,6 +1,6 @@
 "use client";
 import { useActionState } from "react";
-import { navigateUri } from "./actions";
+import { navigateUriAction } from "./actions";
 
 export function AtUriForm({
   defaultUri,
@@ -9,7 +9,10 @@ export function AtUriForm({
   defaultUri?: string;
   style?: React.CSSProperties;
 }) {
-  const [state, action, isPending] = useActionState(navigateUri, undefined);
+  const [state, action, isPending] = useActionState(
+    navigateUriAction,
+    undefined,
+  );
   return (
     <div style={style}>
       <form action={action} style={{ display: "flex" }}>
