@@ -60,6 +60,7 @@ async function getAtUriFromHttp(url: string): Promise<UriParseResult> {
   }
 
   const alternates = doc.querySelectorAll('link[rel="alternate"]');
+  // Choose the first AT URI found in the alternates, there's not really a better way to choose the right one
   const atUriAlternate = alternates.find((link) =>
     link.getAttribute("href")?.startsWith("at://"),
   );
