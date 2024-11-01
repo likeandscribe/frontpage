@@ -4,6 +4,7 @@ import { getAtUriPath } from "@/lib/util";
 import { AtUri, isValidHandle } from "@atproto/syntax";
 import { redirect } from "next/navigation";
 import { parse as parseHtml } from "node-html-parser";
+import { parse as parseLinkHeader } from "http-link-header";
 
 export async function navigateUri(_state: unknown, formData: FormData) {
   const uriInput = formData.get("uri") as string;
@@ -40,17 +41,12 @@ async function getAtUriFromHttp(url: string): Promise<UriParseResult> {
 
   const linkHeader = response.headers.get("Link");
   if (linkHeader) {
-    const atUriMatch = linkHeader.match(/<(at:\/\/[^>]+)>; rel="alternate"/);
-    if (atUriMatch && atUriMatch[1]) {
-      const result = parseUri(
-        // "The URI (absolute or relative) must percent-encode character codes greater than 255"
-        // See https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Link#encoding_urls
-        decodeURIComponent(atUriMatch[1]),
-      );
-
-      if ("uri" in result) {
-        return result;
-      }
+    const ref = parseLinkHeader(linkHeader).refs.find(
+      (ref) => ref.rel === "alternate" && ref.uri.startsWith("at://"),
+    );
+    const result = ref ? parseUri(ref.uri) : null;
+    if (result && "uri" in result) {
+      redirect(getAtUriPath(result.uri));
     }
   }
 
