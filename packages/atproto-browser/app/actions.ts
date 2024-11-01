@@ -34,8 +34,15 @@ type UriParseResult =
   | { uri: AtUri };
 
 async function getAtUriFromHttp(url: string): Promise<UriParseResult> {
-  const response = await fetch(url);
+  const controller = new AbortController();
+  const response = await fetch(url, {
+    headers: {
+      "User-Agent": "atproto-browser.vercel.app",
+    },
+    signal: controller.signal,
+  });
   if (!response.ok) {
+    controller.abort();
     return { error: `Failed to fetch ${url}` };
   }
 
@@ -46,6 +53,7 @@ async function getAtUriFromHttp(url: string): Promise<UriParseResult> {
     );
     const result = ref ? parseUri(ref.uri) : null;
     if (result && "uri" in result) {
+      controller.abort();
       redirect(getAtUriPath(result.uri));
     }
   }
