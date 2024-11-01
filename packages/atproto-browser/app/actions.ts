@@ -42,7 +42,12 @@ async function getAtUriFromHttp(url: string): Promise<UriParseResult> {
   if (linkHeader) {
     const atUriMatch = linkHeader.match(/<(at:\/\/[^>]+)>; rel="alternate"/);
     if (atUriMatch && atUriMatch[1]) {
-      const result = parseUri(atUriMatch[1]);
+      const result = parseUri(
+        // "The URI (absolute or relative) must percent-encode character codes greater than 255"
+        // See https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Link#encoding_urls
+        decodeURIComponent(atUriMatch[1]),
+      );
+
       if ("uri" in result) {
         return result;
       }
