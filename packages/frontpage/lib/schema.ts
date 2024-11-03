@@ -22,6 +22,8 @@ const did = customType<{ data: DID }>({
   },
 });
 
+const nowAsIsoString = sql`(strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))`;
+
 const dateIsoText = customType<{ data: Date; driverData: string }>({
   dataType() {
     return "text";
@@ -92,9 +94,7 @@ export const PostAggregates = sqliteTable(
     rank: integer("rank")
       .notNull()
       .default(sql`(CAST(1 AS REAL) / (pow(2,1.8)))`),
-    createdAt: dateIsoText("created_at")
-      .notNull()
-      .default(sql`(strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))`),
+    createdAt: dateIsoText("created_at").notNull().default(nowAsIsoString),
   },
   (t) => ({
     unique_postId: unique().on(t.postId),
@@ -143,9 +143,7 @@ export const CommentAggregates = sqliteTable(
     rank: integer("rank")
       .notNull()
       .default(sql`(CAST(1 AS REAL) / (pow(2,1.8)))`),
-    createdAt: dateIsoText("created_at")
-      .notNull()
-      .default(sql`(strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))`),
+    createdAt: dateIsoText("created_at").notNull().default(nowAsIsoString),
   },
   (t) => ({
     comment_index: index("comment_id_idx").on(t.commentId),
@@ -253,7 +251,7 @@ export const Report = sqliteTable("reports", {
   actionedAt: dateIsoText("actioned_at"),
   actionedBy: text("actioned_by"),
   subjectUri: text("subject_uri").notNull(),
-  subjectDid: text("subject_did").notNull(),
+  subjectDid: did("subject_did").notNull(),
   subjectCollection: text("subject_collection"),
   subjectRkey: text("subject_rkey"),
   subjectCid: text("subject_cid"),
@@ -266,4 +264,13 @@ export const Report = sqliteTable("reports", {
   status: text("status", {
     enum: ["pending", "accepted", "rejected"],
   }).default("pending"),
+});
+
+export const Notification = sqliteTable("notifications", {
+  id: integer("id").primaryKey(),
+  did: did("did").notNull(),
+  createdAt: dateIsoText("created_at").notNull().default(nowAsIsoString),
+  readAt: dateIsoText("read_at"),
+  reason: text("reason", { enum: ["postComment", "commentReply"] }).notNull(),
+  commentId: integer("comment_id").references(() => Comment.id),
 });
