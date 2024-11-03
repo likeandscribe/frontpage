@@ -266,7 +266,7 @@ export async function unauthed_createComment({
   repo,
   rkey,
 }: UnauthedCreateCommentInput) {
-  await db.transaction(async (tx) => {
+  return await db.transaction(async (tx) => {
     const parentComment =
       comment.parent != null
         ? (
@@ -316,6 +316,19 @@ export async function unauthed_createComment({
       insertedComment.id,
       tx,
     );
+
+    return {
+      id: insertedComment.id,
+      parent: parentComment
+        ? {
+            id: parentComment.id,
+            authorDid: parentComment.authorDid,
+          }
+        : null,
+      post: {
+        authordid: post.authorDid,
+      },
+    };
   });
 }
 

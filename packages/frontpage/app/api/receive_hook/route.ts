@@ -16,6 +16,7 @@ import {
   unauthed_deleteVote,
   unauthed_createCommentVote,
 } from "@/lib/data/db/vote";
+import { unauthed_createNotification } from "@/lib/data/db/notification";
 
 export async function POST(request: Request) {
   const auth = request.headers.get("Authorization");
@@ -68,12 +69,24 @@ export async function POST(request: Request) {
       if (op.action === "create") {
         const comment = await getComment({ rkey, repo });
 
-        await unauthed_createComment({
+        const createdComment = await unauthed_createComment({
           cid: comment.cid,
           comment,
           repo,
           rkey,
         });
+
+        const didToNotify = createdComment.parent
+          ? createdComment.parent.authorDid
+          : createdComment.post.authordid;
+
+        if (didToNotify !== repo) {
+          await unauthed_createNotification({
+            commentId: createdComment.id,
+            did: didToNotify,
+            reason: createdComment.parent ? "commentReply" : "postComment",
+          });
+        }
       } else if (op.action === "delete") {
         await unauthed_deleteComment({ rkey, repo });
       }

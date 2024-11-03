@@ -13,6 +13,7 @@ import {
   getVerifiedHandle,
 } from "@/lib/data/atproto/identity";
 import { UserHoverCard } from "@/lib/components/user-hover-card";
+import { cn } from "@/lib/utils";
 
 type CommentProps = {
   comment: CommentModel;
@@ -92,9 +93,7 @@ async function LiveComment({
             <TimeAgo createdAt={comment.createdAt} side="bottom" />
           </Link>
         </div>
-        <p className="whitespace-pre-wrap text-ellipsis overflow-x-hidden">
-          {comment.body}
-        </p>
+        {comment.body ? <CommentBody body={comment.body} /> : null}
       </CommentClientWrapperWithToolbar>
 
       {comment.children?.map((comment) => (
@@ -107,6 +106,25 @@ async function LiveComment({
         />
       ))}
     </>
+  );
+}
+
+export function CommentBody({
+  body,
+  exerptOnly = false,
+}: {
+  body: string;
+  exerptOnly?: boolean;
+}) {
+  return (
+    <p
+      className={cn(
+        "whitespace-pre-wrap text-ellipsis overflow-x-hidden",
+        exerptOnly && "line-clamp-6",
+      )}
+    >
+      {body}
+    </p>
   );
 }
 

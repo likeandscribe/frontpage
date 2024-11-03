@@ -12,6 +12,7 @@ import {
   newCommentVoteAggregateTrigger,
   newPostVoteAggregateTrigger,
 } from "./triggers";
+import { atUriToString } from "../atproto/uri";
 
 export const getVoteForPost = cache(async (postId: number) => {
   const user = await getUser();
@@ -71,7 +72,9 @@ export const unauthed_createPostVote = async ({
     )[0];
 
     if (!subject) {
-      throw new Error(`Subject not found with uri: ${vote.subject.uri.value}`);
+      throw new Error(
+        `Subject not found with uri: ${atUriToString(vote.subject.uri)}`,
+      );
     }
 
     if (subject.authorDid === repo) {
@@ -112,7 +115,9 @@ export async function unauthed_createCommentVote({
     )[0];
 
     if (!subject) {
-      throw new Error(`Subject not found with uri: ${vote.subject.uri.value}`);
+      throw new Error(
+        `Subject not found with uri: ${atUriToString(vote.subject.uri)}`,
+      );
     }
 
     if (subject.authorDid === repo) {

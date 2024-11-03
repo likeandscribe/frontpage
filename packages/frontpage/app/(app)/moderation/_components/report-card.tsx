@@ -14,6 +14,7 @@ import { cn } from "@/lib/utils";
 import { CommentCollection } from "@/lib/data/atproto/comment";
 import { PostCollection } from "@/lib/data/atproto/post";
 import { getPostFromComment } from "@/lib/data/db/post";
+import { getCommentLink, getPostLink } from "@/lib/navigation";
 
 const createLink = async (
   collection?: string | null,
@@ -22,14 +23,21 @@ const createLink = async (
 ) => {
   switch (collection) {
     case PostCollection:
-      return `/post/${author}/${rkey}/`;
+      return getPostLink({ handleOrDid: author!, rkey: rkey! });
 
     case CommentCollection:
       const { postAuthor, postRkey } = (await getPostFromComment({
         rkey: rkey!,
         did: author!,
       }))!;
-      return `/post/${postAuthor}/${postRkey}/${author}/${rkey}/`;
+      return getCommentLink({
+        post: {
+          handleOrDid: postAuthor,
+          rkey: postRkey,
+        },
+        handleOrDid: author!,
+        rkey: rkey!,
+      });
 
     default:
       return `/profile/${author}/`;
