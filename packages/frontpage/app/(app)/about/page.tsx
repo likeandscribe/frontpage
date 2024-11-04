@@ -1,6 +1,6 @@
 import { ReactNode } from "react";
 
-export function CommunityGuidelinesPage() {
+export default function CommunityGuidelinesPage() {
   return (
     <>
       <Heading1>About Frontpage</Heading1>

@@ -91,6 +91,11 @@ async function LoginOrLogout() {
               Profile
             </Link>
           </DropdownMenuItem>
+          <DropdownMenuItem asChild>
+            <Link href="/about" className="cursor-pointer">
+              About
+            </Link>
+          </DropdownMenuItem>
           <Suspense fallback={null}>
             {isAdmin().then((isAdmin) =>
               isAdmin ? (
