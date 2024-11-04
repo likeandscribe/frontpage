@@ -1,4 +1,14 @@
+import { Metadata } from "next";
 import { ReactNode } from "react";
+
+export const metadata: Metadata = {
+  title: "About Frontpage",
+  description: "Learn about Frontpage and our community guidelines.",
+  openGraph: {
+    title: "About Frontpage",
+    description: "Learn about Frontpage and our community guidelines.",
+  },
+};
 
 export default function CommunityGuidelinesPage() {
   return (
