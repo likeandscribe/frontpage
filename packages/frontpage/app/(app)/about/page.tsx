@@ -26,7 +26,7 @@ export default function CommunityGuidelinesPage() {
         we ask that you follow these guidelines:
       </Paragraph>
 
-      <ol className="my-6 ml-6 list-disc [&>li]:mt-2">
+      <ol className="my-6 ml-6 list-decimal [&>li]:mt-2">
         <li>
           Don&apos;t post hate speech, harassment, or other forms of abuse.
         </li>
