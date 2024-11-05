@@ -7,12 +7,13 @@ import {
 import { z } from "zod";
 import { DataLayerError } from "../error";
 import { DID, getPdsUrl } from "./did";
+import { MAX_POST_TITLE_LENGTH, MAX_POST_URL_LENGTH } from "../db/constants";
 
 export const PostCollection = "fyi.unravel.frontpage.post";
 
 export const PostRecord = z.object({
-  title: z.string(),
-  url: z.string(),
+  title: z.string().max(MAX_POST_TITLE_LENGTH),
+  url: z.string().url().max(MAX_POST_URL_LENGTH),
   createdAt: z.string(),
 });
 
@@ -25,7 +26,12 @@ type PostInput = {
 
 export async function createPost({ title, url }: PostInput) {
   const record = { title, url, createdAt: new Date().toISOString() };
-  PostRecord.parse(record);
+  const parseResult = PostRecord.safeParse(record);
+  if (!parseResult.success) {
+    throw new DataLayerError("Invalid post record", {
+      cause: parseResult.error,
+    });
+  }
 
   const result = await atprotoCreateRecord({
     record,
