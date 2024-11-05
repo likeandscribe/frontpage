@@ -20,6 +20,7 @@ type CommentProps = {
   postAuthorParam: string;
   postRkey: string;
   level?: CommentLevel;
+  allowReply: boolean;
 };
 
 export function Comment({ comment, level, ...props }: CommentProps) {
@@ -43,6 +44,7 @@ async function LiveComment({
   level,
   postAuthorParam,
   postRkey,
+  allowReply,
 }: CommentProps) {
   const [postAuthorDid, handle] = await Promise.all([
     getDidFromHandleOrDid(postAuthorParam),
@@ -75,6 +77,7 @@ async function LiveComment({
         initialVoteState={
           hasAuthored ? "authored" : comment.userHasVoted ? "voted" : "unvoted"
         }
+        allowReply={allowReply}
       >
         <div className="flex items-center gap-2">
           <UserHoverCard asChild did={comment.authorDid}>
@@ -103,6 +106,7 @@ async function LiveComment({
           comment={comment}
           postAuthorParam={postAuthorParam}
           postRkey={postRkey}
+          allowReply={allowReply}
         />
       ))}
     </>
@@ -157,6 +161,7 @@ function DeletedComment({
           postRkey={postRkey}
           postAuthorParam={postAuthorParam}
           level={childCommentLevel}
+          allowReply={false}
         />
       ))}
     </NestComment>

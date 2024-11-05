@@ -62,10 +62,11 @@ const commentVariants = cva(undefined, {
 type CommentVariantProps = VariantProps<typeof commentVariants>;
 export type CommentLevel = CommentVariantProps["level"];
 
-export type CommentClientProps = CommentVariantProps &
+type CommentClientProps = CommentVariantProps &
   Pick<CommentModel, "rkey" | "cid" | "id" | "authorDid"> & {
     postRkey: string;
     postAuthorDid: DID;
+    allowReply: boolean;
     initialVoteState: VoteButtonState;
     hasAuthored: boolean;
     commentHref: string;
@@ -83,6 +84,7 @@ export function CommentClientWrapperWithToolbar({
   hasAuthored,
   children,
   level,
+  allowReply,
   commentHref,
 }: CommentClientProps) {
   const [showNewComment, setShowNewComment] = useState(false);
@@ -111,7 +113,7 @@ export function CommentClientWrapperWithToolbar({
               variant="ghost"
               size="icon"
               onClick={() => !hasAuthored && setShowNewComment(true)}
-              disabled={hasAuthored}
+              disabled={hasAuthored || !allowReply}
             >
               <ChatBubbleIcon className="w-4 h-4" />
               <span className="sr-only">Reply</span>

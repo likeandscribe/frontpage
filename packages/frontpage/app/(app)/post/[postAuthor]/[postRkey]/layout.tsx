@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { PostCard } from "../../../_components/post-card";
 import { getPost } from "@/lib/data/db/post";
 import { getDidFromHandleOrDid } from "@/lib/data/atproto/identity";
+import { Alert, AlertTitle, AlertDescription } from "@/lib/components/ui/alert";
 
 type Params = {
   postRkey: string;
@@ -41,6 +42,14 @@ export default async function Post(props: {
         cid={post.cid}
         isUpvoted={post.userHasVoted}
       />
+      {post.status !== "live" ? (
+        <Alert>
+          <AlertTitle>This post has been deleted</AlertTitle>
+          <AlertDescription>
+            Deleted posts cannot receive new comments.
+          </AlertDescription>
+        </Alert>
+      ) : null}
       {children}
     </main>
   );

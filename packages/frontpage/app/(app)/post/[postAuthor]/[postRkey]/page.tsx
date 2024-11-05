@@ -1,4 +1,3 @@
-import { Alert, AlertDescription, AlertTitle } from "@/lib/components/ui/alert";
 import { NewComment } from "./_lib/comment-client";
 import { Comment } from "./_lib/comment";
 import { getCommentsForPost } from "@/lib/data/db/comment";
@@ -53,14 +52,7 @@ export default async function Post(props: { params: Promise<PostPageParams> }) {
       />
       {post.status === "live" ? (
         <NewComment postRkey={post.rkey} postAuthorDid={authorDid} />
-      ) : (
-        <Alert>
-          <AlertTitle>This post has been deleted</AlertTitle>
-          <AlertDescription>
-            Deleted posts cannot receive new comments.
-          </AlertDescription>
-        </Alert>
-      )}
+      ) : null}
       <div className="flex flex-col gap-6">
         {comments.map((comment) => (
           <Comment
@@ -69,6 +61,7 @@ export default async function Post(props: { params: Promise<PostPageParams> }) {
             level={0}
             postAuthorParam={params.postAuthor}
             postRkey={post.rkey}
+            allowReply={post.status === "live"}
           />
         ))}
       </div>
