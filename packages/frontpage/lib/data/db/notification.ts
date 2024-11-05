@@ -33,17 +33,18 @@ export const getNotifications = cache(
       .from(schema.Notification)
       .where(
         and(
+          eq(schema.Comment.status, "live"),
           eq(schema.Notification.did, user.did),
           cursor
             ? lt(schema.Notification.createdAt, cursorToDate(cursor))
             : undefined,
         ),
       )
-      .leftJoin(
+      .innerJoin(
         schema.Comment,
         eq(schema.Comment.id, schema.Notification.commentId),
       )
-      .leftJoin(schema.Post, eq(schema.Post.id, schema.Comment.postId))
+      .innerJoin(schema.Post, eq(schema.Post.id, schema.Comment.postId))
       .groupBy(schema.Notification.id)
       .orderBy(desc(schema.Notification.id))
       .limit(limit);
