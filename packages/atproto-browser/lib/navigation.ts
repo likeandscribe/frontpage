@@ -5,18 +5,24 @@ import { AtUri, isValidHandle } from "@atproto/syntax";
 import { redirect } from "next/navigation";
 import { parse as parseHtml } from "node-html-parser";
 import { parse as parseLinkHeader } from "http-link-header";
+import { domainToASCII } from "url";
 
 export async function navigateAtUri(input: string) {
-  const handle = parseHandle(input);
+  // Remove all zero-width characters and weird control codes from the input
+  const sanitizedInput = input.replace(/[\u200B-\u200D\uFEFF\u202C]/g, "");
+
+  // Try punycode encoding the input as a domain name and parse it as a handle
+  const handle = parseHandle(domainToASCII(sanitizedInput) || sanitizedInput);
 
   if (handle) {
     redirect(getAtUriPath(new AtUri(`at://${handle}`)));
   }
 
   const result =
-    input.startsWith("http://") || input.startsWith("https://")
-      ? await getAtUriFromHttp(input)
-      : parseUri(input);
+    sanitizedInput.startsWith("http://") ||
+    sanitizedInput.startsWith("https://")
+      ? await getAtUriFromHttp(sanitizedInput)
+      : parseUri(sanitizedInput);
 
   if ("error" in result) {
     return result;
@@ -72,7 +78,10 @@ async function getAtUriFromHttp(url: string): Promise<UriParseResult> {
     link.getAttribute("href")?.startsWith("at://"),
   );
   if (atUriAlternate) {
-    const result = parseUri(atUriAlternate.getAttribute("href")!);
+    console.log(atUriAlternate.getAttribute("href"));
+    const result = parseUri(
+      decodeURIComponent(atUriAlternate.getAttribute("href")!),
+    );
     if ("uri" in result) {
       return result;
     }
@@ -94,8 +103,8 @@ function parseUri(input: string): UriParseResult {
 }
 
 function parseHandle(input: string): string | null {
-  if (!input.startsWith("@")) return null;
-  const handle = input.slice(1);
+  // Remove the leading @
+  const handle = input.replace(/^@/, "");
   if (!isValidHandle(handle)) return null;
   return handle;
 }
