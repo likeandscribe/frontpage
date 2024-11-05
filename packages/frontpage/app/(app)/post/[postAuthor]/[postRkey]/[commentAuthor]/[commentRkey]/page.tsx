@@ -76,6 +76,7 @@ export default async function CommentPage(props: {
         comment={comment}
         postAuthorParam={params.postAuthor}
         postRkey={post.rkey}
+        allowReply={post.status === "live"}
       />
     </>
   );

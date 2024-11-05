@@ -126,6 +126,7 @@ export default async function Profile(props: { params: Promise<Params> }) {
                     comment={entity}
                     postAuthorParam={entity.postAuthorDid as DID}
                     postRkey={entity.postRkey as string}
+                    allowReply={false}
                   />
                 );
               }
@@ -165,6 +166,7 @@ export default async function Profile(props: { params: Promise<Params> }) {
                     comment={comment}
                     postAuthorParam={comment.postAuthorDid as DID}
                     postRkey={comment.postRkey as string}
+                    allowReply={false}
                   />
                 );
               })}
