@@ -9,11 +9,12 @@ import { DataLayerError } from "../error";
 import { z } from "zod";
 import { PostCollection } from "./post";
 import { DID, getPdsUrl } from "./did";
+import { MAX_COMMENT_LENGTH } from "../db/constants";
 
 export const CommentCollection = "fyi.unravel.frontpage.comment";
 
 export const CommentRecord = z.object({
-  content: z.string(),
+  content: z.string().max(MAX_COMMENT_LENGTH),
   parent: z
     .object({
       cid: z.string(),
@@ -53,7 +54,12 @@ export async function createComment({ parent, post, content }: CommentInput) {
     createdAt: new Date().toISOString(),
   };
 
-  CommentRecord.parse(record);
+  const parseResult = CommentRecord.safeParse(record);
+  if (!parseResult.success) {
+    throw new DataLayerError("Invalid comment record", {
+      cause: parseResult.error,
+    });
+  }
 
   const result = await atprotoCreateRecord({
     record,
