@@ -6,13 +6,19 @@ export const metadata: Metadata = {
   robots: "noindex, nofollow",
 };
 
-export default function NewPost() {
+export default async function NewPost(props: {
+  searchParams: Promise<Record<string, string>>;
+}) {
+  const searchParams = await props.searchParams;
   return (
     <main className="flex flex-col gap-3">
       <h2 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-gray-100">
         New post
       </h2>
-      <NewPostForm />
+      <NewPostForm
+        defaultTitle={searchParams.title}
+        defaultUrl={searchParams.url}
+      />
     </main>
   );
 }

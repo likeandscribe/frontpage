@@ -13,11 +13,17 @@ import {
 } from "@/lib/data/db/constants";
 import { InputLengthIndicator } from "@/lib/components/input-length-indicator";
 
-export function NewPostForm() {
+export function NewPostForm({
+  defaultTitle,
+  defaultUrl,
+}: {
+  defaultTitle?: string;
+  defaultUrl?: string;
+}) {
   const [state, action, isPending] = useActionState(newPostAction, null);
   const id = useId();
-  const [title, setTitle] = useState("");
-  const [url, setUrl] = useState("");
+  const [title, setTitle] = useState(defaultTitle ?? "");
+  const [url, setUrl] = useState(defaultUrl ?? "");
   return (
     <form
       action={action}
