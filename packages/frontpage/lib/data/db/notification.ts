@@ -81,6 +81,13 @@ export const getNotificationCount = cache(async () => {
       count: count(),
     })
     .from(schema.Notification)
+    .innerJoin(
+      schema.Comment,
+      and(
+        eq(schema.Comment.id, schema.Notification.commentId),
+        eq(schema.Comment.status, "live"),
+      ),
+    )
     .where(
       and(
         eq(schema.Notification.did, user.did),
