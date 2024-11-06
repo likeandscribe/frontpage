@@ -5,10 +5,10 @@ import { db } from "@/lib/db";
 import { eq, sql, desc, and, isNull, or } from "drizzle-orm";
 import * as schema from "@/lib/schema";
 import { getBlueskyProfile, getUser, isAdmin } from "../user";
-import * as atprotoPost from "../atproto/post";
 import { DID } from "../atproto/did";
 import { sendDiscordMessage } from "@/lib/discord";
 import { newPostAggregateTrigger } from "./triggers";
+import { FyiUnravelFrontpagePost } from "@repo/frontpage-atproto-client";
 
 const buildUserHasVotedQuery = cache(async () => {
   const user = await getUser();
@@ -165,7 +165,7 @@ export async function uncached_doesPostExist(authorDid: DID, rkey: string) {
 }
 
 type CreatePostInput = {
-  post: atprotoPost.Post;
+  post: FyiUnravelFrontpagePost.Record;
   authorDid: DID;
   rkey: string;
   cid: string;
