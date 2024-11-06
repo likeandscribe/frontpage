@@ -18,15 +18,24 @@ export function ThemeToggleMenuGroup() {
       <DropdownMenuLabel className="truncate">Theme</DropdownMenuLabel>
       <DropdownMenuSeparator />
       <DropdownMenuRadioGroup value={theme} onValueChange={setTheme}>
-        <DropdownMenuRadioItem value="light" className="flex gap-1.5">
+        <DropdownMenuRadioItem
+          value="light"
+          className="flex gap-1.5 cursor-pointer"
+        >
           <SunIcon className="size-4" />
           <span>Light</span>
         </DropdownMenuRadioItem>
-        <DropdownMenuRadioItem value="dark" className="flex gap-1.5">
+        <DropdownMenuRadioItem
+          value="dark"
+          className="flex gap-1.5 cursor-pointer"
+        >
           <MoonIcon className="h-[1.2rem] w-[1.2rem]" />
           <span>Dark</span>
         </DropdownMenuRadioItem>
-        <DropdownMenuRadioItem value="system" className="flex gap-1.5">
+        <DropdownMenuRadioItem
+          value="system"
+          className="flex gap-1.5 cursor-pointer"
+        >
           <Half2Icon className="h-[1.2rem] w-[1.2rem]" />
           <span>System</span>
         </DropdownMenuRadioItem>
