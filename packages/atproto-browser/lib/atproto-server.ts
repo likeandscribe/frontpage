@@ -9,6 +9,7 @@ import { cache } from "react";
 import { unstable_cache as nextCache } from "next/cache";
 import { isValidHandle } from "@atproto/syntax";
 import { isDid } from "@atproto/did";
+import { domainToASCII } from "url";
 
 function timeoutWith<T>(
   timeout: number,
@@ -57,8 +58,10 @@ export async function resolveIdentity(
   const decoded = decodeURIComponent(didOrHandle);
   let didStr;
   let didFromHandle = null;
-  if (isValidHandle(decoded)) {
-    didFromHandle = await resolveHandle(decoded).catch(() => undefined);
+  if (isValidHandle(domainToASCII(decoded))) {
+    didFromHandle = await resolveHandle(domainToASCII(decoded)).catch(
+      () => undefined,
+    );
     didStr = didFromHandle;
     if (!didStr) {
       return {

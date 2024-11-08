@@ -54,7 +54,7 @@ export default async function RkeyPage({
     <>
       <link
         rel="alternate"
-        href={`at://${params.identifier}/${params.collection}/${params.rkey}`}
+        href={`at://${identityResult.didDocument.id}/${params.collection}/${params.rkey}`}
       />
       <h2>
         Record

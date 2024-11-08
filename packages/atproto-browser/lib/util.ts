@@ -1,5 +1,3 @@
-import { AtUri } from "@atproto/syntax";
-
 export const utcDateFormatter = new Intl.DateTimeFormat("en-US", {
   dateStyle: "medium",
   timeStyle: "short",
@@ -10,7 +8,11 @@ export function isNotNull<T>(x: T | null): x is T {
   return x !== null;
 }
 
-export function getAtUriPath(uri: AtUri): string {
+export function getAtUriPath(uri: {
+  host: string;
+  collection?: string;
+  rkey?: string;
+}): string {
   return `/at/${[uri.host, uri.collection, uri.rkey]
     .filter(Boolean)
     .map((c) => c && decodeURIComponent(c))

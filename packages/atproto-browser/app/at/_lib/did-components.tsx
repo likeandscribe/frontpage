@@ -4,6 +4,7 @@ import { resolveIdentity } from "@/lib/atproto-server";
 import { DidCollections } from "./collection-server";
 import { Suspense } from "react";
 import Link from "@/lib/link";
+import { domainToUnicode } from "url";
 
 export function CollapsedDidSummary({ did }: { did: string }) {
   return (
@@ -47,7 +48,10 @@ export async function DidHandle({ did }: { did: string }) {
   return (
     <>
       {handle ? (
-        <Link href={`/at/${handle}`}>{handle}</Link>
+        // WARN: There is potential for homograph attacks here, in the future we should consider punycode encoding ambiguous characters as per (for example) https://chromium.googlesource.com/chromium/src/+/main/docs/idn.md.
+        <Link href={`/at/${domainToUnicode(handle)}`}>
+          {domainToUnicode(handle)}
+        </Link>
       ) : (
         "⚠️ Invalid Handle"
       )}{" "}

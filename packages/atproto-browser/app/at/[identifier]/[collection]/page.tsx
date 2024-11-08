@@ -27,7 +27,7 @@ export default async function CollectionPage({
     <div>
       <link
         rel="alternate"
-        href={`at://${params.identifier}/${params.collection}`}
+        href={`at://${identityResult.didDocument.id}/${params.collection}`}
       />
       <h1>
         {params.collection} records{" "}
