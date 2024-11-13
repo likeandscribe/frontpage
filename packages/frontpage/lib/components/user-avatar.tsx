@@ -53,7 +53,11 @@ async function AvatarImage({
   return (
     // eslint-disable-next-line @next/next/no-img-element
     <img
-      src={profile.avatar}
+      src={
+        sizeVariant === "large"
+          ? profile.avatar
+          : profile.avatar.replace("/avatar/", "/avatar_thumbnail/")
+      }
       alt=""
       width={size}
       height={size}
