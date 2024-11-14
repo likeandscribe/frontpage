@@ -25,7 +25,7 @@ async function getMorePostsAction(cursor: number | null) {
 
   return {
     content: (
-      <>
+      <div className="pt-16 divide-y-2 divide-accent">
         {posts.map((post) => (
           <PostCard
             key={post.id}
@@ -41,7 +41,7 @@ async function getMorePostsAction(cursor: number | null) {
             isUpvoted={post.userHasVoted}
           />
         ))}
-      </>
+      </div>
     ),
     pageSize: posts.length,
     nextCursor,

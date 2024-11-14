@@ -78,7 +78,7 @@ export default async function Profile(props: { params: Promise<Params> }) {
   });
 
   return (
-    <>
+    <div className="px-4 pt-20">
       <LinkAlternateAtUri authority={did} />
       <div className="flex items-center space-x-4 mb-4">
         <UserAvatar did={did} size="medium" />
@@ -174,6 +174,6 @@ export default async function Profile(props: { params: Promise<Params> }) {
           </Suspense>
         </TabsContent>
       </Tabs>
-    </>
+    </div>
   );
 }

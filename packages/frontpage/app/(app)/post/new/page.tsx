@@ -11,7 +11,7 @@ export default async function NewPost(props: {
 }) {
   const searchParams = await props.searchParams;
   return (
-    <main className="flex flex-col gap-3">
+    <div className="flex flex-col gap-3 px-4 pt-20">
       <h2 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-gray-100">
         New post
       </h2>
@@ -19,6 +19,6 @@ export default async function NewPost(props: {
         defaultTitle={searchParams.title}
         defaultUrl={searchParams.url}
       />
-    </main>
+    </div>
   );
 }

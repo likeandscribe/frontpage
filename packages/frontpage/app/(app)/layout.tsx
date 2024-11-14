@@ -31,8 +31,8 @@ export default async function Layout({
 }) {
   const session = await getSession();
   return (
-    <div className="container mx-auto px-4 md:px-6 pt-4 pb-8 md:py-12 max-w-3xl">
-      <div className="flex place-content-between items-center mb-8">
+    <div className="relative container mx-auto px-0 md:px-6 pb-8 md:py-12 max-w-3xl">
+      <div className="fixed left-0 right-0 bg-background flex items-center justify-between py-1.5 px-4 shadow z-50">
         <Link href="/">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/frontpage-logo.svg" alt="Frontpage" className="h-12" />
@@ -52,7 +52,7 @@ export default async function Layout({
 
       <main className="mb-6">{children}</main>
 
-      <footer className="flex justify-between items-center text-gray-500 dark:text-gray-400">
+      <footer className="px-4 flex justify-between items-center text-gray-500 dark:text-gray-400">
         <p>
           Made by{" "}
           <a
@@ -98,12 +98,12 @@ async function LoginOrLogout() {
               <Link href={`/profile/${handle}`} className="cursor-pointer">
                 Profile
               </Link>
-            </DropdownMenuItem> 
-          <DropdownMenuItem asChild>
-            <Link href="/about" className="cursor-pointer">
-              About
-            </Link>
-          </DropdownMenuItem>
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <Link href="/about" className="cursor-pointer">
+                About
+              </Link>
+            </DropdownMenuItem>
             <Suspense fallback={null}>
               {isAdmin().then((isAdmin) =>
                 isAdmin ? (

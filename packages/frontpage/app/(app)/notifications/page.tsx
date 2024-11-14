@@ -19,7 +19,7 @@ import { CommentBody } from "../post/[postAuthor]/[postRkey]/_lib/comment";
 
 export default async function NotificationsPage() {
   return (
-    <div className="flex flex-col gap-y-4">
+    <div className="flex flex-col gap-y-4 px-4 pt-20">
       <div className="flex justify-between">
         <h1 className="scroll-m-20 text-xl font-extrabold lg:text-2xl">
           Notifications

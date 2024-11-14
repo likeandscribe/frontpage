@@ -49,41 +49,66 @@ export async function PostCard({
 
   return (
     // TODO: Make article route to postHref via onClick on card except innser links or buttons
-    <article className="flex items-center gap-4 shadow-sm rounded-lg p-4 bg-white dark:bg-slate-900">
-      <div className="flex flex-col items-center">
-        <VoteButton
-          voteAction={async () => {
-            "use server";
-            await ensureUser();
-            await createVote({
-              subjectAuthorDid: author,
-              subjectCid: cid,
-              subjectRkey: rkey,
-              subjectCollection: PostCollection,
-            });
-          }}
-          unvoteAction={async () => {
-            "use server";
-            await ensureUser();
-            const vote = await getVoteForPost(id);
-            if (!vote) {
-              // TODO: Show error notification
-              console.error("Vote not found for post", id);
-              return;
-            }
-            await deleteVote(vote.rkey);
-          }}
-          initialState={
-            (await getUser())?.did === author
-              ? "authored"
-              : isUpvoted
-                ? "voted"
-                : "unvoted"
-          }
-          votes={votes}
-        />
+    <article className="w-full py-2 px-2 bg-white dark:bg-slate-900 space-y-2">
+      <div className="flex justify-between">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-6">
+            <VoteButton
+              voteAction={async () => {
+                "use server";
+                await ensureUser();
+                await createVote({
+                  subjectAuthorDid: author,
+                  subjectCid: cid,
+                  subjectRkey: rkey,
+                  subjectCollection: PostCollection,
+                });
+              }}
+              unvoteAction={async () => {
+                "use server";
+                await ensureUser();
+                const vote = await getVoteForPost(id);
+                if (!vote) {
+                  // TODO: Show error notification
+                  console.error("Vote not found for post", id);
+                  return;
+                }
+                await deleteVote(vote.rkey);
+              }}
+              initialState={
+                (await getUser())?.did === author
+                  ? "authored"
+                  : isUpvoted
+                    ? "voted"
+                    : "unvoted"
+              }
+              votes={votes}
+            />
+
+            <Link href={postHref} className="hover:underline">
+              {commentCount} comments
+            </Link>
+          </div>
+        </div>
+
+        {user ? (
+          <EllipsisDropdown>
+            <ShareDropdownButton path={postHref} />
+            <ReportDialogDropdownButton
+              reportAction={reportPostAction.bind(null, {
+                rkey,
+                cid,
+                author,
+              })}
+            />
+            {user?.did === author ? (
+              <DeleteButton deleteAction={deletePostAction.bind(null, rkey)} />
+            ) : null}
+          </EllipsisDropdown>
+        ) : null}
       </div>
-      <div className="w-full">
+
+      <div className="px-3">
         <h2 className="mb-1 text-xl">
           <a
             href={url}
@@ -94,51 +119,17 @@ export async function PostCard({
               ({new URL(url).host})
             </span>
           </a>
-        </h2>
-        <div className="flex flex-wrap text-gray-500 dark:text-gray-400 sm:gap-4">
-          <div className="flex gap-2 flex-wrap md:flex-nowrap">
-            <div className="flex gap-2 items-center">
-              <span aria-hidden>•</span>
-              <UserHoverCard did={author} asChild>
-                <Link href={`/profile/${handle}`} className="hover:underline">
-                  by {handle}
-                </Link>
-              </UserHoverCard>
-            </div>
-          </div>
-          <div className="w-full flex items-center justify-between gap-2 md:gap-4 sm:w-auto">
-            <div className="flex gap-2">
-              <span aria-hidden>•</span>
-              <TimeAgo createdAt={createdAt} side="bottom" />
-            </div>
-            <div className="flex gap-2">
-              <span aria-hidden>•</span>
-              <Link href={postHref} className="hover:underline">
-                {commentCount} comments
-              </Link>
-            </div>
-          </div>
+        </h2>{" "}
+      </div>
 
-          {user ? (
-            <div className="ml-auto">
-              <EllipsisDropdown>
-                <ShareDropdownButton path={postHref} />
-                <ReportDialogDropdownButton
-                  reportAction={reportPostAction.bind(null, {
-                    rkey,
-                    cid,
-                    author,
-                  })}
-                />
-                {user?.did === author ? (
-                  <DeleteButton
-                    deleteAction={deletePostAction.bind(null, rkey)}
-                  />
-                ) : null}
-              </EllipsisDropdown>
-            </div>
-          ) : null}
-        </div>
+      <div className="px-3 space-x-2">
+        <UserHoverCard did={author} asChild>
+          <Link href={`/profile/${handle}`} className="text-xs hover:underline">
+            by {handle}
+          </Link>
+        </UserHoverCard>
+        <span aria-hidden>•</span>
+        <TimeAgo createdAt={createdAt} side="bottom" className="text-xs" />
       </div>
     </article>
   );

@@ -12,7 +12,7 @@ export const metadata: Metadata = {
 
 export default function CommunityGuidelinesPage() {
   return (
-    <>
+    <div className="px-4 pt-20">
       <Heading1>About Frontpage</Heading1>
       <Paragraph>
         Frontpage is a decentralised and federated link aggregator that&apos;s
@@ -44,7 +44,7 @@ export default function CommunityGuidelinesPage() {
         reports from users to help us keep the community safe. Please report any
         content that violates our guidelines.
       </Paragraph>
-    </>
+    </div>
   );
 }
 

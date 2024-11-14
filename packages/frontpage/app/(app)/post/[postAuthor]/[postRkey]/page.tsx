@@ -44,7 +44,7 @@ export default async function Post(props: { params: Promise<PostPageParams> }) {
   const comments = await getCommentsForPost(post.id);
 
   return (
-    <>
+    <div className="pt-2 px-4">
       <LinkAlternateAtUri
         authority={authorDid}
         collection={PostCollection}
@@ -65,6 +65,6 @@ export default async function Post(props: { params: Promise<PostPageParams> }) {
           />
         ))}
       </div>
-    </>
+    </div>
   );
 }
