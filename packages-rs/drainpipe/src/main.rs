@@ -1,5 +1,4 @@
 use futures_util::stream::StreamExt;
-use std::env;
 use std::error::Error;
 use std::time::Duration;
 use tokio::time::timeout;
@@ -7,8 +6,9 @@ use tokio_tungstenite::{connect_async, tungstenite::protocol::Message};
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
-    let url = env::var("JETSTREAM_URL")
-        .unwrap_or("wss://jetstream1.us-west.bsky.network/subscribe".to_string());
+    let url =
+        "wss://jetstream1.us-west.bsky.network/subscribe?wantedCollections=fyi.unravel.frontpage"
+            .to_string();
 
     let mut reconnect_attempts = 0;
     let max_reconnect_attempts = 5;
