@@ -40,8 +40,9 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
         while let Some(msg) = stream.next().await {
             match msg {
-                Ok(Message::Text(text)) => {
-                    println!("{}", text);
+                Ok(Message::Text(json_string)) => {
+                    let json: serde_json::Value = serde_json::from_str(&json_string).unwrap();
+                    println!("{}", serde_json::to_string_pretty(&json).unwrap());
                 }
                 Err(e) => {
                     eprintln!("Error: {}", e);
