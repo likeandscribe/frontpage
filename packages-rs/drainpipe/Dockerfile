@@ -1,5 +1,7 @@
 FROM rust:1.78-alpine AS builder
 
+# TODO: Figure out what we need to change here!
+
 RUN apk add libressl-dev musl-dev sqlite-dev
 
 WORKDIR /usr/src/unravel
