@@ -49,7 +49,7 @@ export async function PostCard({
 
   return (
     // TODO: Make article route to postHref via onClick on card except innser links or buttons
-    <article className="w-full py-2 px-2 bg-white dark:bg-slate-900 space-y-2">
+    <article className="w-full py-2 px-2 bg-white dark:bg-slate-900 space-y-2 border-b-2 border-b-accent">
       <div className="flex justify-between items-center">
         <div className="flex items-center px-3 space-x-1.5">
           <UserHoverCard did={author} asChild>

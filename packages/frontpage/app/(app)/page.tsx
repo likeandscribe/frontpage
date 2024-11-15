@@ -25,7 +25,7 @@ async function getMorePostsAction(cursor: number | null) {
 
   return {
     content: (
-      <div className="pt-16 md:pt-0 divide-y divide-accent">
+      <div>
         {posts.map((post) => (
           <PostCard
             key={post.id}

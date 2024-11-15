@@ -78,7 +78,7 @@ export default async function Profile(props: { params: Promise<Params> }) {
   });
 
   return (
-    <div className="pt-20 md:pt-0">
+    <div className="pt-4">
       <LinkAlternateAtUri authority={did} />
       <div className="px-4 lg:px-0 flex items-center space-x-4 mb-4">
         <UserAvatar did={did} size="medium" />
