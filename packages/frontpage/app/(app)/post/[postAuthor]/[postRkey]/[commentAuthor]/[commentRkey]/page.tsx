@@ -58,7 +58,7 @@ export default async function CommentPage(props: {
   const { comment, post } = await getCommentPageData(params);
 
   return (
-    <>
+    <div className="px-4 pt-2">
       <LinkAlternateAtUri
         authority={comment.authorDid}
         collection={CommentCollection}
@@ -78,6 +78,6 @@ export default async function CommentPage(props: {
         postRkey={post.rkey}
         allowReply={post.status === "live"}
       />
-    </>
+    </div>
   );
 }

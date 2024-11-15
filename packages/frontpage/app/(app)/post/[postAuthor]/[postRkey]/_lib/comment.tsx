@@ -86,9 +86,12 @@ async function LiveComment({
               className="flex items-center gap-2"
             >
               <UserAvatar did={comment.authorDid} />
-              <div className="font-medium">@{handle}</div>
+              <div className="max-w-[185px] truncate inline-block">
+                @{handle}
+              </div>
             </Link>
           </UserHoverCard>
+          <span aria-hidden="true">•</span>
           <Link
             href={commentHref}
             className="text-gray-500 text-xs dark:text-gray-400 hover:underline"

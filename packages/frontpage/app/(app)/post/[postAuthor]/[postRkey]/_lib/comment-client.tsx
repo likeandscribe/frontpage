@@ -269,7 +269,7 @@ export function NewComment({
           event.currentTarget.requestSubmit();
         }
       }}
-      className="space-y-2"
+      className="space-y-3"
     >
       <Textarea
         value={input}
