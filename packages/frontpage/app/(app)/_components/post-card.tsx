@@ -50,45 +50,18 @@ export async function PostCard({
   return (
     // TODO: Make article route to postHref via onClick on card except innser links or buttons
     <article className="w-full py-2 px-2 bg-white dark:bg-slate-900 space-y-2">
-      <div className="flex justify-between">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-6">
-            <VoteButton
-              voteAction={async () => {
-                "use server";
-                await ensureUser();
-                await createVote({
-                  subjectAuthorDid: author,
-                  subjectCid: cid,
-                  subjectRkey: rkey,
-                  subjectCollection: PostCollection,
-                });
-              }}
-              unvoteAction={async () => {
-                "use server";
-                await ensureUser();
-                const vote = await getVoteForPost(id);
-                if (!vote) {
-                  // TODO: Show error notification
-                  console.error("Vote not found for post", id);
-                  return;
-                }
-                await deleteVote(vote.rkey);
-              }}
-              initialState={
-                (await getUser())?.did === author
-                  ? "authored"
-                  : isUpvoted
-                    ? "voted"
-                    : "unvoted"
-              }
-              votes={votes}
-            />
-
-            <Link href={postHref} className="hover:underline">
-              {commentCount} comments
+      <div className="flex justify-between items-center">
+        <div className="flex items-center px-3 space-x-1.5">
+          <UserHoverCard did={author} asChild>
+            <Link
+              href={`/profile/${handle}`}
+              className="text-xs hover:underline max-w-[185px] truncate inline-block"
+            >
+              by {handle}
             </Link>
-          </div>
+          </UserHoverCard>
+          <span aria-hidden>•</span>
+          <TimeAgo createdAt={createdAt} side="bottom" className="text-xs" />
         </div>
 
         {user ? (
@@ -114,22 +87,49 @@ export async function PostCard({
             href={url}
             className="hover:underline flex flex-wrap items-center gap-x-2"
           >
-            {title}{" "}
+            {title}
             <span className="text-gray-500 dark:text-gray-400 font-normal text-sm md:text-base">
               ({new URL(url).host})
             </span>
           </a>
-        </h2>{" "}
+        </h2>
       </div>
 
-      <div className="px-3 space-x-2">
-        <UserHoverCard did={author} asChild>
-          <Link href={`/profile/${handle}`} className="text-xs hover:underline">
-            by {handle}
-          </Link>
-        </UserHoverCard>
-        <span aria-hidden>•</span>
-        <TimeAgo createdAt={createdAt} side="bottom" className="text-xs" />
+      <div className="flex items-center gap-6">
+        <VoteButton
+          voteAction={async () => {
+            "use server";
+            await ensureUser();
+            await createVote({
+              subjectAuthorDid: author,
+              subjectCid: cid,
+              subjectRkey: rkey,
+              subjectCollection: PostCollection,
+            });
+          }}
+          unvoteAction={async () => {
+            "use server";
+            await ensureUser();
+            const vote = await getVoteForPost(id);
+            if (!vote) {
+              // TODO: Show error notification
+              console.error("Vote not found for post", id);
+              return;
+            }
+            await deleteVote(vote.rkey);
+          }}
+          initialState={
+            (await getUser())?.did === author
+              ? "authored"
+              : isUpvoted
+                ? "voted"
+                : "unvoted"
+          }
+          votes={votes}
+        />
+        <Link href={postHref} className="hover:underline">
+          {commentCount} comments
+        </Link>
       </div>
     </article>
   );
