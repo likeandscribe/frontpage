@@ -86,7 +86,7 @@ async function LiveComment({
               className="flex items-center gap-2"
             >
               <UserAvatar did={comment.authorDid} />
-              <div className="max-w-[185px] truncate inline-block">
+              <div className="max-w-[185px] md:max-w-none truncate inline-block">
                 @{handle}
               </div>
             </Link>

@@ -55,7 +55,7 @@ export async function PostCard({
           <UserHoverCard did={author} asChild>
             <Link
               href={`/profile/${handle}`}
-              className="text-xs hover:underline max-w-[185px] truncate inline-block"
+              className="text-xs hover:underline max-w-[185px] md:max-w-none truncate inline-block"
             >
               by {handle}
             </Link>

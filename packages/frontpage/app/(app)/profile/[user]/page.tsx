@@ -78,12 +78,12 @@ export default async function Profile(props: { params: Promise<Params> }) {
   });
 
   return (
-    <div className="">
+    <div className="pt-4 md:pt-0">
       <LinkAlternateAtUri authority={did} />
-      <div className="px-4 flex items-center space-x-4 mb-4">
+      <div className="px-4 lg:px-0 flex items-center space-x-4 mb-4">
         <UserAvatar did={did} size="medium" />
         <div className="flex flex-wrap items-center gap-2">
-          <h1 className="md:text-2xl font-bold max-w-[185px] truncate inline-block">
+          <h1 className="md:text-2xl font-bold max-w-[185px] md:max-w-none truncate inline-block">
             {userHandle ?? "Invalid handle"}
           </h1>
           <EllipsisDropdown>
@@ -94,7 +94,7 @@ export default async function Profile(props: { params: Promise<Params> }) {
         </div>
       </div>
       <Tabs defaultValue="overview">
-        <div className="px-4 pb-0.5 w-full">
+        <div className="px-4 pb-0.5 w-full lg:px-0">
           <TabsList className="w-full">
             <TabsTrigger value="overview" className="flex-1">
               Overview
