@@ -76,7 +76,7 @@ function InfinteListInner<TCursor>({
   const pages = data!;
 
   return (
-    <div className="space-y-6">
+    <>
       {pages.map((page, indx) => {
         return (
           <Fragment key={String(page.nextCursor)}>
@@ -98,9 +98,9 @@ function InfinteListInner<TCursor>({
 
             {indx === pages.length - 1 ? (
               page.pageSize === 0 ? (
-                <p className="text-center text-gray-400">{emptyMessage}</p>
+                <p className="text-center text-gray-400 mt-6">{emptyMessage}</p>
               ) : (
-                <p ref={inViewRef} className="text-center text-gray-400">
+                <p ref={inViewRef} className="text-center text-gray-400 mt-6">
                   Loading...
                 </p>
               )
@@ -108,6 +108,6 @@ function InfinteListInner<TCursor>({
           </Fragment>
         );
       })}
-    </div>
+    </>
   );
 }
