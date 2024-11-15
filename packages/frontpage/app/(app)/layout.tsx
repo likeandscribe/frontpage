@@ -32,7 +32,7 @@ export default async function Layout({
   const session = await getSession();
   return (
     <div className="relative container mx-auto px-0 md:px-6 pb-8 max-w-3xl">
-      <div className="sticky md:relative top-0 left-0 right-0 bg-background md:bg-transparent py-1.5 md:py-12 px-4 md:px-0 shadow md:shadow-none z-50">
+      <div className="fixed md:static top-0 left-0 right-0 bg-background md:bg-transparent py-1.5 md:py-12 px-4 md:px-0 shadow md:shadow-none z-50">
         <div className="flex items-center justify-between md:max-w-3xl mx-auto">
           <Link href="/">
             {/* eslint-disable-next-line @next/next/no-img-element */}

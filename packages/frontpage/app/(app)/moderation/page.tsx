@@ -117,7 +117,7 @@ export default async function Moderation(props: {
   const stats = await getModeratorReportStats();
 
   return (
-    <div className="px-4">
+    <div className="px-4 pt-16 md:pt-0">
       <Card className="mb-4">
         <CardHeader className="flex justify-evenly text-center">
           <CardTitle className="text-2xl font-bold text-blue-300">

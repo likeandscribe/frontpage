@@ -12,7 +12,7 @@ export const metadata: Metadata = {
 
 export default function CommunityGuidelinesPage() {
   return (
-    <div className="px-4 pt-4 md:pt-0">
+    <div className="px-4 pt-20 md:pt-0">
       <Heading1>About Frontpage</Heading1>
       <Paragraph>
         Frontpage is a decentralised and federated link aggregator that&apos;s
