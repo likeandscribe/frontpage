@@ -78,12 +78,12 @@ export default async function Profile(props: { params: Promise<Params> }) {
   });
 
   return (
-    <div className="px-4 pt-20">
+    <div className="pt-20">
       <LinkAlternateAtUri authority={did} />
-      <div className="flex items-center space-x-4 mb-4">
+      <div className="px-4 flex items-center space-x-4 mb-4">
         <UserAvatar did={did} size="medium" />
         <div className="flex flex-wrap items-center gap-2">
-          <h1 className="md:text-2xl font-bold">
+          <h1 className="md:text-2xl font-bold max-w-[185px] truncate inline-block">
             {userHandle ?? "Invalid handle"}
           </h1>
           <EllipsisDropdown>
@@ -94,13 +94,21 @@ export default async function Profile(props: { params: Promise<Params> }) {
         </div>
       </div>
       <Tabs defaultValue="overview">
-        <TabsList>
-          <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="posts">Posts</TabsTrigger>
-          <TabsTrigger value="comments">Comments</TabsTrigger>
-        </TabsList>
+        <div className="px-4 pb-0.5 w-full">
+          <TabsList className="w-full">
+            <TabsTrigger value="overview" className="flex-1">
+              Overview
+            </TabsTrigger>
+            <TabsTrigger value="posts" className="flex-1">
+              Posts
+            </TabsTrigger>
+            <TabsTrigger value="comments" className="flex-1">
+              Comments
+            </TabsTrigger>
+          </TabsList>
+        </div>
         <TabsContent value="overview">
-          <div className="flex flex-col gap-4">
+          <div className="flex flex-col divide-y divide-accent">
             {overview.map((entity) => {
               if (entity.type === "post") {
                 return (
@@ -121,13 +129,14 @@ export default async function Profile(props: { params: Promise<Params> }) {
               }
               if (entity.type === "comment") {
                 return (
-                  <Comment
-                    key={entity.id}
-                    comment={entity}
-                    postAuthorParam={entity.postAuthorDid as DID}
-                    postRkey={entity.postRkey as string}
-                    allowReply={false}
-                  />
+                  <div key={entity.id} className="pt-4 pb-0.5 px-4">
+                    <Comment
+                      comment={entity}
+                      postAuthorParam={entity.postAuthorDid as DID}
+                      postRkey={entity.postRkey as string}
+                      allowReply={false}
+                    />
+                  </div>
                 );
               }
             })}
@@ -135,7 +144,7 @@ export default async function Profile(props: { params: Promise<Params> }) {
         </TabsContent>
         <TabsContent value="posts">
           <Suspense>
-            <div className="flex flex-col gap-4">
+            <div className="flex flex-col divide-y divide-accent">
               {userPosts.map((post) => {
                 return (
                   <PostCard
@@ -158,7 +167,7 @@ export default async function Profile(props: { params: Promise<Params> }) {
         </TabsContent>
         <TabsContent value="comments">
           <Suspense>
-            <div className="flex flex-col gap-4">
+            <div className="flex flex-col gap-4 px-4">
               {userComments.map((comment) => {
                 return (
                   <Comment
