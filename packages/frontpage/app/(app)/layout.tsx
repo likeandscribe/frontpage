@@ -31,22 +31,24 @@ export default async function Layout({
 }) {
   const session = await getSession();
   return (
-    <div className="relative container mx-auto px-0 md:px-6 pb-8 md:py-12 max-w-3xl">
-      <div className="fixed left-0 right-0 bg-background flex items-center justify-between py-1.5 px-4 shadow z-50">
-        <Link href="/">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/frontpage-logo.svg" alt="Frontpage" className="h-12" />
-        </Link>
+    <div className="relative container mx-auto px-0 md:px-6 pb-8 max-w-3xl">
+      <div className="fixed top-0 left-0 right-0 bg-background py-1.5 px-4 shadow z-50">
+        <div className="flex items-center justify-between md:max-w-3xl mx-auto md:px-6">
+          <Link href="/">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/frontpage-logo.svg" alt="Frontpage" className="h-12" />
+          </Link>
 
-        <div className="flex items-center gap-4">
-          {session ? (
-            <Button asChild>
-              <Link href="/post/new">New</Link>
-            </Button>
-          ) : null}
-          <Suspense>
-            <LoginOrLogout />
-          </Suspense>
+          <div className="flex items-center gap-4">
+            {session ? (
+              <Button asChild>
+                <Link href="/post/new">New</Link>
+              </Button>
+            ) : null}
+            <Suspense>
+              <LoginOrLogout />
+            </Suspense>
+          </div>
         </div>
       </div>
 
@@ -54,7 +56,7 @@ export default async function Layout({
 
       <footer className="px-4 flex justify-between items-center text-gray-500 dark:text-gray-400">
         <p>
-          Made by{" "}
+          Made by
           <a
             href={`https://bsky.app/profile/${FRONTPAGE_ATPROTO_HANDLE}`}
             className="font-medium text-indigo-600 hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300"

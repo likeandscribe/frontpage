@@ -84,7 +84,7 @@ async function DidHistory({ identifier }: { identifier: string }) {
           return (
             // eslint-disable-next-line react/no-array-index-key
             <li key={index}>
-              Change created at {utcDateFormatter.format(previous.createdAt)}{" "}
+              Change created at {utcDateFormatter.format(previous.createdAt)}
               (UTC) of type &quot;{previousOperation.type}&quot;.
             </li>
           );
@@ -174,11 +174,11 @@ async function DidHistory({ identifier }: { identifier: string }) {
               {alsoKnownAsAdded.length === 1 &&
               alsoKnownAsRemoved.length === 1 ? (
                 <li>
-                  Alias changed from{" "}
+                  Alias changed from
                   <Link href={getAtUriPath(new AtUri(alsoKnownAsRemoved[0]!))}>
                     {alsoKnownAsRemoved[0]}
-                  </Link>{" "}
-                  to{" "}
+                  </Link>
+                  to
                   <Link href={getAtUriPath(new AtUri(alsoKnownAsAdded[0]!))}>
                     {alsoKnownAsAdded[0]}
                   </Link>
@@ -187,7 +187,7 @@ async function DidHistory({ identifier }: { identifier: string }) {
                 <>
                   {alsoKnownAsAdded.length > 0 && (
                     <li>
-                      Alias added:{" "}
+                      Alias added:
                       {alsoKnownAsAdded.flatMap((aka) => [
                         <Link key={aka} href={getAtUriPath(new AtUri(aka))}>
                           {aka}
@@ -198,7 +198,7 @@ async function DidHistory({ identifier }: { identifier: string }) {
                   )}
                   {alsoKnownAsRemoved.length > 0 && (
                     <li>
-                      Alias removed:{" "}
+                      Alias removed:
                       {alsoKnownAsRemoved.flatMap((aka) => [
                         <Link key={aka} href={getAtUriPath(new AtUri(aka))}>
                           {aka}
@@ -222,11 +222,11 @@ async function DidHistory({ identifier }: { identifier: string }) {
                     )}
                     {!!service.endpoint && (
                       <li key={service.id}>
-                        Service &quot;{service.id}&quot; changed endpoint from{" "}
+                        Service &quot;{service.id}&quot; changed endpoint from
                         <a href={service.endpoint.from}>
                           {service.endpoint.from}
-                        </a>{" "}
-                        to{" "}
+                        </a>
+                        to
                         <a href={service.endpoint.to}>{service.endpoint.to}</a>
                       </li>
                     )}
@@ -234,7 +234,7 @@ async function DidHistory({ identifier }: { identifier: string }) {
                 ))}
               {servicesAdded.length > 0 && (
                 <li>
-                  Services added:{" "}
+                  Services added:
                   {servicesAdded.flatMap(([id, service]) => [
                     <Link key={id} href={service.endpoint}>
                       {id} ({service.type})
@@ -245,7 +245,7 @@ async function DidHistory({ identifier }: { identifier: string }) {
               )}
               {servicesRemoved.length > 0 && (
                 <li>
-                  Services removed:{" "}
+                  Services removed:
                   {servicesRemoved.flatMap(([id, service]) => [
                     <Link key={id} href={service.endpoint}>
                       {id} ({service.type})
@@ -256,7 +256,7 @@ async function DidHistory({ identifier }: { identifier: string }) {
               )}
               {rotationKeysAdded.length > 0 && (
                 <li>
-                  Rotation keys added:{" "}
+                  Rotation keys added:
                   {rotationKeysAdded.flatMap((key) => [
                     <code key={key}>{key}</code>,
                     ", ",
@@ -265,7 +265,7 @@ async function DidHistory({ identifier }: { identifier: string }) {
               )}
               {rotationKeysRemoved.length > 0 && (
                 <li>
-                  Rotation keys removed:{" "}
+                  Rotation keys removed:
                   {rotationKeysRemoved.flatMap((key) => [
                     <code key={key}>{key}</code>,
                     ", ",
@@ -275,13 +275,13 @@ async function DidHistory({ identifier }: { identifier: string }) {
               {verificationMethodsChanged.length > 0 &&
                 verificationMethodsChanged.map((method) => (
                   <li key={method.id}>
-                    Verification method &quot;{method.id}&quot; changed from{" "}
+                    Verification method &quot;{method.id}&quot; changed from
                     <code>{method.from}</code> to <code>{method.to}</code>
                   </li>
                 ))}
               {verificationMethodsAdded.length > 0 && (
                 <li>
-                  Verification methods added:{" "}
+                  Verification methods added:
                   {verificationMethodsAdded.flatMap(([id, key]) => [
                     <Fragment key={id}>
                       <code>{key}</code> (&quot;{id}&quot;)
@@ -292,7 +292,7 @@ async function DidHistory({ identifier }: { identifier: string }) {
               )}
               {verificationMethodsRemoved.length > 0 && (
                 <li>
-                  Verification methods removed:{" "}
+                  Verification methods removed:
                   {verificationMethodsRemoved.flatMap(([id, key]) => [
                     <Fragment key={id}>
                       <code>{key}</code> (&quot;{id}&quot;)

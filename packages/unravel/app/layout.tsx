@@ -31,7 +31,6 @@ export default function RootLayout({
           "bg-slate-50/50 dark:bg-slate-950 min-h-screen",
         )}
       >
-        {" "}
         <ThemeProvider
           attribute="class"
           defaultTheme="system"

@@ -93,7 +93,7 @@ export async function GET(
         <OgBox style={{ alignItems: "center", gap: 12 }}>
           <OgCommentIcon />
           <OgBox>
-            {comment.children!.length}{" "}
+            {comment.children!.length}
             {comment.children!.length === 1 ? "reply" : "replies"}
           </OgBox>
         </OgBox>

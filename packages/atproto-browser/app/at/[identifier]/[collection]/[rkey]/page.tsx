@@ -42,7 +42,7 @@ export default async function RkeyPage({
   if (!response.ok) {
     return (
       <div>
-        🚨 Failed to fetch record: {response.statusText}. URL:{" "}
+        🚨 Failed to fetch record: {response.statusText}. URL:
         {getRecordUrl.toString()}
       </div>
     );

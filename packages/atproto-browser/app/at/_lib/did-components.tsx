@@ -54,7 +54,7 @@ export async function DidHandle({ did }: { did: string }) {
         </Link>
       ) : (
         "⚠️ Invalid Handle"
-      )}{" "}
+      )}
       (<Link href={`/at/${didDocument.id}`}>{didDocument.id}</Link>)
     </>
   );

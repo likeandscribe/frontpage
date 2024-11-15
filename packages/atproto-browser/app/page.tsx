@@ -21,11 +21,11 @@ export default function Home() {
 
       <footer>
         <p>
-          Developed by{" "}
+          Developed by
           <Link href="/at/did:plc:2xau7wbgdq4phuou2ypwuen7/app.bsky.actor.profile/self">
             @tom.frontpage.team
           </Link>
-          .{" "}
+          .
           <a href="https://github.com/likeandscribe/frontpage/tree/main/packages/atproto-browser">
             Source code
           </a>

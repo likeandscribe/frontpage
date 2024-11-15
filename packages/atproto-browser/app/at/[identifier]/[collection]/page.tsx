@@ -30,7 +30,7 @@ export default async function CollectionPage({
         href={`at://${identityResult.didDocument.id}/${params.collection}`}
       />
       <h1>
-        {params.collection} records{" "}
+        {params.collection} records
         <Link
           href={`/collection-rss?u=at://${params.identifier}/${params.collection}`}
           title="RSS feed"
