@@ -56,13 +56,11 @@ export async function PostCard({
           <UserHoverCard did={author} asChild>
             <Link
               href={`/profile/${handle}`}
-              className="text-xs hover:underline max-w-[185px] md:max-w-none truncate inline-block"
+              className="text-xs hover:underline"
             >
               by {handle}
             </Link>
           </UserHoverCard>
-          <span aria-hidden>•</span>
-          <TimeAgo createdAt={createdAt} side="bottom" className="text-xs" />
         </div>
 
         {user ? (
@@ -96,45 +94,48 @@ export async function PostCard({
         </h2>
       </div>
 
-      <div className="pr-2 flex items-center gap-6">
-        <VoteButton
-          voteAction={async () => {
-            "use server";
-            await ensureUser();
-            await createVote({
-              subjectAuthorDid: author,
-              subjectCid: cid,
-              subjectRkey: rkey,
-              subjectCollection: PostCollection,
-            });
-          }}
-          unvoteAction={async () => {
-            "use server";
-            await ensureUser();
-            const vote = await getVoteForPost(id);
-            if (!vote) {
-              // TODO: Show error notification
-              console.error("Vote not found for post", id);
-              return;
+      <div className="pr-2 flex items-center justify-between">
+        <div className="flex items-center gap-6">
+          <VoteButton
+            voteAction={async () => {
+              "use server";
+              await ensureUser();
+              await createVote({
+                subjectAuthorDid: author,
+                subjectCid: cid,
+                subjectRkey: rkey,
+                subjectCollection: PostCollection,
+              });
+            }}
+            unvoteAction={async () => {
+              "use server";
+              await ensureUser();
+              const vote = await getVoteForPost(id);
+              if (!vote) {
+                // TODO: Show error notification
+                console.error("Vote not found for post", id);
+                return;
+              }
+              await deleteVote(vote.rkey);
+            }}
+            initialState={
+              (await getUser())?.did === author
+                ? "authored"
+                : isUpvoted
+                  ? "voted"
+                  : "unvoted"
             }
-            await deleteVote(vote.rkey);
-          }}
-          initialState={
-            (await getUser())?.did === author
-              ? "authored"
-              : isUpvoted
-                ? "voted"
-                : "unvoted"
-          }
-          votes={votes}
-        />
-        <Link
-          href={postHref}
-          className="hover:underline flex items-center gap-2"
-        >
-          <ChatBubbleIcon className="w-4 h-4" />
-          {commentCount}
-        </Link>
+            votes={votes}
+          />
+          <Link
+            href={postHref}
+            className="hover:underline flex items-center gap-2"
+          >
+            <ChatBubbleIcon className="w-4 h-4" />
+            {commentCount}
+          </Link>
+        </div>
+        <TimeAgo createdAt={createdAt} side="bottom" className="text-xs" />
       </div>
     </article>
   );
