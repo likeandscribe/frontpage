@@ -5,7 +5,10 @@ import { ensureUser, getUser } from "@/lib/data/user";
 import { TimeAgo } from "@/lib/components/time-ago";
 import { VoteButton } from "./vote-button";
 import { PostCollection, deletePost } from "@/lib/data/atproto/post";
-import { getVerifiedHandle } from "@/lib/data/atproto/identity";
+import {
+  getDidFromHandleOrDid,
+  getVerifiedHandle,
+} from "@/lib/data/atproto/identity";
 import { UserHoverCard } from "@/lib/components/user-hover-card";
 import type { DID } from "@/lib/data/atproto/did";
 import { parseReportForm } from "@/lib/data/db/report-shared";
@@ -15,6 +18,9 @@ import { revalidatePath } from "next/cache";
 import { ReportDialogDropdownButton } from "./report-dialog";
 import { DeleteButton } from "./delete-button";
 import { ShareDropdownButton } from "./share-button";
+import { Separator } from "@/lib/components/ui/separator";
+import { ChatBubbleIcon } from "@radix-ui/react-icons";
+import { UserAvatar } from "@/lib/components/user-avatar";
 
 type PostProps = {
   id: number;
@@ -46,11 +52,108 @@ export async function PostCard({
     getUser(),
   ]);
   const postHref = `/post/${handle}/${rkey}`;
+  const did = await getDidFromHandleOrDid(handle ?? "");
 
   return (
     // TODO: Make article route to postHref via onClick on card except innser links or buttons
-    <article className="flex items-center gap-4 shadow-sm rounded-lg p-4 bg-white dark:bg-slate-900">
-      <div className="flex flex-col items-center">
+    <article className="flex flex-col gap-2 shadow-sm rounded-lg p-4 bg-white dark:bg-slate-900">
+      <div>
+        <h2 className="mb-1 text-xl">
+          <a
+            href={url}
+            className="hover:underline flex flex-wrap items-center gap-x-2"
+          >
+            {title}{" "}
+            <span className="text-gray-500 dark:text-gray-400 font-normal text-sm md:text-base">
+              ({new URL(url).host})
+            </span>
+          </a>
+        </h2>
+      </div>
+
+      <div className="flex items-center gap-2">
+        <UserHoverCard did={author} asChild>
+          <Link
+            href={`/profile/${handle}`}
+            className="flex items-center gap-2 hover:underline"
+          >
+            {did ? <UserAvatar did={did} size="small" /> : null}
+            <span className="max-w-[185px] md:max-w-none truncate inline-block">
+              {handle}
+            </span>
+          </Link>
+        </UserHoverCard>
+        <span aria-hidden>•</span>
+        <TimeAgo createdAt={createdAt} side="bottom" />
+      </div>
+
+      <Separator className="my-2" />
+
+      <div className="flex justify-between items-center">
+        <div className="flex items-center gap-4">
+          <VoteButton
+            voteAction={async () => {
+              "use server";
+              await ensureUser();
+              await createVote({
+                subjectAuthorDid: author,
+                subjectCid: cid,
+                subjectRkey: rkey,
+                subjectCollection: PostCollection,
+              });
+            }}
+            unvoteAction={async () => {
+              "use server";
+              await ensureUser();
+              const vote = await getVoteForPost(id);
+              if (!vote) {
+                // TODO: Show error notification
+                console.error("Vote not found for post", id);
+                return;
+              }
+              await deleteVote(vote.rkey);
+            }}
+            initialState={
+              (await getUser())?.did === author
+                ? "authored"
+                : isUpvoted
+                  ? "voted"
+                  : "unvoted"
+            }
+            votes={votes}
+          />
+          <Link
+            href={postHref}
+            className="flex items-center gap-1 group hover:underline"
+          >
+            <ChatBubbleIcon className="w-5 h-5" />
+            {commentCount}
+          </Link>
+        </div>
+        <div>
+          {user ? (
+            <div className="ml-auto">
+              <EllipsisDropdown>
+                <ShareDropdownButton path={postHref} />
+                <ReportDialogDropdownButton
+                  reportAction={reportPostAction.bind(null, {
+                    rkey,
+                    cid,
+                    author,
+                  })}
+                />
+                {user?.did === author ? (
+                  <DeleteButton
+                    deleteAction={deletePostAction.bind(null, rkey)}
+                  />
+                ) : null}
+              </EllipsisDropdown>
+            </div>
+          ) : null}
+        </div>
+      </div>
+
+      {/* <div className="flex flex-col items-center">
         <VoteButton
           voteAction={async () => {
             "use server";
@@ -139,7 +242,7 @@ export async function PostCard({
             </div>
           ) : null}
         </div>
-      </div>
+      </div> */}
     </article>
   );
 }

@@ -73,6 +73,7 @@ export function VoteButton({
         size="icon"
         disabled={initialState === "authored"}
         name={hasVoted ? "unvote" : "vote"}
+        className="h-6 flex items-center gap-1 group"
       >
         <ChevronUpIcon
           className={cn(
@@ -80,10 +81,10 @@ export function VoteButton({
             hasVoted && "text-yellow-500 group-disabled:text-yellow-500",
           )}
         />
+        {votes === undefined ? null : (
+          <span className="font-medium">{actualVotes}</span>
+        )}
       </Button>
-      {votes === undefined ? null : (
-        <span className="font-medium">{actualVotes}</span>
-      )}
     </form>
   );
 }
