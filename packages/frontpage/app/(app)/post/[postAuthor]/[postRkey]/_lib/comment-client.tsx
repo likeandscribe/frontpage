@@ -112,8 +112,8 @@ export function CommentClientWrapperWithToolbar({
             <Button
               variant="ghost"
               size="icon"
-              onClick={() => !hasAuthored && setShowNewComment(true)}
-              disabled={hasAuthored || !allowReply}
+              onClick={() => setShowNewComment(true)}
+              disabled={!allowReply}
             >
               <ChatBubbleIcon className="w-4 h-4" />
               <span className="sr-only">Reply</span>
