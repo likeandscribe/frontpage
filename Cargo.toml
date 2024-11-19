@@ -1,3 +1,7 @@
 [workspace]
-members = ["packages-rs/drainpipe"]
+members = [
+  "packages-rs/drainpipe",
+  "packages-rs/drainpipe-cli",
+  "packages-rs/drainpipe-store",
+]
 resolver = "2"

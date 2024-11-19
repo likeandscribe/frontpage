@@ -1,7 +1,3 @@
 /target
 
-// TODO: we can maybe get rid of all the db bits???
-drainpipe.db
-drainpipe.db-shm
-drainpipe.db-wal
-drainpipe.db-journal
+drainpipedata
