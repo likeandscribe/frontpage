@@ -48,8 +48,13 @@ async fn main() -> anyhow::Result<()> {
         })
         .transpose()?;
 
+    let endpoint = config
+        .jetstream_url
+        .clone()
+        .unwrap_or(DefaultJetstreamEndpoints::USEastOne.into());
+
     let jetstream = JetstreamConnector::new(JetstreamConfig {
-        endpoint: DefaultJetstreamEndpoints::USEastOne.into(),
+        endpoint,
         wanted_collections: vec!["fyi.unravel.frontpage.*".to_string()],
         wanted_dids: vec![],
         compression: JetstreamCompression::Zstd,
