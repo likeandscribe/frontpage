@@ -91,13 +91,13 @@ services:
 
   jetstream:
     container_name: jetstream
-    image: ghcr.io/bluesky-social/jetstream:sha-2aacb58
+    image: ghcr.io/bluesky-social/jetstream:sha-0ab10bd
     restart: unless-stopped
     volumes:
       - jetstream:/data
     environment:
       - JETSTREAM_DATA_DIR=/data
-# livness check interval to restart when no events are received (default: 15sec)
+        # livness check interval to restart when no events are received (default: 15sec)
       - JETSTREAM_LIVENESS_TTL=300s
       - JETSTREAM_WS_URL=ws://pds:3000/xrpc/com.atproto.sync.subscribeRepos
 
