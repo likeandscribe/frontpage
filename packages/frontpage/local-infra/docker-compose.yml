@@ -65,7 +65,9 @@ services:
     environment:
       FRONTPAGE_CONSUMER_URL: http://host.docker.internal:3000/api/receive_hook
       FRONTPAGE_CONSUMER_SECRET: secret
-      RELAY_URL: ws://pds:3000
+      JETSTREAM_URL: ws://jetstream:6008/subscribe
+      STORE_LOCATION: /drainpipedata
+      RUST_LOG: info
     volumes:
       - drainpipe:/drainpipedata
     extra_hosts:
@@ -87,6 +89,18 @@ services:
     extra_hosts:
       - "host.docker.internal:host-gateway"
 
+  jetstream:
+    container_name: jetstream
+    image: ghcr.io/bluesky-social/jetstream:sha-2aacb58
+    restart: unless-stopped
+    volumes:
+      - jetstream:/data
+    environment:
+      - JETSTREAM_DATA_DIR=/data
+# livness check interval to restart when no events are received (default: 15sec)
+      - JETSTREAM_LIVENESS_TTL=300s
+      - JETSTREAM_WS_URL=ws://pds:3000/xrpc/com.atproto.sync.subscribeRepos
+
 volumes:
   caddy_data:
   caddy_config:
@@ -94,3 +108,4 @@ volumes:
   pds:
   plc:
   drainpipe:
+  jetstream:

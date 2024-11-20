@@ -48,3 +48,23 @@ turso.dev.unravel.fyi {
 
 	reverse_proxy http://pds:3000
 }
+
+jetstream.dev.unravel.fyi {
+	tls {
+		issuer internal {
+			ca unravel
+		}
+	}
+
+	reverse_proxy http://jetstream:6008
+}
+
+jetstream-metrics.dev.unravel.fyi {
+	tls {
+		issuer internal {
+			ca unravel
+		}
+	}
+
+	reverse_proxy http://jetstream:6009
+}
