@@ -4,7 +4,7 @@ import { CommentCollection } from "./comment";
 import { PostCollection } from "./post";
 import { isDid } from "./did";
 
-// This module refers to the event emitted by the Firehose
+// This module refers to the event emitted by Jetstream
 
 export const Collection = z.union([
   z.literal(PostCollection),
