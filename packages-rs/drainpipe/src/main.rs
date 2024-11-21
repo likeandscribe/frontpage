@@ -27,16 +27,6 @@ async fn main() -> anyhow::Result<()> {
 
     let monitor = tokio_metrics::TaskMonitor::new();
 
-    {
-        let metrics_monitor = monitor.clone();
-        tokio::spawn(async move {
-            for interval in metrics_monitor.intervals() {
-                log::info!("{:?} per second", interval.instrumented_count as f64 / 5.0,);
-                tokio::time::sleep(Duration::from_millis(5000)).await;
-            }
-        });
-    }
-
     let config = Config::from_env()?;
     let store = drainpipe_store::Store::open(&config.store_location)?;
     let endpoint = config
@@ -59,33 +49,55 @@ async fn main() -> anyhow::Result<()> {
             wanted_collections: vec!["fyi.unravel.frontpage.*".to_string()],
             wanted_dids: vec![],
             compression: JetstreamCompression::Zstd,
+            // Connect 10 seconds before the most recently received cursor
             cursor: existing_cursor.map(|c| c - Duration::from_secs(10)),
         })
         .await?;
 
-        while let Ok(event) = receiver.recv_async().await {
-            monitor
-                .instrument(async {
-                    if let JetstreamEvent::Commit(ref commit) = event {
-                        println!("Received commit: {:?}", commit);
+        let metric_logs_abort_handler = {
+            let metrics_monitor = monitor.clone();
+            tokio::spawn(async move {
+                for interval in metrics_monitor.intervals() {
+                    log::info!("{:?} per second", interval.instrumented_count as f64 / 5.0,);
+                    tokio::time::sleep(Duration::from_millis(5000)).await;
+                }
+            })
+            .abort_handle()
+        };
 
-                        send_frontpage_commit(&config, commit).await.or_else(|e| {
-                            log::error!("Error processing commit: {:?}", e);
-                            store.record_dead_letter(&drainpipe_store::DeadLetter::new(
-                                commit.info().time_us.to_string(),
-                                serde_json::to_string(commit)?,
-                                e.to_string(),
-                            ))
-                        })?
-                    }
+        loop {
+            match receiver.recv_async().await {
+                Ok(event) => {
+                    monitor
+                        .instrument(async {
+                            if let JetstreamEvent::Commit(ref commit) = event {
+                                println!("Received commit: {:?}", commit);
 
-                    store.set_cursor(event.info().time_us)?;
+                                send_frontpage_commit(&config, commit).await.or_else(|e| {
+                                    log::error!("Error processing commit: {:?}", e);
+                                    store.record_dead_letter(&drainpipe_store::DeadLetter::new(
+                                        commit.info().time_us.to_string(),
+                                        serde_json::to_string(commit)?,
+                                        e.to_string(),
+                                    ))
+                                })?
+                            }
 
-                    Ok(()) as anyhow::Result<()>
-                })
-                .await?
+                            store.set_cursor(event.info().time_us)?;
+
+                            Ok(()) as anyhow::Result<()>
+                        })
+                        .await?
+                }
+
+                Err(e) => {
+                    log::error!("Error receiving event: {:?}", e);
+                    break;
+                }
+            }
         }
 
+        metric_logs_abort_handler.abort();
         log::info!("WebSocket connection closed, attempting to reconnect...");
     }
 }
@@ -96,7 +108,7 @@ async fn connect(config: JetstreamConfig) -> anyhow::Result<flume::Receiver<Jets
 
     loop {
         match timeout(Duration::from_secs(10), jetstream.connect()).await {
-            Ok(Ok((receiver, _))) => return Ok(receiver),
+            Ok(Ok(receiver)) => return Ok(receiver),
             Ok(Err(e)) => {
                 log::error!("WebSocket error. Retrying... {}", e);
             }
