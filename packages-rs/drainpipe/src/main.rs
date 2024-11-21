@@ -130,7 +130,7 @@ async fn send_frontpage_commit(
             "cid": commit.cid,
         }]),
         CommitEvent::Delete { commit, .. } => json!([{
-            "action": "create",
+            "action": "delete",
             "path": format!("{}/{}", commit.collection.to_string(), commit.rkey)
         }]),
     };
