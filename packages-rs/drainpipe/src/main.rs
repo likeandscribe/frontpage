@@ -32,7 +32,7 @@ async fn main() -> anyhow::Result<()> {
     let endpoint = config
         .jetstream_url
         .clone()
-        .unwrap_or(DefaultJetstreamEndpoints::USEastOne.into());
+        .unwrap_or(DefaultJetstreamEndpoints::USEastTwo.into());
 
     loop {
         let existing_cursor = store
