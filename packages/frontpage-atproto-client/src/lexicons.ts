@@ -4,6 +4,87 @@
 import { LexiconDoc, Lexicons } from "@atproto/lexicon";
 
 export const schemaDict = {
+  AppBskyRichtextFacet: {
+    lexicon: 1,
+    id: "app.bsky.richtext.facet",
+    defs: {
+      main: {
+        type: "object",
+        description: "Annotation of a sub-string within rich text.",
+        required: ["index", "features"],
+        properties: {
+          index: {
+            type: "ref",
+            ref: "lex:app.bsky.richtext.facet#byteSlice",
+          },
+          features: {
+            type: "array",
+            items: {
+              type: "union",
+              refs: [
+                "lex:app.bsky.richtext.facet#mention",
+                "lex:app.bsky.richtext.facet#link",
+                "lex:app.bsky.richtext.facet#tag",
+              ],
+            },
+          },
+        },
+      },
+      mention: {
+        type: "object",
+        description:
+          "Facet feature for mention of another account. The text is usually a handle, including a '@' prefix, but the facet reference is a DID.",
+        required: ["did"],
+        properties: {
+          did: {
+            type: "string",
+            format: "did",
+          },
+        },
+      },
+      link: {
+        type: "object",
+        description:
+          "Facet feature for a URL. The text URL may have been simplified or truncated, but the facet reference should be a complete URL.",
+        required: ["uri"],
+        properties: {
+          uri: {
+            type: "string",
+            format: "uri",
+          },
+        },
+      },
+      tag: {
+        type: "object",
+        description:
+          "Facet feature for a hashtag. The text usually includes a '#' prefix, but the facet reference should not (except in the case of 'double hash tags').",
+        required: ["tag"],
+        properties: {
+          tag: {
+            type: "string",
+            maxLength: 640,
+            maxGraphemes: 64,
+          },
+        },
+      },
+      byteSlice: {
+        type: "object",
+        description:
+          "Specifies the sub-string range a facet feature applies to. Start index is inclusive, end index is exclusive. Indices are zero-indexed, counting bytes of the UTF-8 encoded text. NOTE: some languages, like Javascript, use UTF-16 or Unicode codepoints for string slice indexing; in these languages, convert to byte arrays before working with facets.",
+        required: ["byteStart", "byteEnd"],
+        properties: {
+          byteStart: {
+            type: "integer",
+            minimum: 0,
+          },
+          byteEnd: {
+            type: "integer",
+            minimum: 0,
+          },
+        },
+      },
+    },
+  },
   ComAtprotoRepoApplyWrites: {
     lexicon: 1,
     id: "com.atproto.repo.applyWrites",
@@ -94,7 +175,7 @@ export const schemaDict = {
           },
           rkey: {
             type: "string",
-            maxLength: 15,
+            maxLength: 512,
           },
           value: {
             type: "unknown",
@@ -203,7 +284,7 @@ export const schemaDict = {
               rkey: {
                 type: "string",
                 description: "The Record Key.",
-                maxLength: 15,
+                maxLength: 512,
               },
               validate: {
                 type: "boolean",
@@ -654,7 +735,7 @@ export const schemaDict = {
               rkey: {
                 type: "string",
                 description: "The Record Key.",
-                maxLength: 15,
+                maxLength: 512,
               },
               validate: {
                 type: "boolean",
@@ -778,6 +859,15 @@ export const schemaDict = {
               maxGraphemes: 10000,
               description: "The content of the comment.",
             },
+            facets: {
+              type: "array",
+              description:
+                "Annotations of text (mentions, URLs, hashtags, etc)",
+              items: {
+                type: "ref",
+                ref: "lex:app.bsky.richtext.facet",
+              },
+            },
             createdAt: {
               type: "string",
               format: "datetime",
@@ -862,6 +952,7 @@ export const schemaDict = {
 export const schemas: LexiconDoc[] = Object.values(schemaDict) as LexiconDoc[];
 export const lexicons: Lexicons = new Lexicons(schemas);
 export const ids = {
+  AppBskyRichtextFacet: "app.bsky.richtext.facet",
   ComAtprotoRepoApplyWrites: "com.atproto.repo.applyWrites",
   ComAtprotoRepoCreateRecord: "com.atproto.repo.createRecord",
   ComAtprotoRepoDefs: "com.atproto.repo.defs",
