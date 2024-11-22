@@ -16,6 +16,11 @@
             "maxGraphemes": 10000,
             "description": "The content of the comment."
           },
+          "facets": {
+            "type": "array",
+            "description": "Annotations of text (mentions, URLs, hashtags, etc)",
+            "items": { "type": "ref", "ref": "app.bsky.richtext.facet" }
+          },
           "createdAt": {
             "type": "string",
             "format": "datetime",
