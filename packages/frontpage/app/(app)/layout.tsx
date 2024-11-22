@@ -35,7 +35,11 @@ export default async function Layout({
       <div className="flex place-content-between items-center mb-8">
         <Link href="/">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/frontpage-logo.svg" alt="Frontpage" className="h-12" />
+          <img
+            src="/frontpage-logo.svg"
+            alt="Frontpageeeeeee"
+            className="h-12"
+          />
         </Link>
 
         <div className="flex items-center gap-4">
@@ -98,12 +102,12 @@ async function LoginOrLogout() {
               <Link href={`/profile/${handle}`} className="cursor-pointer">
                 Profile
               </Link>
-            </DropdownMenuItem> 
-          <DropdownMenuItem asChild>
-            <Link href="/about" className="cursor-pointer">
-              About
-            </Link>
-          </DropdownMenuItem>
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <Link href="/about" className="cursor-pointer">
+                About
+              </Link>
+            </DropdownMenuItem>
             <Suspense fallback={null}>
               {isAdmin().then((isAdmin) =>
                 isAdmin ? (
