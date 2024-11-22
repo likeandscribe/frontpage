@@ -25,4 +25,5 @@ size = 'shared-cpu-1x'
 
 [env]
 FRONTPAGE_CONSUMER_URL = "https://frontpage.fyi/api/receive_hook"
-STORE_LOCATION = "/drainpipedata"
+STORE_LOCATION = "/drainpipedata/sled"
+RUST_LOG = "info"

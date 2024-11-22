@@ -17,6 +17,6 @@ RUN --mount=type=cache,target=/usr/local/cargo/registry \
 FROM alpine:3.14
 COPY --from=builder /root/release/drainpipe /
 
-ENV DATABASE_URL="/drainpipedata/drainpipe.db"
+ENV STORE_LOCATION="/drainpipedata/sled"
 
 ENTRYPOINT ["/drainpipe"]
