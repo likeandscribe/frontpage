@@ -30,7 +30,7 @@ export const CommentRecord = z.object({
 
 export type Comment = z.infer<typeof CommentRecord>;
 
-type CommentInput = {
+export type CommentInput = {
   parent?: { cid: string; rkey: string; authorDid: DID };
   post: { cid: string; rkey: string; authorDid: DID };
   content: string;
@@ -68,6 +68,7 @@ export async function createComment({ parent, post, content }: CommentInput) {
 
   return {
     rkey: result.uri.rkey,
+    cid: result.cid,
   };
 }
 

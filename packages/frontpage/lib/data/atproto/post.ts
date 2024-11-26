@@ -19,7 +19,7 @@ export const PostRecord = z.object({
 
 export type Post = z.infer<typeof PostRecord>;
 
-type PostInput = {
+export type PostInput = {
   title: string;
   url: string;
 };
@@ -57,12 +57,12 @@ export async function getPost({ rkey, repo }: { rkey: string; repo: DID }) {
     throw new DataLayerError("Failed to get service url");
   }
 
-  const { value } = await atprotoGetRecord({
+  const { value, cid } = await atprotoGetRecord({
     serviceEndpoint: service,
     repo,
     collection: PostCollection,
     rkey,
   });
 
-  return PostRecord.parse(value);
+  return { ...PostRecord.parse(value), cid };
 }

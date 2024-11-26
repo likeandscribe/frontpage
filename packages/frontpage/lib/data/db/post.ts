@@ -4,10 +4,9 @@ import { cache } from "react";
 import { db } from "@/lib/db";
 import { eq, sql, desc, and, isNull, or } from "drizzle-orm";
 import * as schema from "@/lib/schema";
-import { getBlueskyProfile, getUser, isAdmin } from "../user";
+import { getUser, isAdmin } from "../user";
 import * as atprotoPost from "../atproto/post";
 import { DID } from "../atproto/did";
-import { sendDiscordMessage } from "@/lib/discord";
 import { newPostAggregateTrigger } from "./triggers";
 
 const buildUserHasVotedQuery = cache(async () => {
@@ -164,22 +163,20 @@ export async function uncached_doesPostExist(authorDid: DID, rkey: string) {
   return Boolean(row[0]);
 }
 
-type CreatePostInput = {
+export type CreatePostInput = {
   post: atprotoPost.Post;
   authorDid: DID;
   rkey: string;
   cid: string;
-  offset: number;
 };
 
-export async function unauthed_createPost({
+export async function createPost({
   post,
   rkey,
   authorDid,
   cid,
-  offset,
 }: CreatePostInput) {
-  await db.transaction(async (tx) => {
+  return await db.transaction(async (tx) => {
     const [insertedPostRow] = await tx
       .insert(schema.Post)
       .values({
@@ -198,47 +195,19 @@ export async function unauthed_createPost({
 
     await newPostAggregateTrigger(insertedPostRow.postId, tx);
 
-    await tx.insert(schema.ConsumedOffset).values({ offset });
-  });
-
-  const bskyProfile = await getBlueskyProfile(authorDid);
-  await sendDiscordMessage({
-    embeds: [
-      {
-        title: "New post on Frontpage",
-        description: post.title,
-        url: `https://frontpage.fyi/post/${authorDid}/${rkey}`,
-        color: 10181046,
-        author: bskyProfile
-          ? {
-              name: `@${bskyProfile.handle}`,
-              icon_url: bskyProfile.avatar,
-              url: `https://frontpage.fyi/profile/${bskyProfile.handle}`,
-            }
-          : undefined,
-        fields: [
-          {
-            name: "Link",
-            value: post.url,
-          },
-        ],
-      },
-    ],
+    return {
+      postId: insertedPostRow.postId,
+    };
   });
 }
 
-type DeletePostInput = {
+export type DeletePostInput = {
   rkey: string;
   authorDid: DID;
-  offset: number;
 };
 
-export async function unauthed_deletePost({
-  rkey,
-  authorDid,
-  offset,
-}: DeletePostInput) {
-  console.log("Deleting post", rkey, offset);
+export async function deletePost({ rkey, authorDid }: DeletePostInput) {
+  console.log("Deleting post", rkey);
   await db.transaction(async (tx) => {
     console.log("Updating post status to deleted", rkey);
     await tx
@@ -247,10 +216,6 @@ export async function unauthed_deletePost({
       .where(
         and(eq(schema.Post.rkey, rkey), eq(schema.Post.authorDid, authorDid)),
       );
-
-    console.log("Inserting consumed offset", offset);
-    await tx.insert(schema.ConsumedOffset).values({ offset });
-    console.log("Done deleting post");
   });
   console.log("Done deleting post transaction");
 }

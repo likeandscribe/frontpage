@@ -253,19 +253,19 @@ export async function moderateComment({
     );
 }
 
-export type UnauthedCreateCommentInput = {
+export type CreateCommentInput = {
   cid: string;
   comment: atprotoComment.Comment;
   repo: DID;
   rkey: string;
 };
 
-export async function unauthed_createComment({
+export async function createComment({
   cid,
   comment,
   repo,
   rkey,
-}: UnauthedCreateCommentInput) {
+}: CreateCommentInput) {
   return await db.transaction(async (tx) => {
     const parentComment =
       comment.parent != null
@@ -332,15 +332,12 @@ export async function unauthed_createComment({
   });
 }
 
-export type UnauthedDeleteCommentInput = {
+export type DeleteCommentInput = {
   rkey: string;
   repo: DID;
 };
 
-export async function unauthed_deleteComment({
-  rkey,
-  repo,
-}: UnauthedDeleteCommentInput) {
+export async function deleteComment({ rkey, repo }: DeleteCommentInput) {
   await db.transaction(async (tx) => {
     const [deletedComment] = await tx
       .update(schema.Comment)

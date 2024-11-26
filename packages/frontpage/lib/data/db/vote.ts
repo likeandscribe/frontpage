@@ -32,38 +32,76 @@ export const getVoteForPost = cache(async (postId: number) => {
   return rows[0] ?? null;
 });
 
-export const getVoteForComment = cache(async (commentId: number) => {
-  const user = await getUser();
-  if (!user) return null;
-
-  const rows = await db
-    .select()
-    .from(schema.CommentVote)
+export const uncached_doesPostVoteExist = async (
+  authorDid: DID,
+  rkey: string,
+  cid: string,
+) => {
+  const row = await db
+    .select({ id: schema.PostVote.id })
+    .from(schema.PostVote)
     .where(
       and(
-        eq(schema.CommentVote.authorDid, user.did),
-        eq(schema.CommentVote.commentId, commentId),
+        eq(schema.PostVote.authorDid, authorDid),
+        eq(schema.PostVote.rkey, rkey),
+        eq(schema.PostVote.cid, cid),
       ),
     )
     .limit(1);
 
-  return rows[0] ?? null;
-});
+  return Boolean(row[0]);
+};
+export const uncached_doesCommentVoteExist = async (
+  authorDid: DID,
+  rkey: string,
+  cid: string,
+) => {
+  const row = await db
+    .select({ id: schema.CommentVote.id })
+    .from(schema.CommentVote)
+    .where(
+      and(
+        eq(schema.CommentVote.authorDid, authorDid),
+        eq(schema.CommentVote.rkey, rkey),
+        eq(schema.CommentVote.cid, cid),
+      ),
+    )
+    .limit(1);
 
-export type UnauthedCreatePostVoteInput = {
+  return Boolean(row[0]);
+};
+
+export const getVoteForComment = cache(
+  async (commentId: number, userDid: DID) => {
+    const rows = await db
+      .select()
+      .from(schema.CommentVote)
+      .where(
+        and(
+          eq(schema.CommentVote.authorDid, userDid),
+          eq(schema.CommentVote.commentId, commentId),
+        ),
+      )
+      .limit(1);
+
+    return rows[0] ?? null;
+  },
+);
+
+export type CreatePostVoteInput = {
   repo: DID;
   rkey: string;
   vote: atprotoVote.Vote;
   cid: string;
 };
 
-export const unauthed_createPostVote = async ({
+export const createPostVote = async ({
   repo,
   rkey,
   vote,
   cid,
-}: UnauthedCreatePostVoteInput) => {
-  await db.transaction(async (tx) => {
+}: CreatePostVoteInput) => {
+  return await db.transaction(async (tx) => {
     const subject = (
       await tx
         .select()
@@ -80,19 +118,28 @@ export const unauthed_createPostVote = async ({
     if (subject.authorDid === repo) {
       throw new Error(`[naughty] Cannot vote on own content ${repo}`);
     }
-    await tx.insert(schema.PostVote).values({
-      postId: subject.id,
-      authorDid: repo,
-      createdAt: new Date(vote.createdAt),
-      cid,
-      rkey,
-    });
+    const [insertedVote] = await tx
+      .insert(schema.PostVote)
+      .values({
+        postId: subject.id,
+        authorDid: repo,
+        createdAt: new Date(vote.createdAt),
+        cid,
+        rkey,
+      })
+      .returning({ id: schema.PostVote.id });
+
+    if (!insertedVote) {
+      throw new Error("Failed to insert vote");
+    }
 
     await newPostVoteAggregateTrigger(subject.id, tx);
+
+    return { id: insertedVote?.id };
   });
 };
 
-export type UnauthedCreateCommentVoteInput = {
+export type CreateCommentVoteInput = {
   repo: DID;
   rkey: string;
   vote: atprotoVote.Vote;
@@ -100,13 +147,13 @@ export type UnauthedCreateCommentVoteInput = {
   cid: string;
 };
 
-export async function unauthed_createCommentVote({
+export async function createCommentVote({
   repo,
   rkey,
   vote,
   cid,
-}: UnauthedCreateCommentVoteInput) {
-  await db.transaction(async (tx) => {
+}: CreateCommentVoteInput) {
+  return await db.transaction(async (tx) => {
     const subject = (
       await tx
         .select()
@@ -124,21 +171,30 @@ export async function unauthed_createCommentVote({
       throw new Error(`[naughty] Cannot vote on own content ${repo}`);
     }
 
-    await tx.insert(schema.CommentVote).values({
-      commentId: subject.id,
-      authorDid: repo,
-      createdAt: new Date(vote.createdAt),
-      cid: cid,
-      rkey,
-    });
+    const [insertedVote] = await tx
+      .insert(schema.CommentVote)
+      .values({
+        commentId: subject.id,
+        authorDid: repo,
+        createdAt: new Date(vote.createdAt),
+        cid: cid,
+        rkey,
+      })
+      .returning({ id: schema.CommentVote.id });
+
+    if (!insertedVote) {
+      throw new Error("Failed to insert vote");
+    }
 
     await newCommentVoteAggregateTrigger(subject.postId, subject.id, tx);
+
+    return { id: insertedVote?.id };
   });
 }
 
 // Try deleting from both tables. In reality only one will have a record.
 // Relies on sqlite not throwing an error if the record doesn't exist.
-export const unauthed_deleteVote = async (rkey: string, repo: DID) => {
+export const deleteVote = async (rkey: string, repo: DID) => {
   await db.transaction(async (tx) => {
     const [deletedCommentVoteRow] = await tx
       .delete(schema.CommentVote)

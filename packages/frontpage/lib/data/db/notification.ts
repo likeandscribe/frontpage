@@ -135,7 +135,7 @@ type CreateNotificationInput = {
   commentId: number;
 };
 
-export async function unauthed_createNotification({
+export async function createNotification({
   did,
   reason,
   commentId,
