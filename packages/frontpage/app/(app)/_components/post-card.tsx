@@ -1,10 +1,9 @@
 import Link from "next/link";
-import { createVote, deleteVote } from "@/lib/data/atproto/vote";
 import { getVoteForPost } from "@/lib/data/db/vote";
 import { ensureUser, getUser } from "@/lib/data/user";
 import { TimeAgo } from "@/lib/components/time-ago";
 import { VoteButton } from "./vote-button";
-import { PostCollection, deletePost } from "@/lib/data/atproto/post";
+import { PostCollection } from "@/lib/data/atproto/post";
 import { getVerifiedHandle } from "@/lib/data/atproto/identity";
 import { UserHoverCard } from "@/lib/components/user-hover-card";
 import type { DID } from "@/lib/data/atproto/did";
@@ -15,6 +14,8 @@ import { revalidatePath } from "next/cache";
 import { ReportDialogDropdownButton } from "./report-dialog";
 import { DeleteButton } from "./delete-button";
 import { ShareDropdownButton } from "./share-button";
+import { createVote, deleteVote } from "@/lib/api/vote";
+import { deletePost } from "@/lib/api/post";
 
 type PostProps = {
   id: number;
@@ -56,9 +57,9 @@ export async function PostCard({
             "use server";
             await ensureUser();
             await createVote({
-              subjectAuthorDid: author,
-              subjectCid: cid,
               subjectRkey: rkey,
+              subjectCid: cid,
+              subjectAuthorDid: author,
               subjectCollection: PostCollection,
             });
           }}
@@ -130,6 +131,7 @@ export async function PostCard({
                     author,
                   })}
                 />
+                {/* TODO: there's a bug here where delete shows on deleted posts */}
                 {user?.did === author ? (
                   <DeleteButton
                     deleteAction={deletePostAction.bind(null, rkey)}

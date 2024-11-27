@@ -88,19 +88,19 @@ export const getVoteForComment = cache(
   },
 );
 
-export type CreatePostVoteInput = {
+export type CreateVoteInput = {
   repo: DID;
+  cid: string;
   rkey: string;
   vote: atprotoVote.Vote;
-  cid: string;
 };
 
 export const createPostVote = async ({
   repo,
+  cid,
   rkey,
   vote,
-  cid,
-}: CreatePostVoteInput) => {
+}: CreateVoteInput) => {
   return await db.transaction(async (tx) => {
     const subject = (
       await tx
@@ -139,20 +139,12 @@ export const createPostVote = async ({
   });
 };
 
-export type CreateCommentVoteInput = {
-  repo: DID;
-  rkey: string;
-  vote: atprotoVote.Vote;
-
-  cid: string;
-};
-
 export async function createCommentVote({
   repo,
   rkey,
   vote,
   cid,
-}: CreateCommentVoteInput) {
+}: CreateVoteInput) {
   return await db.transaction(async (tx) => {
     const subject = (
       await tx
@@ -177,7 +169,7 @@ export async function createCommentVote({
         commentId: subject.id,
         authorDid: repo,
         createdAt: new Date(vote.createdAt),
-        cid: cid,
+        cid,
         rkey,
       })
       .returning({ id: schema.CommentVote.id });

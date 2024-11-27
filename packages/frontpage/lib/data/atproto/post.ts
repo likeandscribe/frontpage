@@ -40,6 +40,7 @@ export async function createPost({ title, url }: PostInput) {
 
   return {
     rkey: result.uri.rkey,
+    cid: result.cid,
   };
 }
 

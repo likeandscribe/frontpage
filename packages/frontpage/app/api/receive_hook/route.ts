@@ -24,7 +24,7 @@ export async function POST(request: Request) {
   if (!service) {
     throw new Error("No AtprotoPersonalDataServer service found");
   }
-
+  console.log("ops", ops);
   const promises = ops.map(async (op) => {
     const { collection, rkey } = op.path;
     console.log("Processing", collection, rkey, op.action);
@@ -42,11 +42,10 @@ export async function POST(request: Request) {
       default:
         throw new Error(`Unknown collection: ${collection}, ${op}`);
     }
-
-    await db.insert(schema.ConsumedOffset).values({ offset: seq });
   });
 
   await Promise.all(promises);
-
+  console.log("offset", seq);
+  await db.insert(schema.ConsumedOffset).values({ offset: seq });
   return new Response("OK");
 }

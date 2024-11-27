@@ -5,23 +5,30 @@ import { ensureUser, getBlueskyProfile } from "../data/user";
 import { DataLayerError } from "../data/error";
 import { sendDiscordMessage } from "../discord";
 
-export type ApiCreatePostInput = {
-  post: atproto.Post;
-  rkey: string;
-  cid: string;
-};
+export interface ApiCreatePostInput extends Omit<atproto.Post, "createdAt"> {}
 
-export async function createPost({ post, rkey, cid }: ApiCreatePostInput) {
+export async function createPost({ title, url }: ApiCreatePostInput) {
   const user = await ensureUser();
 
   try {
-    const createdPost = await atproto.createPost({
-      title: post.title,
-      url: post.url,
+    const { rkey, cid } = await atproto.createPost({
+      title: title,
+      url: url,
     });
 
-    if (!createdPost) {
+    if (!rkey || !cid) {
       throw new DataLayerError("Failed to create post");
+    }
+
+    const post = await atproto.getPost({
+      rkey,
+      repo: user.did,
+    });
+
+    if (!post) {
+      throw new DataLayerError(
+        "Failed to retrieve atproto post, database creation aborted",
+      );
     }
 
     const dbCreatedPost = await db.createPost({
@@ -34,33 +41,37 @@ export async function createPost({ post, rkey, cid }: ApiCreatePostInput) {
     if (!dbCreatedPost) {
       throw new DataLayerError("Failed to insert post in database");
     }
+
+    const bskyProfile = await getBlueskyProfile(user.did);
+
+    await sendDiscordMessage({
+      embeds: [
+        {
+          title: "New post on Frontpage",
+          description: title,
+          url: `https://frontpage.fyi/post/${user.did}/${rkey}`,
+          color: 10181046,
+          author: bskyProfile
+            ? {
+                name: `@${bskyProfile.handle}`,
+                icon_url: bskyProfile.avatar,
+                url: `https://frontpage.fyi/profile/${bskyProfile.handle}`,
+              }
+            : undefined,
+          fields: [
+            {
+              name: "Link",
+              value: url,
+            },
+          ],
+        },
+      ],
+    });
+
+    return { rkey, cid };
   } catch (e) {
     throw new DataLayerError(`Failed to create post: ${e}`);
   }
-  const bskyProfile = await getBlueskyProfile(user.did);
-  await sendDiscordMessage({
-    embeds: [
-      {
-        title: "New post on Frontpage",
-        description: post.title,
-        url: `https://frontpage.fyi/post/${user.did}/${rkey}`,
-        color: 10181046,
-        author: bskyProfile
-          ? {
-              name: `@${bskyProfile.handle}`,
-              icon_url: bskyProfile.avatar,
-              url: `https://frontpage.fyi/profile/${bskyProfile.handle}`,
-            }
-          : undefined,
-        fields: [
-          {
-            name: "Link",
-            value: post.url,
-          },
-        ],
-      },
-    ],
-  });
 }
 
 export async function deletePost(rkey: string) {

@@ -1,5 +1,4 @@
 import "server-only";
-import { ensureUser } from "../user";
 import {
   atprotoCreateRecord,
   atprotoDeleteRecord,
@@ -42,7 +41,6 @@ export async function createVote({
   subjectCollection,
   subjectAuthorDid,
 }: VoteInput) {
-  await ensureUser();
   const uri = `at://${subjectAuthorDid}/${subjectCollection}/${subjectRkey}`;
 
   const record = {
@@ -53,21 +51,25 @@ export async function createVote({
     },
   };
 
-  VoteRecord.parse(record);
+  const parseResult = VoteRecord.safeParse(record);
+  if (!parseResult.success) {
+    throw new DataLayerError("Invalid vote record", {
+      cause: parseResult.error,
+    });
+  }
 
   const response = await atprotoCreateRecord({
     collection: VoteCollection,
     record: record,
   });
 
-  const createdRecord = { createdAt: record.createdAt, subject: response };
-  const parsedRecord = VoteRecord.parse(createdRecord);
-  return parsedRecord;
+  return {
+    rkey: response.uri.rkey,
+    cid: response.cid,
+  };
 }
 
 export async function deleteVote(rkey: string) {
-  await ensureUser();
-
   await atprotoDeleteRecord({
     collection: VoteCollection,
     rkey,

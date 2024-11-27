@@ -31,12 +31,16 @@ export async function handlePost({ op, repo, rkey }: HandlerInput) {
     const post = await dbPost.uncached_doesPostExist(repo, rkey);
 
     if (!post && postRecord) {
-      await dbPost.createPost({
+      const createdDbPost = await dbPost.createPost({
         post: postRecord,
         rkey,
         authorDid: repo,
         cid: postRecord.cid,
       });
+
+      if (!createdDbPost) {
+        throw new Error("Failed to insert post from relay in database");
+      }
 
       const bskyProfile = await getBlueskyProfile(repo);
       await sendDiscordMessage({
@@ -80,6 +84,7 @@ export async function handleComment({ op, repo, rkey }: HandlerInput) {
 
     const comment = await dbComment.uncached_doesCommentExist(rkey);
 
+    console.log("comment", comment);
     if (!comment && commentRecord) {
       const createdComment = await dbComment.createComment({
         cid: commentRecord.cid,
@@ -87,6 +92,10 @@ export async function handleComment({ op, repo, rkey }: HandlerInput) {
         repo,
         rkey,
       });
+
+      if (!createdComment) {
+        throw new Error("Failed to insert comment from relay in database");
+      }
 
       const didToNotify = createdComment.parent
         ? createdComment.parent.authorDid
@@ -121,12 +130,18 @@ export async function handleVote({ op, repo, rkey }: HandlerInput) {
         );
 
         if (!postVote) {
-          await dbVote.createPostVote({
+          const createdDbPostVote = await dbVote.createPostVote({
             repo,
             rkey,
             vote: hydratedRecord,
             cid: hydratedRecord.cid,
           });
+
+          if (!createdDbPostVote) {
+            throw new Error(
+              "Failed to insert post vote from relay in database",
+            );
+          }
         }
         break;
       case atprotoComment.CommentCollection:
@@ -137,12 +152,18 @@ export async function handleVote({ op, repo, rkey }: HandlerInput) {
         );
 
         if (!commentVote) {
-          await dbVote.createCommentVote({
+          const createdDbCommentVote = await dbVote.createCommentVote({
             cid: hydratedRecord.cid,
             vote: hydratedRecord,
             repo,
             rkey,
           });
+
+          if (!createdDbCommentVote) {
+            throw new Error(
+              "Failed to insert comment vote from relay in database",
+            );
+          }
         }
         break;
       default:

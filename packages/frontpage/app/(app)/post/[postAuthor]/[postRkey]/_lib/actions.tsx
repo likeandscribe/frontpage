@@ -2,15 +2,15 @@
 
 import { CommentCollection } from "@/lib/data/atproto/comment";
 import { DID } from "@/lib/data/atproto/did";
-import { createVote, deleteVote } from "@/lib/data/atproto/vote";
-import { deleteComment, getComment } from "@/lib/data/db/comment";
+import { getComment } from "@/lib/data/db/comment";
 import { getPost } from "@/lib/data/db/post";
 import { parseReportForm } from "@/lib/data/db/report-shared";
 import { createReport } from "@/lib/data/db/report";
 import { getVoteForComment } from "@/lib/data/db/vote";
 import { ensureUser } from "@/lib/data/user";
 import { revalidatePath } from "next/cache";
-import { createComment } from "@/lib/api/comment";
+import { createComment, deleteComment } from "@/lib/api/comment";
+import { createVote, deleteVote } from "@/lib/api/vote";
 
 export async function createCommentAction(
   input: { parentRkey?: string; postRkey: string; postAuthorDid: DID },

@@ -4,6 +4,7 @@ import { DataLayerError } from "../data/error";
 import { ensureUser } from "../data/user";
 import * as db from "../data/db/comment";
 import { DID, getPdsUrl } from "../data/atproto/did";
+import { createNotification } from "../data/db/notification";
 
 export type ApiCreateCommentInput = atproto.CommentInput & {
   repo: DID;
@@ -16,11 +17,6 @@ export async function createComment({
   repo,
 }: ApiCreateCommentInput) {
   const user = await ensureUser();
-  const service = await getPdsUrl(repo);
-
-  if (!service) {
-    throw new DataLayerError("Failed to get service URL");
-  }
 
   try {
     const { rkey, cid } = await atproto.createComment({
@@ -53,6 +49,18 @@ export async function createComment({
 
     if (!createdComment) {
       throw new DataLayerError("Failed to insert comment in database");
+    }
+
+    const didToNotify = createdComment.parent
+      ? createdComment.parent.authorDid
+      : createdComment.post.authordid;
+
+    if (didToNotify !== repo) {
+      await createNotification({
+        commentId: createdComment.id,
+        did: didToNotify,
+        reason: createdComment.parent ? "commentReply" : "postComment",
+      });
     }
   } catch (e) {
     throw new DataLayerError(`Failed to create comment: ${e}`);

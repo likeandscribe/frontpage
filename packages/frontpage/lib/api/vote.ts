@@ -8,49 +8,57 @@ import { DID } from "../data/atproto/did";
 import { CommentCollection } from "../data/atproto/comment";
 
 export type ApiCreateVoteInput = {
-  rkey: string;
-  cid: string;
-  repo: DID;
-  collection: typeof PostCollection | typeof CommentCollection;
+  subjectRkey: string;
+  subjectCid: string;
+  subjectAuthorDid: DID;
+  subjectCollection: typeof PostCollection | typeof CommentCollection;
 };
 
 export async function createVote({
-  rkey,
-  cid,
-  repo,
-  collection,
+  subjectRkey,
+  subjectCid,
+  subjectAuthorDid,
+  subjectCollection,
 }: ApiCreateVoteInput) {
-  await ensureUser();
+  const user = await ensureUser();
 
   try {
-    const createdVote = await atproto.createVote({
-      subjectRkey: rkey,
-      subjectCid: cid,
-      subjectCollection: collection,
-      subjectAuthorDid: repo,
+    const { rkey, cid } = await atproto.createVote({
+      subjectRkey,
+      subjectCid,
+      subjectCollection,
+      subjectAuthorDid,
     });
 
-    if (!createdVote) {
+    if (!rkey || !cid) {
       throw new DataLayerError("Failed to create vote");
     }
 
-    if (collection == PostCollection) {
+    const vote = await atproto.getVote({ rkey, repo: user.did });
+
+    if (!vote) {
+      throw new DataLayerError(
+        "Failed to retrieve atproto vote, database creation aborted",
+      );
+    }
+
+    if (subjectCollection == PostCollection) {
       const dbCreatedVote = await db.createPostVote({
-        repo,
-        rkey,
-        vote: createdVote,
+        repo: user.did,
         cid,
+        rkey,
+        vote,
       });
 
       if (!dbCreatedVote) {
         throw new DataLayerError("Failed to insert post vote in database");
       }
-    } else if (collection == CommentCollection) {
+    } else if (subjectCollection == CommentCollection) {
       const dbCreatedVote = await db.createCommentVote({
-        repo,
-        rkey,
-        vote: createdVote,
+        repo: user.did,
         cid,
+        rkey,
+        vote,
       });
 
       if (!dbCreatedVote) {
@@ -59,5 +67,17 @@ export async function createVote({
     }
   } catch (e) {
     throw new DataLayerError(`Failed to create post vote: ${e}`);
+  }
+}
+
+export async function deleteVote(rkey: string) {
+  const user = await ensureUser();
+
+  try {
+    await atproto.deleteVote(rkey);
+
+    await db.deleteVote(rkey, user.did);
+  } catch (e) {
+    throw new DataLayerError(`Failed to delete vote: ${e}`);
   }
 }
