@@ -1,9 +1,7 @@
 "use server";
 
 import { createPost } from "@/lib/api/post";
-import { DID } from "@/lib/data/atproto/did";
 import { getVerifiedHandle } from "@/lib/data/atproto/identity";
-import { uncached_doesPostExist } from "@/lib/data/db/post";
 import { DataLayerError } from "@/lib/data/error";
 import { ensureUser } from "@/lib/data/user";
 import { redirect } from "next/navigation";
