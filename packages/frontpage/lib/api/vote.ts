@@ -6,6 +6,7 @@ import { ensureUser } from "../data/user";
 import { PostCollection } from "../data/atproto/post";
 import { DID } from "../data/atproto/did";
 import { CommentCollection } from "../data/atproto/comment";
+import { invariant } from "../utils";
 
 export type ApiCreateVoteInput = {
   subjectRkey: string;
@@ -30,17 +31,14 @@ export async function createVote({
       subjectAuthorDid,
     });
 
-    if (!rkey || !cid) {
-      throw new DataLayerError("Failed to create vote");
-    }
+    invariant(rkey && cid, "Failed to create vote, rkey/cid missing");
 
     const vote = await atproto.getVote({ rkey, repo: user.did });
 
-    if (!vote) {
-      throw new DataLayerError(
-        "Failed to retrieve atproto vote, database creation aborted",
-      );
-    }
+    invariant(
+      vote,
+      "Failed to retrieve atproto vote, database creation aborted",
+    );
 
     if (subjectCollection == PostCollection) {
       const dbCreatedVote = await db.createPostVote({
@@ -50,9 +48,7 @@ export async function createVote({
         vote,
       });
 
-      if (!dbCreatedVote) {
-        throw new DataLayerError("Failed to insert post vote in database");
-      }
+      invariant(dbCreatedVote, "Failed to insert post vote in database");
     } else if (subjectCollection == CommentCollection) {
       const dbCreatedVote = await db.createCommentVote({
         repo: user.did,
@@ -61,9 +57,7 @@ export async function createVote({
         vote,
       });
 
-      if (!dbCreatedVote) {
-        throw new DataLayerError("Failed to insert comment vote in database");
-      }
+      invariant(dbCreatedVote, "Failed to insert post vote in database");
     }
   } catch (e) {
     throw new DataLayerError(`Failed to create post vote: ${e}`);

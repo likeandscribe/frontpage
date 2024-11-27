@@ -4,6 +4,7 @@ import * as atproto from "../data/atproto/post";
 import { ensureUser, getBlueskyProfile } from "../data/user";
 import { DataLayerError } from "../data/error";
 import { sendDiscordMessage } from "../discord";
+import { invariant } from "../utils";
 
 export interface ApiCreatePostInput extends Omit<atproto.Post, "createdAt"> {}
 
@@ -16,20 +17,17 @@ export async function createPost({ title, url }: ApiCreatePostInput) {
       url: url,
     });
 
-    if (!rkey || !cid) {
-      throw new DataLayerError("Failed to create post");
-    }
+    invariant(rkey && cid, "Failed to create post, rkey/cid missing");
 
     const post = await atproto.getPost({
       rkey,
       repo: user.did,
     });
 
-    if (!post) {
-      throw new DataLayerError(
-        "Failed to retrieve atproto post, database creation aborted",
-      );
-    }
+    invariant(
+      post,
+      "Failed to retrieve atproto post, database creation aborted",
+    );
 
     const dbCreatedPost = await db.createPost({
       post,
@@ -38,9 +36,7 @@ export async function createPost({ title, url }: ApiCreatePostInput) {
       cid,
     });
 
-    if (!dbCreatedPost) {
-      throw new DataLayerError("Failed to insert post in database");
-    }
+    invariant(dbCreatedPost, "Failed to insert post in database");
 
     const bskyProfile = await getBlueskyProfile(user.did);
 

@@ -5,6 +5,7 @@ import { ensureUser } from "../data/user";
 import * as db from "../data/db/comment";
 import { DID } from "../data/atproto/did";
 import { createNotification } from "../data/db/notification";
+import { invariant } from "../utils";
 
 export type ApiCreateCommentInput = atproto.CommentInput & {
   repo: DID;
@@ -25,41 +26,36 @@ export async function createComment({
       content,
     });
 
-    if (!rkey || !cid) {
-      throw new DataLayerError("Failed to create comment");
-    }
+    invariant(rkey && cid, "Failed to create comment, rkey/cid missing");
 
     const comment = await atproto.getComment({
       rkey,
       repo: user.did,
     });
 
-    if (!comment) {
-      throw new DataLayerError(
-        "Failed to retrieve atproto comment, database creation aborted",
-      );
-    }
+    invariant(
+      comment,
+      "Failed to retrieve atproto comment, database creation aborted",
+    );
 
-    const createdComment = await db.createComment({
+    const dbCreatedComment = await db.createComment({
       cid,
       comment,
       repo,
       rkey: rkey,
     });
 
-    if (!createdComment) {
-      throw new DataLayerError("Failed to insert comment in database");
-    }
+    invariant(dbCreatedComment, "Failed to insert comment in database");
 
-    const didToNotify = createdComment.parent
-      ? createdComment.parent.authorDid
-      : createdComment.post.authordid;
+    const didToNotify = dbCreatedComment.parent
+      ? dbCreatedComment.parent.authorDid
+      : dbCreatedComment.post.authordid;
 
     if (didToNotify !== repo) {
       await createNotification({
-        commentId: createdComment.id,
+        commentId: dbCreatedComment.id,
         did: didToNotify,
-        reason: createdComment.parent ? "commentReply" : "postComment",
+        reason: dbCreatedComment.parent ? "commentReply" : "postComment",
       });
     }
   } catch (e) {
