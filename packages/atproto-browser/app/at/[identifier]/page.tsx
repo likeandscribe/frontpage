@@ -11,11 +11,10 @@ import { getPds } from "@atproto/identity";
 import { describeRepo } from "@/lib/atproto";
 import { isDidWeb } from "@atproto/did";
 
-export default async function IdentifierPage({
-  params,
-}: {
-  params: { identifier: string };
+export default async function IdentifierPage(props: {
+  params: Promise<{ identifier: string }>;
 }) {
+  const params = await props.params;
   const identityResult = await resolveIdentity(params.identifier);
   if (!identityResult.success) {
     return <div>{identityResult.error}</div>;
@@ -85,7 +84,7 @@ async function DidHistory({ identifier }: { identifier: string }) {
             // eslint-disable-next-line react/no-array-index-key
             <li key={index}>
               Change created at {utcDateFormatter.format(previous.createdAt)}{" "}
-              (UTC) of type &quot;{previousOperation.type}&quot;.
+              (UTC) of type "{previousOperation.type}".
             </li>
           );
         }
