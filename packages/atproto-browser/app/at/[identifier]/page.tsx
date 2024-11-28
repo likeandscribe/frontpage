@@ -84,7 +84,7 @@ async function DidHistory({ identifier }: { identifier: string }) {
             // eslint-disable-next-line react/no-array-index-key
             <li key={index}>
               Change created at {utcDateFormatter.format(previous.createdAt)}{" "}
-              (UTC) of type "{previousOperation.type}".
+              (UTC) of type &quot;{previousOperation.type}&quot;.
             </li>
           );
         }
