@@ -4,6 +4,7 @@
 import { XrpcClient, FetchHandler, FetchHandlerOptions } from "@atproto/xrpc";
 import { schemas } from "./lexicons";
 import { CID } from "multiformats/cid";
+import * as AppBskyRichtextFacet from "./types/app/bsky/richtext/facet";
 import * as ComAtprotoRepoApplyWrites from "./types/com/atproto/repo/applyWrites";
 import * as ComAtprotoRepoCreateRecord from "./types/com/atproto/repo/createRecord";
 import * as ComAtprotoRepoDefs from "./types/com/atproto/repo/defs";
@@ -20,6 +21,7 @@ import * as FyiUnravelFrontpageComment from "./types/fyi/unravel/frontpage/comme
 import * as FyiUnravelFrontpagePost from "./types/fyi/unravel/frontpage/post";
 import * as FyiUnravelFrontpageVote from "./types/fyi/unravel/frontpage/vote";
 
+export * as AppBskyRichtextFacet from "./types/app/bsky/richtext/facet";
 export * as ComAtprotoRepoApplyWrites from "./types/com/atproto/repo/applyWrites";
 export * as ComAtprotoRepoCreateRecord from "./types/com/atproto/repo/createRecord";
 export * as ComAtprotoRepoDefs from "./types/com/atproto/repo/defs";
@@ -37,11 +39,13 @@ export * as FyiUnravelFrontpagePost from "./types/fyi/unravel/frontpage/post";
 export * as FyiUnravelFrontpageVote from "./types/fyi/unravel/frontpage/vote";
 
 export class AtpBaseClient extends XrpcClient {
+  app: AppNS;
   com: ComNS;
   fyi: FyiNS;
 
   constructor(options: FetchHandler | FetchHandlerOptions) {
     super(options, schemas);
+    this.app = new AppNS(this);
     this.com = new ComNS(this);
     this.fyi = new FyiNS(this);
   }
@@ -49,6 +53,34 @@ export class AtpBaseClient extends XrpcClient {
   /** @deprecated use `this` instead */
   get xrpc(): XrpcClient {
     return this;
+  }
+}
+
+export class AppNS {
+  _client: XrpcClient;
+  bsky: AppBskyNS;
+
+  constructor(client: XrpcClient) {
+    this._client = client;
+    this.bsky = new AppBskyNS(client);
+  }
+}
+
+export class AppBskyNS {
+  _client: XrpcClient;
+  richtext: AppBskyRichtextNS;
+
+  constructor(client: XrpcClient) {
+    this._client = client;
+    this.richtext = new AppBskyRichtextNS(client);
+  }
+}
+
+export class AppBskyRichtextNS {
+  _client: XrpcClient;
+
+  constructor(client: XrpcClient) {
+    this._client = client;
   }
 }
 
