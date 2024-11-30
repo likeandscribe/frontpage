@@ -4,7 +4,6 @@ import { getVoteForPost } from "@/lib/data/db/vote";
 import { ensureUser, getUser } from "@/lib/data/user";
 import { TimeAgo } from "@/lib/components/time-ago";
 import { VoteButton } from "./vote-button";
-import { PostCollection, deletePost } from "@/lib/data/atproto/post";
 import { getVerifiedHandle } from "@/lib/data/atproto/identity";
 import { UserHoverCard } from "@/lib/components/user-hover-card";
 import type { DID } from "@/lib/data/atproto/did";
@@ -15,6 +14,7 @@ import { revalidatePath } from "next/cache";
 import { ReportDialogDropdownButton } from "./report-dialog";
 import { DeleteButton } from "./delete-button";
 import { ShareDropdownButton } from "./share-button";
+import { atprotoClient, nsids } from "@/lib/data/atproto/repo";
 
 type PostProps = {
   id: number;
@@ -59,7 +59,7 @@ export async function PostCard({
               subjectAuthorDid: author,
               subjectCid: cid,
               subjectRkey: rkey,
-              subjectCollection: PostCollection,
+              subjectCollection: nsids.FyiUnravelFrontpagePost,
             });
           }}
           unvoteAction={async () => {
@@ -147,7 +147,10 @@ export async function PostCard({
 export async function deletePostAction(rkey: string) {
   "use server";
   await ensureUser();
-  await deletePost(rkey);
+  const atproto = atprotoClient();
+  await atproto.fyi.unravel.frontpage.post.delete({
+    rkey,
+  });
 
   revalidatePath("/");
 }
@@ -170,9 +173,9 @@ export async function reportPostAction(
 
   await createReport({
     ...formResult.data,
-    subjectUri: `at://${input.author}/${PostCollection}/${input.rkey}`,
+    subjectUri: `at://${input.author}/${nsids.FyiUnravelFrontpagePost}/${input.rkey}`,
     subjectDid: input.author,
-    subjectCollection: PostCollection,
+    subjectCollection: nsids.FyiUnravelFrontpagePost,
     subjectRkey: input.rkey,
     subjectCid: input.cid,
   });

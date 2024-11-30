@@ -2,7 +2,6 @@ import { db } from "@/lib/db";
 import * as schema from "@/lib/schema";
 import { atprotoGetRecord } from "@/lib/data/atproto/record";
 import { Commit } from "@/lib/data/atproto/event";
-import * as atprotoPost from "@/lib/data/atproto/post";
 import * as dbPost from "@/lib/data/db/post";
 import * as atprotoComment from "@/lib/data/atproto/comment";
 import { VoteRecord } from "@/lib/data/atproto/vote";
@@ -17,6 +16,7 @@ import {
   unauthed_createCommentVote,
 } from "@/lib/data/db/vote";
 import { unauthed_createNotification } from "@/lib/data/db/notification";
+import { atprotoClient, nsids } from "@/lib/data/atproto/repo";
 
 export async function POST(request: Request) {
   const auth = request.headers.get("Authorization");
@@ -36,24 +36,23 @@ export async function POST(request: Request) {
     throw new Error("No AtprotoPersonalDataServer service found");
   }
 
+  const atproto = atprotoClient(service);
+
   const promises = ops.map(async (op) => {
     const { collection, rkey } = op.path;
     console.log("Processing", collection, rkey, op.action);
 
-    if (collection === atprotoPost.PostCollection) {
+    if (collection === nsids.FyiUnravelFrontpagePost) {
       if (op.action === "create") {
-        const record = await atprotoGetRecord({
-          serviceEndpoint: service,
+        const postRecord = await atproto.fyi.unravel.frontpage.post.get({
           repo,
-          collection,
           rkey,
         });
-        const postRecord = atprotoPost.PostRecord.parse(record.value);
         await dbPost.unauthed_createPost({
-          post: postRecord,
+          post: postRecord.value,
           rkey,
           authorDid: repo,
-          cid: record.cid,
+          cid: postRecord.cid,
           offset: seq,
         });
       } else if (op.action === "delete") {
@@ -108,7 +107,7 @@ export async function POST(request: Request) {
 
         if (
           hydratedVoteRecordValue.subject.uri.collection ===
-          atprotoPost.PostCollection
+          nsids.FyiUnravelFrontpagePost
         ) {
           await unauthed_createPostVote({
             repo,

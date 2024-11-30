@@ -2,13 +2,13 @@ import "server-only";
 import { ensureUser } from "../user";
 import { atprotoCreateRecord, atprotoDeleteRecord } from "./record";
 import { z } from "zod";
-import { PostCollection } from "./post";
 import { CommentCollection } from "./comment";
 import { DID } from "./did";
 import { createAtUriParser } from "./uri";
+import { nsids } from "./repo";
 
 const VoteSubjectCollection = z.union([
-  z.literal(PostCollection),
+  z.literal(nsids.FyiUnravelFrontpagePost),
   z.literal(CommentCollection),
 ]);
 
