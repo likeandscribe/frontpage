@@ -78,10 +78,7 @@ async fn main() -> anyhow::Result<()> {
 
                                 send_frontpage_commit(&config, commit).await.or_else(|e| {
                                     log::error!("Error processing commit: {:?}", e);
-                                    store.record_dead_letter(
-                                        serde_json::to_string(commit)?,
-                                        e.to_string(),
-                                    )
+                                    store.record_dead_letter_commit(&commit, e.to_string())
                                 })?
                             }
 
@@ -93,7 +90,7 @@ async fn main() -> anyhow::Result<()> {
                 }
 
                 Ok(Err(e)) => {
-                    store.record_dead_letter("null".into(), e.to_string())?;
+                    store.record_dead_letter_jetstream_error(&e)?;
                     log::error!(
                         "Error receiving event (possible junk event structure?): {:?}",
                         e

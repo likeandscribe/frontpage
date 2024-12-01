@@ -94,16 +94,27 @@ impl Store {
             .transpose()
     }
 
-    pub fn record_dead_letter(
-        &self,
-        commit_json: String,
-        error_message: String,
-    ) -> anyhow::Result<()> {
+    fn record_dead_letter(&self, commit_json: String, error_message: String) -> anyhow::Result<()> {
         let key = self.db.generate_id()?.to_string();
         self.dead_letter_tree.insert(
             key.clone(),
             bincode::serialize(&DeadLetter::new(key, commit_json, error_message))?,
         )?;
         Ok(())
+    }
+
+    pub fn record_dead_letter_commit(
+        &self,
+        commit: &jetstream::event::CommitEvent,
+        error_message: String,
+    ) -> anyhow::Result<()> {
+        self.record_dead_letter(serde_json::to_string(commit)?, error_message)
+    }
+
+    pub fn record_dead_letter_jetstream_error(
+        &self,
+        error: &jetstream::error::JetstreamEventError,
+    ) -> anyhow::Result<()> {
+        self.record_dead_letter("null".into(), error.to_string())
     }
 }
