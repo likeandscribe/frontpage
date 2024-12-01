@@ -5,6 +5,7 @@ use serde::{Deserialize, Serialize};
 use sled::Tree;
 
 pub struct Store {
+    db: sled::Db,
     cursor_tree: Tree,
     dead_letter_tree: Tree,
 }
@@ -62,6 +63,7 @@ impl Store {
     pub fn open(path: &PathBuf) -> anyhow::Result<Store> {
         let db = sled::open(path)?;
         Ok(Self {
+            db: db.clone(),
             cursor_tree: db.open_tree("cursor")?,
             dead_letter_tree: db.open_tree("dead_letter")?,
         })
@@ -92,9 +94,16 @@ impl Store {
             .transpose()
     }
 
-    pub fn record_dead_letter(&self, dead_letter: &DeadLetter) -> anyhow::Result<()> {
-        self.dead_letter_tree
-            .insert(dead_letter.key(), bincode::serialize(&dead_letter)?)?;
+    pub fn record_dead_letter(
+        &self,
+        commit_json: String,
+        error_message: String,
+    ) -> anyhow::Result<()> {
+        let key = self.db.generate_id()?.to_string();
+        self.dead_letter_tree.insert(
+            key.clone(),
+            bincode::serialize(&DeadLetter::new(key, commit_json, error_message))?,
+        )?;
         Ok(())
     }
 }

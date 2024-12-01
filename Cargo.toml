@@ -3,5 +3,6 @@ members = [
   "packages-rs/drainpipe",
   "packages-rs/drainpipe-cli",
   "packages-rs/drainpipe-store",
+  "packages-rs/jetstream",
 ]
 resolver = "2"

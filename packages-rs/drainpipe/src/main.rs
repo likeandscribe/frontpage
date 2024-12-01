@@ -1,5 +1,4 @@
 mod config;
-mod jetstream;
 
 use chrono::{TimeZone, Utc};
 use config::Config;
@@ -79,11 +78,10 @@ async fn main() -> anyhow::Result<()> {
 
                                 send_frontpage_commit(&config, commit).await.or_else(|e| {
                                     log::error!("Error processing commit: {:?}", e);
-                                    store.record_dead_letter(&drainpipe_store::DeadLetter::new(
-                                        commit.info().time_us.to_string(),
+                                    store.record_dead_letter(
                                         serde_json::to_string(commit)?,
                                         e.to_string(),
-                                    ))
+                                    )
                                 })?
                             }
 
@@ -95,7 +93,7 @@ async fn main() -> anyhow::Result<()> {
                 }
 
                 Ok(Err(e)) => {
-                    // TODO: This should add a dead letter
+                    store.record_dead_letter("null".into(), e.to_string())?;
                     log::error!(
                         "Error receiving event (possible junk event structure?): {:?}",
                         e
