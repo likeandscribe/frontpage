@@ -51,12 +51,6 @@ impl DeadLetter {
             error_message,
         })
     }
-
-    pub fn key(&self) -> &String {
-        match &self.0 {
-            DeadLetterInner::V1 { key, .. } => key,
-        }
-    }
 }
 
 impl Store {
