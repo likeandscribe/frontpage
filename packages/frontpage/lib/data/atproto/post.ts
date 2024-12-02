@@ -22,9 +22,10 @@ export type Post = z.infer<typeof PostRecord>;
 export type PostInput = {
   title: string;
   url: string;
+  rkey: string;
 };
 
-export async function createPost({ title, url }: PostInput) {
+export async function createPost({ title, url, rkey }: PostInput) {
   const record = { title, url, createdAt: new Date().toISOString() };
   const parseResult = PostRecord.safeParse(record);
   if (!parseResult.success) {
@@ -36,6 +37,7 @@ export async function createPost({ title, url }: PostInput) {
   const result = await atprotoCreateRecord({
     record,
     collection: PostCollection,
+    rkey,
   });
 
   return {

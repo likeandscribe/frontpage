@@ -143,7 +143,7 @@ export async function handleVote({ op, repo, rkey }: HandlerInput) {
 
     switch (hydratedRecord.subject.uri.collection) {
       case atprotoPost.PostCollection:
-        const postVote = await dbVote.uncached_doesCommentVoteExist(repo, rkey);
+        const postVote = await dbVote.uncached_doesPostVoteExist(repo, rkey);
         if (!postVote) {
           const createdDbPostVote = await dbVote.createPostVote({
             repo,

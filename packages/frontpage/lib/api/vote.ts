@@ -47,6 +47,7 @@ export async function createVote({
     }
 
     const { cid } = await atproto.createVote({
+      rkey,
       subjectRkey,
       subjectCid,
       subjectCollection,
@@ -70,7 +71,7 @@ export async function deleteVote({ rkey }: db.DeleteVoteInput) {
   const user = await ensureUser();
 
   try {
-    // await db.deleteVote({ authorDid: user.did, rkey });
+    await db.deleteVote({ authorDid: user.did, rkey });
 
     await atproto.deleteVote(user.did, rkey);
   } catch (e) {

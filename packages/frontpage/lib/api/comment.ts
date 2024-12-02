@@ -38,6 +38,7 @@ export async function createComment({
       parent,
       post,
       content,
+      rkey,
     });
 
     invariant(cid, "Failed to create comment, rkey/cid missing");

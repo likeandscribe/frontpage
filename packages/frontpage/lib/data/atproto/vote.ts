@@ -33,9 +33,11 @@ export type VoteInput = {
   subjectCid: string;
   subjectCollection: string;
   subjectAuthorDid: DID;
+  rkey: string;
 };
 
 export async function createVote({
+  rkey,
   subjectRkey,
   subjectCid,
   subjectCollection,
@@ -61,6 +63,7 @@ export async function createVote({
   const response = await atprotoCreateRecord({
     collection: VoteCollection,
     record: record,
+    rkey,
   });
 
   return {

@@ -34,9 +34,15 @@ export type CommentInput = {
   parent?: { cid: string; rkey: string; authorDid: DID };
   post: { cid: string; rkey: string; authorDid: DID };
   content: string;
+  rkey: string;
 };
 
-export async function createComment({ parent, post, content }: CommentInput) {
+export async function createComment({
+  parent,
+  post,
+  content,
+  rkey,
+}: CommentInput) {
   // Collapse newlines into a single \n\n and trim whitespace
   const sanitizedContent = content.replace(/\n\n+/g, "\n\n").trim();
   const record = {
@@ -64,6 +70,7 @@ export async function createComment({ parent, post, content }: CommentInput) {
   const result = await atprotoCreateRecord({
     record,
     collection: CommentCollection,
+    rkey,
   });
 
   return {

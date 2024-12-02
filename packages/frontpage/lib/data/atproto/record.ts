@@ -14,11 +14,13 @@ const CreateRecordResponse = z.object({
 type CreateRecordInput = {
   record: unknown;
   collection: string;
+  rkey: string;
 };
 
 export async function atprotoCreateRecord({
   record,
   collection,
+  rkey,
 }: CreateRecordInput) {
   const user = await ensureUser();
   const pdsUrl = new URL(user.pdsUrl);
@@ -32,6 +34,7 @@ export async function atprotoCreateRecord({
     body: JSON.stringify({
       repo: user.did,
       collection,
+      rkey,
       validate: false,
       record: record,
     }),

@@ -32,6 +32,7 @@ export async function createPost({
     const { cid } = await atproto.createPost({
       title: title,
       url: url,
+      rkey,
     });
 
     invariant(cid, "Failed to create comment, rkey/cid missing");
