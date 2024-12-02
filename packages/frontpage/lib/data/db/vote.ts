@@ -2,8 +2,7 @@ import "server-only";
 import { getUser } from "../user";
 import { db } from "@/lib/db";
 import * as schema from "@/lib/schema";
-import * as atprotoVote from "../atproto/vote";
-import { and, eq } from "drizzle-orm";
+import { and, eq, InferSelectModel } from "drizzle-orm";
 import { cache } from "react";
 import { DID } from "../atproto/did";
 import {
@@ -185,6 +184,48 @@ export async function createCommentVote({
     return { id: insertedVote?.id };
   });
 }
+
+type UpdatePostVoteInput = Partial<
+  Omit<InferSelectModel<typeof schema.PostVote>, "id">
+> & {
+  authorDid: DID;
+  rkey: string;
+};
+
+export const updatePostVote = async (input: UpdatePostVoteInput) => {
+  const { rkey, authorDid, ...updateFields } = input;
+
+  return await db
+    .update(schema.PostVote)
+    .set(updateFields)
+    .where(
+      and(
+        eq(schema.PostVote.rkey, rkey),
+        eq(schema.PostVote.authorDid, authorDid),
+      ),
+    );
+};
+
+type UpdateCommentVoteInput = Partial<
+  Omit<InferSelectModel<typeof schema.PostVote>, "id">
+> & {
+  authorDid: DID;
+  rkey: string;
+};
+
+export const updateCommentVote = async (input: UpdateCommentVoteInput) => {
+  const { rkey, authorDid, ...updateFields } = input;
+
+  return await db
+    .update(schema.CommentVote)
+    .set(updateFields)
+    .where(
+      and(
+        eq(schema.CommentVote.rkey, rkey),
+        eq(schema.CommentVote.authorDid, authorDid),
+      ),
+    );
+};
 
 // Try deleting from both tables. In reality only one will have a record.
 // Relies on sqlite not throwing an error if the record doesn't exist.

@@ -54,6 +54,12 @@ export async function createVote({
     });
 
     invariant(cid, "Failed to create vote, cid missing");
+
+    if (subjectCollection == PostCollection) {
+      db.updatePostVote({ authorDid: user.did, rkey, cid });
+    } else if (subjectCollection == CommentCollection) {
+      db.updateCommentVote({ authorDid: user.did, rkey, cid });
+    }
   } catch (e) {
     db.deleteVote({ authorDid: user.did, rkey });
     throw new DataLayerError(`Failed to create post vote: ${e}`);
