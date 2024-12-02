@@ -6,6 +6,7 @@ import * as db from "../data/db/comment";
 import { DID } from "../data/atproto/did";
 import { createNotification } from "../data/db/notification";
 import { invariant } from "../utils";
+import { TID } from "@atproto/common-web";
 
 export type ApiCreateCommentInput = atproto.CommentInput & {
   repo: DID;
@@ -19,56 +20,51 @@ export async function createComment({
 }: ApiCreateCommentInput) {
   const user = await ensureUser();
 
+  const rkey = TID.next().toString();
   try {
-    const { rkey, cid } = await atproto.createComment({
+    const dbCreatedComment = await db.createComment({
+      cid: "",
+      authorDid: user.did,
+      rkey,
+      content,
+      createdAt: new Date(),
+      parent,
+      post,
+    });
+
+    invariant(dbCreatedComment, "Failed to insert comment in database");
+
+    const { cid } = await atproto.createComment({
       parent,
       post,
       content,
     });
 
-    invariant(rkey && cid, "Failed to create comment, rkey/cid missing");
+    invariant(cid, "Failed to create comment, rkey/cid missing");
 
-    const comment = await atproto.getComment({
-      rkey,
-      repo: user.did,
-    });
+    db.updateComment({ authorDid: user.did, rkey, cid });
 
-    invariant(
-      comment,
-      "Failed to retrieve atproto comment, database creation aborted",
-    );
-
-    const dbCreatedComment = await db.createComment({
-      cid,
-      comment,
-      repo,
-      rkey: rkey,
-    });
-
-    invariant(dbCreatedComment, "Failed to insert comment in database");
-
-    const didToNotify = dbCreatedComment.parent
-      ? dbCreatedComment.parent.authorDid
-      : dbCreatedComment.post.authordid;
+    const didToNotify = parent ? parent.authorDid : post.authorDid;
 
     if (didToNotify !== repo) {
       await createNotification({
         commentId: dbCreatedComment.id,
         did: didToNotify,
-        reason: dbCreatedComment.parent ? "commentReply" : "postComment",
+        reason: parent ? "commentReply" : "postComment",
       });
     }
   } catch (e) {
+    db.deleteComment({ authorDid: user.did, rkey });
     throw new DataLayerError(`Failed to create comment: ${e}`);
   }
 }
 
-export async function deleteComment({ rkey, repo }: db.DeleteCommentInput) {
-  await ensureUser();
+export async function deleteComment({ rkey }: db.DeleteCommentInput) {
+  const user = await ensureUser();
 
   try {
-    await atproto.deleteComment(rkey);
-    await db.deleteComment({ rkey, repo });
+    await atproto.deleteComment(user.did, rkey);
+    await db.deleteComment({ authorDid: user.did, rkey });
   } catch (e) {
     throw new DataLayerError(`Failed to delete comment: ${e}`);
   }

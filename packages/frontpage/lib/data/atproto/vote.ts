@@ -69,8 +69,9 @@ export async function createVote({
   };
 }
 
-export async function deleteVote(rkey: string) {
+export async function deleteVote(authorDid: DID, rkey: string) {
   await atprotoDeleteRecord({
+    authorDid,
     collection: VoteCollection,
     rkey,
   });

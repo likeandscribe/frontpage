@@ -25,7 +25,7 @@ export async function newPostAction(_prevState: unknown, formData: FormData) {
   }
 
   try {
-    const { rkey } = await createPost({ title, url });
+    const { rkey } = await createPost({ title, url, createdAt: new Date() });
     const handle = await getVerifiedHandle(user.did);
     redirect(`/post/${handle}/${rkey}`);
   } catch (error) {

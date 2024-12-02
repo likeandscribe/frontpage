@@ -7,6 +7,7 @@ import { PostCollection } from "../data/atproto/post";
 import { DID } from "../data/atproto/did";
 import { CommentCollection } from "../data/atproto/comment";
 import { invariant } from "../utils";
+import { TID } from "@atproto/common-web";
 
 export type ApiCreateVoteInput = {
   subjectRkey: string;
@@ -17,60 +18,55 @@ export type ApiCreateVoteInput = {
 
 export async function createVote({
   subjectRkey,
-  subjectCid,
   subjectAuthorDid,
   subjectCollection,
+  subjectCid,
 }: ApiCreateVoteInput) {
   const user = await ensureUser();
 
+  const rkey = TID.next().toString();
   try {
-    const { rkey, cid } = await atproto.createVote({
-      subjectRkey,
-      subjectCid,
-      subjectCollection,
-      subjectAuthorDid,
-    });
-
-    invariant(rkey && cid, "Failed to create vote, rkey/cid missing");
-
-    const vote = await atproto.getVote({ rkey, repo: user.did });
-
-    invariant(
-      vote,
-      "Failed to retrieve atproto vote, database creation aborted",
-    );
-
     if (subjectCollection == PostCollection) {
       const dbCreatedVote = await db.createPostVote({
         repo: user.did,
-        cid,
         rkey,
-        vote,
+        subjectRkey,
+        subjectAuthorDid,
       });
 
       invariant(dbCreatedVote, "Failed to insert post vote in database");
     } else if (subjectCollection == CommentCollection) {
       const dbCreatedVote = await db.createCommentVote({
         repo: user.did,
-        cid,
         rkey,
-        vote,
+        subjectRkey,
+        subjectAuthorDid,
       });
 
       invariant(dbCreatedVote, "Failed to insert post vote in database");
     }
+
+    const { cid } = await atproto.createVote({
+      subjectRkey,
+      subjectCid,
+      subjectCollection,
+      subjectAuthorDid,
+    });
+
+    invariant(cid, "Failed to create vote, cid missing");
   } catch (e) {
+    db.deleteVote({ authorDid: user.did, rkey });
     throw new DataLayerError(`Failed to create post vote: ${e}`);
   }
 }
 
-export async function deleteVote(rkey: string) {
+export async function deleteVote({ rkey }: db.DeleteVoteInput) {
   const user = await ensureUser();
 
   try {
-    await atproto.deleteVote(rkey);
+    await atproto.deleteVote(user.did, rkey);
 
-    await db.deleteVote(rkey, user.did);
+    await db.deleteVote({ authorDid: user.did, rkey });
   } catch (e) {
     throw new DataLayerError(`Failed to delete vote: ${e}`);
   }

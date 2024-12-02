@@ -50,7 +50,7 @@ export async function createCommentAction(
 
 export async function deleteCommentAction(rkey: string) {
   const user = await ensureUser();
-  await deleteComment({ rkey, repo: user.did });
+  await deleteComment({ rkey, authorDid: user.did });
   revalidatePath("/post");
 }
 
@@ -100,5 +100,5 @@ export async function commentUnvoteAction(commentId: number) {
     return;
   }
 
-  await deleteVote(vote.rkey);
+  await deleteVote({ authorDid: user.did, rkey: vote.rkey });
 }

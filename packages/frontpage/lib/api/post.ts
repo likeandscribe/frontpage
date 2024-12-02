@@ -5,38 +5,38 @@ import { ensureUser, getBlueskyProfile } from "../data/user";
 import { DataLayerError } from "../data/error";
 import { sendDiscordMessage } from "../discord";
 import { invariant } from "../utils";
+import { TID } from "@atproto/common-web";
 
-export interface ApiCreatePostInput extends Omit<atproto.Post, "createdAt"> {}
+export type ApiCreatePostInput = {
+  title: string;
+  url: string;
+  createdAt: Date;
+};
 
-export async function createPost({ title, url }: ApiCreatePostInput) {
+export async function createPost({
+  title,
+  url,
+  createdAt,
+}: ApiCreatePostInput) {
   const user = await ensureUser();
 
+  const rkey = TID.next().toString();
   try {
-    const { rkey, cid } = await atproto.createPost({
+    const dbCreatedPost = await db.createPost({
+      post: { title, url, createdAt },
+      rkey,
+      authorDid: user.did,
+    });
+    invariant(dbCreatedPost, "Failed to insert post in database");
+
+    const { cid } = await atproto.createPost({
       title: title,
       url: url,
     });
 
-    invariant(rkey && cid, "Failed to create post, rkey/cid missing");
+    invariant(cid, "Failed to create comment, rkey/cid missing");
 
-    const post = await atproto.getPost({
-      rkey,
-      repo: user.did,
-    });
-
-    invariant(
-      post,
-      "Failed to retrieve atproto post, database creation aborted",
-    );
-
-    const dbCreatedPost = await db.createPost({
-      post,
-      rkey,
-      authorDid: user.did,
-      cid,
-    });
-
-    invariant(dbCreatedPost, "Failed to insert post in database");
+    db.updatePost({ authorDid: user.did, rkey, cid });
 
     const bskyProfile = await getBlueskyProfile(user.did);
 
@@ -66,17 +66,18 @@ export async function createPost({ title, url }: ApiCreatePostInput) {
 
     return { rkey, cid };
   } catch (e) {
+    db.deletePost({ authorDid: user.did, rkey });
     throw new DataLayerError(`Failed to create post: ${e}`);
   }
 }
 
-export async function deletePost(rkey: string) {
+export async function deletePost({ rkey }: db.DeletePostInput) {
   const user = await ensureUser();
 
   try {
-    await atproto.deletePost(rkey);
+    await atproto.deletePost(user.did, rkey);
 
-    await db.deletePost({ rkey, authorDid: user.did });
+    await db.deletePost({ authorDid: user.did, rkey });
   } catch (e) {
     throw new DataLayerError(`Failed to delete post: ${e}`);
   }

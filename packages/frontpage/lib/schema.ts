@@ -46,7 +46,7 @@ export const Post = sqliteTable(
   {
     id: integer("id").primaryKey(),
     rkey: text("rkey").notNull(),
-    cid: text("cid").notNull().unique(),
+    cid: text("cid").notNull().default(""),
     title: text("title", {
       length: MAX_POST_TITLE_LENGTH,
     }).notNull(),
@@ -72,7 +72,7 @@ export const PostVote = sqliteTable(
       .references(() => Post.id),
     createdAt: dateIsoText("created_at").notNull(),
     authorDid: did("author_did").notNull(),
-    cid: text("cid").notNull().unique(),
+    cid: text("cid").notNull().default(""),
     rkey: text("rkey").notNull(),
   },
   (t) => ({
@@ -108,7 +108,7 @@ export const Comment = sqliteTable(
   {
     id: integer("id").primaryKey(),
     rkey: text("rkey").notNull(),
-    cid: text("cid").notNull().unique(),
+    cid: text("cid").notNull().default(""),
     postId: integer("post_id")
       .notNull()
       .references(() => Post.id),
@@ -159,7 +159,7 @@ export const CommentVote = sqliteTable(
       .references(() => Comment.id),
     createdAt: dateIsoText("created_at").notNull(),
     authorDid: did("author_did").notNull(),
-    cid: text("cid").notNull().unique(),
+    cid: text("cid").notNull().default(""),
     rkey: text("rkey").notNull(),
   },
   (t) => ({

@@ -44,10 +44,11 @@ export async function createPost({ title, url }: PostInput) {
   };
 }
 
-export async function deletePost(rkey: string) {
+export async function deletePost(authorDid: DID, rkey: string) {
   await atprotoDeleteRecord({
-    rkey,
+    authorDid,
     collection: PostCollection,
+    rkey,
   });
 }
 

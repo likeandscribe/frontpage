@@ -2,7 +2,7 @@ import "server-only";
 
 import { cache } from "react";
 import { db } from "@/lib/db";
-import { eq, sql, desc, and, isNull, or } from "drizzle-orm";
+import { eq, sql, desc, and, isNull, or, InferSelectModel } from "drizzle-orm";
 import * as schema from "@/lib/schema";
 import { getUser, isAdmin } from "../user";
 import * as atprotoPost from "../atproto/post";
@@ -70,7 +70,7 @@ export const getFrontpagePosts = cache(async (offset: number) => {
   const posts = rows.map((row) => ({
     id: row.id,
     rkey: row.rkey,
-    cid: row.cid,
+    cid: row.cid!,
     title: row.title,
     url: row.url,
     createdAt: row.createdAt,
@@ -164,16 +164,16 @@ export async function uncached_doesPostExist(authorDid: DID, rkey: string) {
 }
 
 export type CreatePostInput = {
-  post: atprotoPost.Post;
+  post: { title: string; url: string; createdAt: Date };
   authorDid: DID;
   rkey: string;
-  cid: string;
+  cid?: string;
 };
 
 export async function createPost({
   post,
-  rkey,
   authorDid,
+  rkey,
   cid,
 }: CreatePostInput) {
   return await db.transaction(async (tx) => {
@@ -181,11 +181,11 @@ export async function createPost({
       .insert(schema.Post)
       .values({
         rkey,
-        cid,
+        cid: cid ?? "",
         authorDid,
         title: post.title,
         url: post.url,
-        createdAt: new Date(post.createdAt),
+        createdAt: post.createdAt,
       })
       .returning({ postId: schema.Post.id });
 
@@ -201,12 +201,29 @@ export async function createPost({
   });
 }
 
-export type DeletePostInput = {
-  rkey: string;
+type UpdatePostInput = Partial<
+  Omit<InferSelectModel<typeof schema.Post>, "id">
+> & {
   authorDid: DID;
+  rkey: string;
 };
 
-export async function deletePost({ rkey, authorDid }: DeletePostInput) {
+export const updatePost = async (input: UpdatePostInput) => {
+  const { rkey, authorDid, ...updateFields } = input;
+  await db
+    .update(schema.Post)
+    .set(updateFields)
+    .where(
+      and(eq(schema.Post.rkey, rkey), eq(schema.Post.authorDid, authorDid)),
+    );
+};
+
+export type DeletePostInput = {
+  authorDid: DID;
+  rkey: string;
+};
+
+export async function deletePost({ authorDid, rkey }: DeletePostInput) {
   console.log("Deleting post", rkey);
   await db.transaction(async (tx) => {
     console.log("Updating post status to deleted", rkey);

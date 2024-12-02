@@ -65,14 +65,14 @@ export async function PostCard({
           }}
           unvoteAction={async () => {
             "use server";
-            await ensureUser();
+            const user = await ensureUser();
             const vote = await getVoteForPost(id);
             if (!vote) {
               // TODO: Show error notification
               console.error("Vote not found for post", id);
               return;
             }
-            await deleteVote(vote.rkey);
+            await deleteVote({ authorDid: user.did, rkey: vote.rkey });
           }}
           initialState={
             (await getUser())?.did === author
@@ -148,8 +148,8 @@ export async function PostCard({
 
 export async function deletePostAction(rkey: string) {
   "use server";
-  await ensureUser();
-  await deletePost(rkey);
+  const user = await ensureUser();
+  await deletePost({ authorDid: user.did, rkey });
 
   revalidatePath("/");
 }

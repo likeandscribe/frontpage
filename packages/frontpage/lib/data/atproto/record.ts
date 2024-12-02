@@ -4,6 +4,7 @@ import { ensureUser } from "../user";
 import { DataLayerError } from "../error";
 import { fetchAuthenticatedAtproto } from "@/lib/auth";
 import { AtUri } from "./uri";
+import { DID } from "./did";
 
 const CreateRecordResponse = z.object({
   uri: AtUri,
@@ -46,15 +47,22 @@ export async function atprotoCreateRecord({
 }
 
 type DeleteRecordInput = {
+  authorDid: DID;
   collection: string;
   rkey: string;
 };
 
 export async function atprotoDeleteRecord({
+  authorDid,
   collection,
   rkey,
 }: DeleteRecordInput) {
   const user = await ensureUser();
+
+  if (user.did !== authorDid) {
+    throw new DataLayerError("User does not own record");
+  }
+
   const pdsUrl = new URL(user.pdsUrl);
   pdsUrl.pathname = "/xrpc/com.atproto.repo.deleteRecord";
 

@@ -72,8 +72,9 @@ export async function createComment({ parent, post, content }: CommentInput) {
   };
 }
 
-export async function deleteComment(rkey: string) {
+export async function deleteComment(authorDid: DID, rkey: string) {
   await atprotoDeleteRecord({
+    authorDid,
     rkey,
     collection: CommentCollection,
   });

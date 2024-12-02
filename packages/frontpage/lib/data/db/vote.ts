@@ -12,7 +12,7 @@ import {
   newCommentVoteAggregateTrigger,
   newPostVoteAggregateTrigger,
 } from "./triggers";
-import { atUriToString } from "../atproto/uri";
+import { invariant } from "@/lib/utils";
 
 export const getVoteForPost = cache(async (postId: number) => {
   const user = await getUser();
@@ -35,7 +35,6 @@ export const getVoteForPost = cache(async (postId: number) => {
 export const uncached_doesPostVoteExist = async (
   authorDid: DID,
   rkey: string,
-  cid: string,
 ) => {
   const row = await db
     .select({ id: schema.PostVote.id })
@@ -44,17 +43,16 @@ export const uncached_doesPostVoteExist = async (
       and(
         eq(schema.PostVote.authorDid, authorDid),
         eq(schema.PostVote.rkey, rkey),
-        eq(schema.PostVote.cid, cid),
       ),
     )
     .limit(1);
 
   return Boolean(row[0]);
 };
+
 export const uncached_doesCommentVoteExist = async (
   authorDid: DID,
   rkey: string,
-  cid: string,
 ) => {
   const row = await db
     .select({ id: schema.CommentVote.id })
@@ -63,7 +61,6 @@ export const uncached_doesCommentVoteExist = async (
       and(
         eq(schema.CommentVote.authorDid, authorDid),
         eq(schema.CommentVote.rkey, rkey),
-        eq(schema.CommentVote.cid, cid),
       ),
     )
     .limit(1);
@@ -90,41 +87,44 @@ export const getVoteForComment = cache(
 
 export type CreateVoteInput = {
   repo: DID;
-  cid: string;
   rkey: string;
-  vote: atprotoVote.Vote;
+  cid?: string;
+  subjectRkey: string;
+  subjectAuthorDid: DID;
 };
 
 export const createPostVote = async ({
   repo,
-  cid,
   rkey,
-  vote,
+  cid,
+  subjectRkey,
+  subjectAuthorDid,
 }: CreateVoteInput) => {
   return await db.transaction(async (tx) => {
-    const subject = (
+    const post = (
       await tx
         .select()
         .from(schema.Post)
-        .where(eq(schema.Post.rkey, vote.subject.uri.rkey))
+        .where(
+          and(
+            eq(schema.Post.rkey, subjectRkey),
+            eq(schema.Post.authorDid, subjectAuthorDid),
+          ),
+        )
     )[0];
 
-    if (!subject) {
-      throw new Error(
-        `Subject not found with uri: ${atUriToString(vote.subject.uri)}`,
-      );
-    }
+    invariant(post, `Post not found with rkey: ${subjectRkey}`);
 
-    if (subject.authorDid === repo) {
+    if (post.authorDid === repo) {
       throw new Error(`[naughty] Cannot vote on own content ${repo}`);
     }
     const [insertedVote] = await tx
       .insert(schema.PostVote)
       .values({
-        postId: subject.id,
+        postId: post.id,
         authorDid: repo,
-        createdAt: new Date(vote.createdAt),
-        cid,
+        createdAt: new Date(),
+        cid: cid ?? "",
         rkey,
       })
       .returning({ id: schema.PostVote.id });
@@ -133,7 +133,7 @@ export const createPostVote = async ({
       throw new Error("Failed to insert vote");
     }
 
-    await newPostVoteAggregateTrigger(subject.id, tx);
+    await newPostVoteAggregateTrigger(post.id, tx);
 
     return { id: insertedVote?.id };
   });
@@ -142,34 +142,36 @@ export const createPostVote = async ({
 export async function createCommentVote({
   repo,
   rkey,
-  vote,
   cid,
+  subjectRkey,
+  subjectAuthorDid,
 }: CreateVoteInput) {
   return await db.transaction(async (tx) => {
-    const subject = (
+    const comment = (
       await tx
         .select()
         .from(schema.Comment)
-        .where(eq(schema.Comment.rkey, vote.subject.uri.rkey))
+        .where(
+          and(
+            eq(schema.Comment.rkey, subjectRkey),
+            eq(schema.Comment.authorDid, subjectAuthorDid),
+          ),
+        )
     )[0];
 
-    if (!subject) {
-      throw new Error(
-        `Subject not found with uri: ${atUriToString(vote.subject.uri)}`,
-      );
-    }
+    invariant(comment, `Comment not found with rkey: ${subjectRkey}`);
 
-    if (subject.authorDid === repo) {
+    if (comment.authorDid === repo) {
       throw new Error(`[naughty] Cannot vote on own content ${repo}`);
     }
 
     const [insertedVote] = await tx
       .insert(schema.CommentVote)
       .values({
-        commentId: subject.id,
+        commentId: comment.id,
         authorDid: repo,
-        createdAt: new Date(vote.createdAt),
-        cid,
+        createdAt: new Date(),
+        cid: cid ?? "",
         rkey,
       })
       .returning({ id: schema.CommentVote.id });
@@ -178,7 +180,7 @@ export async function createCommentVote({
       throw new Error("Failed to insert vote");
     }
 
-    await newCommentVoteAggregateTrigger(subject.postId, subject.id, tx);
+    await newCommentVoteAggregateTrigger(comment.postId, comment.id, tx);
 
     return { id: insertedVote?.id };
   });
@@ -186,14 +188,19 @@ export async function createCommentVote({
 
 // Try deleting from both tables. In reality only one will have a record.
 // Relies on sqlite not throwing an error if the record doesn't exist.
-export const deleteVote = async (rkey: string, repo: DID) => {
+export type DeleteVoteInput = {
+  authorDid: DID;
+  rkey: string;
+};
+
+export const deleteVote = async ({ authorDid, rkey }: DeleteVoteInput) => {
   await db.transaction(async (tx) => {
     const [deletedCommentVoteRow] = await tx
       .delete(schema.CommentVote)
       .where(
         and(
           eq(schema.CommentVote.rkey, rkey),
-          eq(schema.CommentVote.authorDid, repo),
+          eq(schema.CommentVote.authorDid, authorDid),
         ),
       )
       .returning({
@@ -205,7 +212,7 @@ export const deleteVote = async (rkey: string, repo: DID) => {
       .where(
         and(
           eq(schema.PostVote.rkey, rkey),
-          eq(schema.PostVote.authorDid, repo),
+          eq(schema.PostVote.authorDid, authorDid),
         ),
       )
       .returning({ postId: schema.PostVote.postId });

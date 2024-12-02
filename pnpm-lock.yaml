@@ -98,7 +98,7 @@ importers:
         version: 4.3.2(typescript@5.5.2)(vite@5.3.5(@types/node@20.13.0)(terser@5.34.1))
       vitest:
         specifier: ^2.0.4
-        version: 2.0.4(@types/node@20.13.0)(jsdom@24.1.1(bufferutil@4.0.8)(utf-8-validate@6.0.3))(terser@5.34.1)
+        version: 2.0.4(@types/node@20.13.0)(jsdom@24.1.1)(terser@5.34.1)
 
   packages/eslint-config:
     devDependencies:
@@ -126,6 +126,9 @@ importers:
 
   packages/frontpage:
     dependencies:
+      '@atproto/common-web':
+        specifier: ^0.3.1
+        version: 0.3.1
       '@atproto/oauth-types':
         specifier: ^0.1.2
         version: 0.1.2
@@ -300,7 +303,7 @@ importers:
         version: 4.3.2(typescript@5.4.5)(vite@5.3.5(@types/node@20.13.0)(terser@5.34.1))
       vitest:
         specifier: ^2.0.4
-        version: 2.0.4(@types/node@20.13.0)(jsdom@24.1.1(bufferutil@4.0.8)(utf-8-validate@6.0.3))(terser@5.34.1)
+        version: 2.0.4(@types/node@20.13.0)(jsdom@24.1.1)(terser@5.34.1)
 
   packages/frontpage-atproto-client:
     dependencies:
@@ -408,9 +411,6 @@ packages:
   '@ampproject/remapping@2.3.0':
     resolution: {integrity: sha512-30iZtAPgz+LTIYoeivqYo853f02jBYSd5uGnGpkFV0M3xOt9aN73erkgYAmZU43x4VfqcnLxW9Kpg3R5LC4YYw==}
     engines: {node: '>=6.0.0'}
-
-  '@atproto/common-web@0.3.0':
-    resolution: {integrity: sha512-67VnV6JJyX+ZWyjV7xFQMypAgDmjVaR9ZCuU/QW+mqlqI7fex2uL4Fv+7/jHadgzhuJHVd6OHOvNn0wR5WZYtA==}
 
   '@atproto/common-web@0.3.1':
     resolution: {integrity: sha512-N7wiTnus5vAr+lT//0y8m/FaHHLJ9LpGuEwkwDAeV3LCiPif4m/FS8x/QOYrx1PdZQwKso95RAPzCGWQBH5j6Q==}
@@ -5950,13 +5950,6 @@ snapshots:
       '@jridgewell/gen-mapping': 0.3.5
       '@jridgewell/trace-mapping': 0.3.25
 
-  '@atproto/common-web@0.3.0':
-    dependencies:
-      graphemer: 1.4.0
-      multiformats: 9.9.0
-      uint8arrays: 3.0.0
-      zod: 3.23.8
-
   '@atproto/common-web@0.3.1':
     dependencies:
       graphemer: 1.4.0
@@ -5966,7 +5959,7 @@ snapshots:
 
   '@atproto/common@0.4.1':
     dependencies:
-      '@atproto/common-web': 0.3.0
+      '@atproto/common-web': 0.3.1
       '@ipld/dag-cbor': 7.0.3
       cbor-x: 1.5.9
       iso-datestring-validator: 2.2.2
@@ -5985,7 +5978,7 @@ snapshots:
 
   '@atproto/identity@0.4.1':
     dependencies:
-      '@atproto/common-web': 0.3.0
+      '@atproto/common-web': 0.3.1
       '@atproto/crypto': 0.4.1
       axios: 0.27.2
     transitivePeerDependencies:
@@ -6023,7 +6016,7 @@ snapshots:
   '@atproto/repo@0.4.3':
     dependencies:
       '@atproto/common': 0.4.1
-      '@atproto/common-web': 0.3.0
+      '@atproto/common-web': 0.3.1
       '@atproto/crypto': 0.4.1
       '@atproto/lexicon': 0.4.2
       '@ipld/car': 3.2.4
@@ -9770,7 +9763,7 @@ snapshots:
       eslint: 8.57.0
     optionalDependencies:
       '@typescript-eslint/eslint-plugin': 7.14.1(@typescript-eslint/parser@7.14.1(eslint@8.57.0)(typescript@5.5.2))(eslint@8.57.0)(typescript@5.5.2)
-      vitest: 2.0.4(@types/node@20.13.0)(jsdom@24.1.1(bufferutil@4.0.8)(utf-8-validate@6.0.3))(terser@5.34.1)
+      vitest: 2.0.4(@types/node@20.13.0)(jsdom@24.1.1)(terser@5.34.1)
     transitivePeerDependencies:
       - supports-color
       - typescript
@@ -11954,7 +11947,7 @@ snapshots:
       fsevents: 2.3.3
       terser: 5.34.1
 
-  vitest@2.0.4(@types/node@20.13.0)(jsdom@24.1.1(bufferutil@4.0.8)(utf-8-validate@6.0.3))(terser@5.34.1):
+  vitest@2.0.4(@types/node@20.13.0)(jsdom@24.1.1)(terser@5.34.1):
     dependencies:
       '@ampproject/remapping': 2.3.0
       '@vitest/expect': 2.0.4
