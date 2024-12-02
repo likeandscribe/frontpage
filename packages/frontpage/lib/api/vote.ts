@@ -56,9 +56,9 @@ export async function createVote({
     invariant(cid, "Failed to create vote, cid missing");
 
     if (subjectCollection == PostCollection) {
-      db.updatePostVote({ authorDid: user.did, rkey, cid });
+      await db.updatePostVote({ authorDid: user.did, rkey, cid });
     } else if (subjectCollection == CommentCollection) {
-      db.updateCommentVote({ authorDid: user.did, rkey, cid });
+      await db.updateCommentVote({ authorDid: user.did, rkey, cid });
     }
   } catch (e) {
     db.deleteVote({ authorDid: user.did, rkey });
@@ -70,9 +70,9 @@ export async function deleteVote({ rkey }: db.DeleteVoteInput) {
   const user = await ensureUser();
 
   try {
-    await atproto.deleteVote(user.did, rkey);
+    // await db.deleteVote({ authorDid: user.did, rkey });
 
-    await db.deleteVote({ authorDid: user.did, rkey });
+    await atproto.deleteVote(user.did, rkey);
   } catch (e) {
     throw new DataLayerError(`Failed to delete vote: ${e}`);
   }

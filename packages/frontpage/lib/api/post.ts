@@ -36,7 +36,7 @@ export async function createPost({
 
     invariant(cid, "Failed to create comment, rkey/cid missing");
 
-    db.updatePost({ authorDid: user.did, rkey, cid });
+    await db.updatePost({ authorDid: user.did, rkey, cid });
 
     const bskyProfile = await getBlueskyProfile(user.did);
 
@@ -75,9 +75,8 @@ export async function deletePost({ rkey }: db.DeletePostInput) {
   const user = await ensureUser();
 
   try {
-    await atproto.deletePost(user.did, rkey);
-
     await db.deletePost({ authorDid: user.did, rkey });
+    await atproto.deletePost(user.did, rkey);
   } catch (e) {
     throw new DataLayerError(`Failed to delete post: ${e}`);
   }

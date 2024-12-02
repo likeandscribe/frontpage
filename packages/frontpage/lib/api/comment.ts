@@ -42,7 +42,7 @@ export async function createComment({
 
     invariant(cid, "Failed to create comment, rkey/cid missing");
 
-    db.updateComment({ authorDid: user.did, rkey, cid });
+    await db.updateComment({ authorDid: user.did, rkey, cid });
 
     const didToNotify = parent ? parent.authorDid : post.authorDid;
 
@@ -63,8 +63,9 @@ export async function deleteComment({ rkey }: db.DeleteCommentInput) {
   const user = await ensureUser();
 
   try {
-    await atproto.deleteComment(user.did, rkey);
+    console.log("deleteComment", rkey);
     await db.deleteComment({ authorDid: user.did, rkey });
+    await atproto.deleteComment(user.did, rkey);
   } catch (e) {
     throw new DataLayerError(`Failed to delete comment: ${e}`);
   }
