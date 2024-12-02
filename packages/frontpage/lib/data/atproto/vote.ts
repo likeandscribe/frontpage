@@ -29,26 +29,22 @@ export const VoteRecord = z.object({
 export type Vote = z.infer<typeof VoteRecord>;
 
 export type VoteInput = {
-  subjectRkey: string;
-  subjectCid: string;
-  subjectCollection: string;
-  subjectAuthorDid: DID;
   rkey: string;
+  subject: {
+    rkey: string;
+    cid: string;
+    authorDid: DID;
+    collection: typeof PostCollection | typeof CommentCollection;
+  };
 };
 
-export async function createVote({
-  rkey,
-  subjectRkey,
-  subjectCid,
-  subjectCollection,
-  subjectAuthorDid,
-}: VoteInput) {
-  const uri = `at://${subjectAuthorDid}/${subjectCollection}/${subjectRkey}`;
+export async function createVote({ rkey, subject }: VoteInput) {
+  const uri = `at://${subject.authorDid}/${subject.collection}/${subject.rkey}`;
 
   const record = {
     createdAt: new Date().toISOString(),
     subject: {
-      cid: subjectCid,
+      cid: subject.cid,
       uri,
     },
   };

@@ -67,7 +67,7 @@ export async function createPost({
 
     return { rkey, cid };
   } catch (e) {
-    db.deletePost({ authorDid: user.did, rkey });
+    await db.deletePost({ authorDid: user.did, rkey });
     throw new DataLayerError(`Failed to create post: ${e}`);
   }
 }

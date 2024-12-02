@@ -10,37 +10,38 @@ import { invariant } from "../utils";
 import { TID } from "@atproto/common-web";
 
 export type ApiCreateVoteInput = {
-  subjectRkey: string;
-  subjectCid: string;
-  subjectAuthorDid: DID;
-  subjectCollection: typeof PostCollection | typeof CommentCollection;
+  subject: {
+    rkey: string;
+    cid: string;
+    authorDid: DID;
+    collection: typeof PostCollection | typeof CommentCollection;
+  };
 };
 
-export async function createVote({
-  subjectRkey,
-  subjectAuthorDid,
-  subjectCollection,
-  subjectCid,
-}: ApiCreateVoteInput) {
+export async function createVote({ subject }: ApiCreateVoteInput) {
   const user = await ensureUser();
 
   const rkey = TID.next().toString();
   try {
-    if (subjectCollection == PostCollection) {
+    if (subject.collection == PostCollection) {
       const dbCreatedVote = await db.createPostVote({
         repo: user.did,
         rkey,
-        subjectRkey,
-        subjectAuthorDid,
+        subject: {
+          rkey: subject.rkey,
+          authorDid: subject.authorDid,
+        },
       });
 
       invariant(dbCreatedVote, "Failed to insert post vote in database");
-    } else if (subjectCollection == CommentCollection) {
+    } else if (subject.collection == CommentCollection) {
       const dbCreatedVote = await db.createCommentVote({
         repo: user.did,
         rkey,
-        subjectRkey,
-        subjectAuthorDid,
+        subject: {
+          rkey: subject.rkey,
+          authorDid: subject.authorDid,
+        },
       });
 
       invariant(dbCreatedVote, "Failed to insert post vote in database");
@@ -48,21 +49,18 @@ export async function createVote({
 
     const { cid } = await atproto.createVote({
       rkey,
-      subjectRkey,
-      subjectCid,
-      subjectCollection,
-      subjectAuthorDid,
+      subject,
     });
 
     invariant(cid, "Failed to create vote, cid missing");
 
-    if (subjectCollection == PostCollection) {
+    if (subject.collection == PostCollection) {
       await db.updatePostVote({ authorDid: user.did, rkey, cid });
-    } else if (subjectCollection == CommentCollection) {
+    } else if (subject.collection == CommentCollection) {
       await db.updateCommentVote({ authorDid: user.did, rkey, cid });
     }
   } catch (e) {
-    db.deleteVote({ authorDid: user.did, rkey });
+    await db.deleteVote({ authorDid: user.did, rkey });
     throw new DataLayerError(`Failed to create post vote: ${e}`);
   }
 }

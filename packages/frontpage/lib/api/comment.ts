@@ -8,7 +8,7 @@ import { createNotification } from "../data/db/notification";
 import { invariant } from "../utils";
 import { TID } from "@atproto/common-web";
 
-export type ApiCreateCommentInput = atproto.CommentInput & {
+export type ApiCreateCommentInput = Omit<atproto.CommentInput, "rkey"> & {
   repo: DID;
 };
 
@@ -55,7 +55,7 @@ export async function createComment({
       });
     }
   } catch (e) {
-    db.deleteComment({ authorDid: user.did, rkey });
+    await db.deleteComment({ authorDid: user.did, rkey });
     throw new DataLayerError(`Failed to create comment: ${e}`);
   }
 }

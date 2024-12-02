@@ -5,7 +5,6 @@ import { db } from "@/lib/db";
 import { eq, sql, desc, and, isNull, or, InferSelectModel } from "drizzle-orm";
 import * as schema from "@/lib/schema";
 import { getUser, isAdmin } from "../user";
-import * as atprotoPost from "../atproto/post";
 import { DID } from "../atproto/did";
 import { newPostAggregateTrigger } from "./triggers";
 

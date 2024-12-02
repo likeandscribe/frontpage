@@ -88,16 +88,17 @@ export type CreateVoteInput = {
   repo: DID;
   rkey: string;
   cid?: string;
-  subjectRkey: string;
-  subjectAuthorDid: DID;
+  subject: {
+    rkey: string;
+    authorDid: DID;
+  };
 };
 
 export const createPostVote = async ({
   repo,
   rkey,
   cid,
-  subjectRkey,
-  subjectAuthorDid,
+  subject,
 }: CreateVoteInput) => {
   return await db.transaction(async (tx) => {
     const post = (
@@ -106,13 +107,13 @@ export const createPostVote = async ({
         .from(schema.Post)
         .where(
           and(
-            eq(schema.Post.rkey, subjectRkey),
-            eq(schema.Post.authorDid, subjectAuthorDid),
+            eq(schema.Post.rkey, subject.rkey),
+            eq(schema.Post.authorDid, subject.authorDid),
           ),
         )
     )[0];
 
-    invariant(post, `Post not found with rkey: ${subjectRkey}`);
+    invariant(post, `Post not found with rkey: ${subject.rkey}`);
 
     if (post.authorDid === repo) {
       throw new Error(`[naughty] Cannot vote on own content ${repo}`);
@@ -142,8 +143,7 @@ export async function createCommentVote({
   repo,
   rkey,
   cid,
-  subjectRkey,
-  subjectAuthorDid,
+  subject,
 }: CreateVoteInput) {
   return await db.transaction(async (tx) => {
     const comment = (
@@ -152,13 +152,13 @@ export async function createCommentVote({
         .from(schema.Comment)
         .where(
           and(
-            eq(schema.Comment.rkey, subjectRkey),
-            eq(schema.Comment.authorDid, subjectAuthorDid),
+            eq(schema.Comment.rkey, subject.rkey),
+            eq(schema.Comment.authorDid, subject.authorDid),
           ),
         )
     )[0];
 
-    invariant(comment, `Comment not found with rkey: ${subjectRkey}`);
+    invariant(comment, `Comment not found with rkey: ${subject.rkey}`);
 
     if (comment.authorDid === repo) {
       throw new Error(`[naughty] Cannot vote on own content ${repo}`);

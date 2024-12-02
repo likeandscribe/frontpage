@@ -57,10 +57,12 @@ export async function PostCard({
             "use server";
             await ensureUser();
             await createVote({
-              subjectRkey: rkey,
-              subjectCid: cid,
-              subjectAuthorDid: author,
-              subjectCollection: PostCollection,
+              subject: {
+                rkey,
+                cid,
+                authorDid: author,
+                collection: PostCollection,
+              },
             });
           }}
           unvoteAction={async () => {

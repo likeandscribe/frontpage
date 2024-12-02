@@ -85,10 +85,12 @@ export async function commentVoteAction(input: {
 }) {
   await ensureUser();
   await createVote({
-    subjectAuthorDid: input.authorDid,
-    subjectCid: input.cid,
-    subjectRkey: input.rkey,
-    subjectCollection: CommentCollection,
+    subject: {
+      rkey: input.rkey,
+      cid: input.cid,
+      authorDid: input.authorDid,
+      collection: CommentCollection,
+    },
   });
 }
 

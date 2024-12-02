@@ -149,8 +149,10 @@ export async function handleVote({ op, repo, rkey }: HandlerInput) {
             repo,
             rkey,
             cid: hydratedRecord.cid,
-            subjectRkey: hydratedRecord.subject.uri.rkey,
-            subjectAuthorDid: hydratedRecord.subject.uri.authority as DID,
+            subject: {
+              rkey: hydratedRecord.subject.uri.rkey,
+              authorDid: hydratedRecord.subject.uri.authority as DID,
+            },
           });
 
           if (!createdDbPostVote) {
@@ -170,8 +172,10 @@ export async function handleVote({ op, repo, rkey }: HandlerInput) {
             repo,
             rkey,
             cid: hydratedRecord.cid,
-            subjectRkey: hydratedRecord.subject.uri.rkey,
-            subjectAuthorDid: hydratedRecord.subject.uri.authority as DID,
+            subject: {
+              rkey: hydratedRecord.subject.uri.rkey,
+              authorDid: hydratedRecord.subject.uri.authority as DID,
+            },
           });
 
           if (!createdDbCommentVote) {
