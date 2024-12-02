@@ -5,11 +5,10 @@ import Link from "@/lib/link";
 import { SWRConfig } from "swr";
 import { CollectionItems } from "../../_lib/collection";
 
-export default async function CollectionPage({
-  params,
-}: {
-  params: { identifier: string; collection: string };
+export default async function CollectionPage(props: {
+  params: Promise<{ identifier: string; collection: string }>;
 }) {
+  const params = await props.params;
   const identityResult = await resolveIdentity(params.identifier);
   if (!identityResult.success) {
     return <div>{identityResult.error}</div>;

@@ -11,11 +11,10 @@ import { getPds } from "@atproto/identity";
 import { describeRepo } from "@/lib/atproto";
 import { isDidWeb } from "@atproto/did";
 
-export default async function IdentifierPage({
-  params,
-}: {
-  params: { identifier: string };
+export default async function IdentifierPage(props: {
+  params: Promise<{ identifier: string }>;
 }) {
+  const params = await props.params;
   const identityResult = await resolveIdentity(params.identifier);
   if (!identityResult.success) {
     return <div>{identityResult.error}</div>;

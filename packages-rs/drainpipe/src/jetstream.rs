@@ -59,10 +59,10 @@ const MAX_WANTED_DIDS: usize = 10_000;
 const JETSTREAM_ZSTD_DICTIONARY: &[u8] = include_bytes!("../zstd_dictionary");
 
 /// A receiver channel for consuming Jetstream events.
-pub type JetstreamReceiver = flume::Receiver<JetstreamEvent>;
+pub type JetstreamReceiver = flume::Receiver<Result<JetstreamEvent, JetstreamEventError>>;
 
 /// An internal sender channel for sending Jetstream events to [JetstreamReceiver]'s.
-type JetstreamSender = flume::Sender<JetstreamEvent>;
+type JetstreamSender = flume::Sender<Result<JetstreamEvent, JetstreamEventError>>;
 
 /// A wrapper connector type for working with a WebSocket connection to a Jetstream instance to
 /// receive and consume events. See [JetstreamConnector::connect] for more info.
@@ -242,50 +242,43 @@ async fn websocket_task(
                 return Err(JetstreamEventError::WebSocketCloseFailure);
             }
 
-            Some(Ok(Message::Text(json))) => {
-                let event = serde_json::from_str::<JetstreamEvent>(&json)
-                    .map_err(JetstreamEventError::ReceivedMalformedJSON)?;
+            Some(message) => {
+                send_channel.send(decode_message(message, &dictionary)).map_err(|e| {
+                    log::error!("All receivers for the Jetstream connection have been dropped, closing connection. {:?}", e);
 
-                if let Err(e) = send_channel.send(event) {
-                    // We can assume that all receivers have been dropped, so we can close the
-                    // connection and exit the task.
-                    log::info!(
-                      "All receivers for the Jetstream connection have been dropped, closing connection. {:?}", e
-                    );
-                    return Ok(());
-                }
-            }
-
-            Some(Ok(Message::Binary(zstd_json))) => {
-                let mut cursor = Cursor::new(zstd_json);
-                let mut decoder =
-                    zstd::stream::Decoder::with_prepared_dictionary(&mut cursor, &dictionary)
-                        .map_err(JetstreamEventError::CompressionDictionaryError)?;
-
-                let mut json = String::new();
-                decoder
-                    .read_to_string(&mut json)
-                    .map_err(JetstreamEventError::CompressionDecoderError)?;
-
-                let event = serde_json::from_str::<JetstreamEvent>(&json)
-                    .map_err(JetstreamEventError::ReceivedMalformedJSON)?;
-
-                if let Err(e) = send_channel.send(event) {
-                    // We can assume that all receivers have been dropped, so we can close the
-                    // connection and exit the task.
-                    log::info!(
-                      "All receivers for the Jetstream connection have been dropped, closing connection... {:?}", e
-                    );
-                    return Ok(());
-                }
-            }
-
-            unexpected => {
-                log::error!(
-                    "Received an unexpected message type from Jetstream: {:?}",
-                    unexpected
-                );
+                    JetstreamEventError::WebSocketCloseFailure
+                })?;
             }
         }
     }
+}
+
+fn decode_message(
+    message: Result<Message, tokio_tungstenite::tungstenite::Error>,
+    dictionary: &DecoderDictionary<'_>,
+) -> Result<JetstreamEvent, JetstreamEventError> {
+    let json = match message {
+        Ok(Message::Text(json)) => json,
+
+        Ok(Message::Binary(zstd_json)) => {
+            let mut cursor = Cursor::new(zstd_json);
+            let mut decoder =
+                zstd::stream::Decoder::with_prepared_dictionary(&mut cursor, &dictionary)
+                    .map_err(JetstreamEventError::CompressionDictionaryError)?;
+
+            let mut json = String::new();
+            decoder
+                .read_to_string(&mut json)
+                .map_err(JetstreamEventError::CompressionDecoderError)?;
+
+            json
+        }
+
+        Ok(msg) => Err(JetstreamEventError::UnexpectedEvent(msg))?,
+
+        Err(e) => Err(JetstreamEventError::WebsocketReceiveFailure(e))?,
+    };
+
+    serde_json::from_str::<JetstreamEvent>(&json)
+        .map_err(|e| JetstreamEventError::ReceivedMalformedJSON { error: e, json })
 }

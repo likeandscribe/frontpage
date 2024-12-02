@@ -2,14 +2,13 @@ import { resolveIdentity } from "@/lib/atproto-server";
 import { getPds } from "@atproto/identity";
 import { CSSProperties, ReactNode } from "react";
 
-export default async function BlobPage({
-  params,
-}: {
-  params: {
+export default async function BlobPage(props: {
+  params: Promise<{
     identifier: string;
     cid: string;
-  };
+  }>;
 }) {
+  const params = await props.params;
   const identityResult = await resolveIdentity(params.identifier);
   if (!identityResult.success) {
     return <p>{identityResult.error}</p>;
