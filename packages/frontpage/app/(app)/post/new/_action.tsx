@@ -1,9 +1,11 @@
 "use server";
 
+import { TextLink } from "@/lib/components/ui/typography";
 import { DID } from "@/lib/data/atproto/did";
 import { getVerifiedHandle } from "@/lib/data/atproto/identity";
 import { createPost } from "@/lib/data/atproto/post";
 import { uncached_doesPostExist } from "@/lib/data/db/post";
+import { isBanned } from "@/lib/data/db/user";
 import { DataLayerError } from "@/lib/data/error";
 import { ensureUser } from "@/lib/data/user";
 import { redirect } from "next/navigation";
@@ -24,6 +26,17 @@ export async function newPostAction(_prevState: unknown, formData: FormData) {
 
   if (!URL.canParse(url)) {
     return { error: "Invalid URL" };
+  }
+
+  if (await isBanned(user.did)) {
+    return {
+      error: (
+        <>
+          Your account is currently banned from creating new posts.{" "}
+          <TextLink href="/about#contact">Contact us</TextLink> to appeal.
+        </>
+      ),
+    };
   }
 
   try {

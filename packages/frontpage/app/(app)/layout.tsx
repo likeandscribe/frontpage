@@ -23,6 +23,7 @@ import { FRONTPAGE_ATPROTO_HANDLE } from "@/lib/constants";
 import { cookies } from "next/headers";
 import { revalidatePath } from "next/cache";
 import { NotificationIndicator } from "./_components/notification-indicator";
+import { TextLink } from "@/lib/components/ui/typography";
 
 export default async function Layout({
   children,
@@ -55,12 +56,11 @@ export default async function Layout({
       <footer className="flex justify-between items-center text-gray-500 dark:text-gray-400">
         <p>
           Made by{" "}
-          <a
+          <TextLink
             href={`https://bsky.app/profile/${FRONTPAGE_ATPROTO_HANDLE}`}
-            className="font-medium text-indigo-600 hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300"
           >
             @frontpage.fyi <OpenInNewWindowIcon className="inline" />
-          </a>
+          </TextLink>
         </p>
       </footer>
     </div>
@@ -98,12 +98,12 @@ async function LoginOrLogout() {
               <Link href={`/profile/${handle}`} className="cursor-pointer">
                 Profile
               </Link>
-            </DropdownMenuItem> 
-          <DropdownMenuItem asChild>
-            <Link href="/about" className="cursor-pointer">
-              About
-            </Link>
-          </DropdownMenuItem>
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <Link href="/about" className="cursor-pointer">
+                About
+              </Link>
+            </DropdownMenuItem>
             <Suspense fallback={null}>
               {isAdmin().then((isAdmin) =>
                 isAdmin ? (
