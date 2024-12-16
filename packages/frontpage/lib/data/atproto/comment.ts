@@ -30,13 +30,19 @@ export const CommentRecord = z.object({
 
 export type Comment = z.infer<typeof CommentRecord>;
 
-type CommentInput = {
+export type CommentInput = {
   parent?: { cid: string; rkey: string; authorDid: DID };
   post: { cid: string; rkey: string; authorDid: DID };
   content: string;
+  rkey: string;
 };
 
-export async function createComment({ parent, post, content }: CommentInput) {
+export async function createComment({
+  parent,
+  post,
+  content,
+  rkey,
+}: CommentInput) {
   // Collapse newlines into a single \n\n and trim whitespace
   const sanitizedContent = content.replace(/\n\n+/g, "\n\n").trim();
   const record = {
@@ -64,15 +70,18 @@ export async function createComment({ parent, post, content }: CommentInput) {
   const result = await atprotoCreateRecord({
     record,
     collection: CommentCollection,
+    rkey,
   });
 
   return {
     rkey: result.uri.rkey,
+    cid: result.cid,
   };
 }
 
-export async function deleteComment(rkey: string) {
+export async function deleteComment(authorDid: DID, rkey: string) {
   await atprotoDeleteRecord({
+    authorDid,
     rkey,
     collection: CommentCollection,
   });
