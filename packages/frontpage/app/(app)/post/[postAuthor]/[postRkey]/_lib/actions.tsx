@@ -110,7 +110,10 @@ export async function commentVoteAction(input: {
   rkey: string;
   authorDid: DID;
 }) {
-  await ensureUser();
+  const user = await ensureUser();
+  if (await isBanned(user.did)) {
+    throw new Error("Author is banned");
+  }
   await createVote({
     subjectAuthorDid: input.authorDid,
     subjectCid: input.cid,
