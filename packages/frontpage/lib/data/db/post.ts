@@ -2,11 +2,21 @@ import "server-only";
 
 import { cache } from "react";
 import { db } from "@/lib/db";
-import { eq, sql, desc, and, isNull, or, InferSelectModel } from "drizzle-orm";
+import {
+  eq,
+  sql,
+  desc,
+  and,
+  isNull,
+  or,
+  InferSelectModel,
+  ne,
+} from "drizzle-orm";
 import * as schema from "@/lib/schema";
 import { getUser, isAdmin } from "../user";
 import { DID } from "../atproto/did";
 import { newPostAggregateTrigger } from "./triggers";
+import { invariant } from "@/lib/utils";
 
 const buildUserHasVotedQuery = cache(async () => {
   const user = await getUser();
@@ -226,14 +236,25 @@ export async function deletePost({ authorDid, rkey }: DeletePostInput) {
   console.log("Deleting post", rkey);
   await db.transaction(async (tx) => {
     console.log("Updating post status to deleted", rkey);
-    await tx
+    const [updatedPost] = await tx
       .update(schema.Post)
       .set({ status: "deleted" })
       .where(
-        and(eq(schema.Post.rkey, rkey), eq(schema.Post.authorDid, authorDid)),
-      );
+        and(
+          eq(schema.Post.rkey, rkey),
+          eq(schema.Post.authorDid, authorDid),
+          ne(schema.Post.status, "deleted"),
+        ),
+      )
+      .returning({ id: schema.Post.id });
+
+    invariant(
+      updatedPost,
+      "Failed to update post status to deleted or post not found",
+    );
+
+    console.log("Done deleting post transaction");
   });
-  console.log("Done deleting post transaction");
 }
 
 type ModeratePostInput = {

@@ -1,7 +1,15 @@
 import "server-only";
 import { cache } from "react";
 import { db } from "@/lib/db";
-import { eq, sql, desc, and, InferSelectModel, isNotNull } from "drizzle-orm";
+import {
+  eq,
+  sql,
+  desc,
+  and,
+  InferSelectModel,
+  isNotNull,
+  ne,
+} from "drizzle-orm";
 import * as schema from "@/lib/schema";
 import { getUser, isAdmin } from "../user";
 import { DID } from "../atproto/did";
@@ -369,13 +377,14 @@ export type DeleteCommentInput = {
 
 export async function deleteComment({ rkey, authorDid }: DeleteCommentInput) {
   await db.transaction(async (tx) => {
-    const [deletedComment] = await tx
+    const [updatedComment] = await tx
       .update(schema.Comment)
       .set({ status: "deleted" })
       .where(
         and(
           eq(schema.Comment.rkey, rkey),
           eq(schema.Comment.authorDid, authorDid),
+          ne(schema.Comment.status, "deleted"),
         ),
       )
       .returning({
@@ -383,13 +392,14 @@ export async function deleteComment({ rkey, authorDid }: DeleteCommentInput) {
         postId: schema.Comment.postId,
       });
 
-    if (!deletedComment) {
-      throw new Error("Failed to delete comment");
-    }
+    invariant(
+      updatedComment,
+      "Failed to update comment status to deleted or comment not found",
+    );
 
     await deleteCommentAggregateTrigger(
-      deletedComment.postId,
-      deletedComment.id,
+      updatedComment.postId,
+      updatedComment.id,
       tx,
     );
   });
