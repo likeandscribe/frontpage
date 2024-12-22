@@ -42,7 +42,7 @@ export async function createCommentAction(
     parent: comment,
     post,
     content,
-    repo: user.did,
+    authorDid: user.did,
   });
 
   revalidatePath(`/post`);
@@ -83,8 +83,9 @@ export async function commentVoteAction(input: {
   rkey: string;
   authorDid: DID;
 }) {
-  await ensureUser();
+  const user = await ensureUser();
   await createVote({
+    authorDid: user.did,
     subject: {
       rkey: input.rkey,
       cid: input.cid,

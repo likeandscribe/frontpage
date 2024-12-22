@@ -26,7 +26,7 @@ export async function newPostAction(_prevState: unknown, formData: FormData) {
 
   try {
     const [{ rkey }, handle] = await Promise.all([
-      createPost({ title, url }),
+      createPost({ authorDid: user.did, title, url }),
       getVerifiedHandle(user.did),
     ]);
 

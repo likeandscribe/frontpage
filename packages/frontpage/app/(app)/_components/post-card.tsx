@@ -55,8 +55,9 @@ export async function PostCard({
         <VoteButton
           voteAction={async () => {
             "use server";
-            await ensureUser();
+            const user = await ensureUser();
             await createVote({
+              authorDid: user.did,
               subject: {
                 rkey,
                 cid,

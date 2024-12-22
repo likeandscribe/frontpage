@@ -9,14 +9,14 @@ import { invariant } from "../utils";
 import { TID } from "@atproto/common-web";
 
 export type ApiCreateCommentInput = Omit<atproto.CommentInput, "rkey"> & {
-  repo: DID;
+  authorDid: DID;
 };
 
 export async function createComment({
   parent,
   post,
   content,
-  repo,
+  authorDid,
 }: ApiCreateCommentInput) {
   const user = await ensureUser();
 
@@ -49,7 +49,7 @@ export async function createComment({
 
     const didToNotify = parent ? parent.authorDid : post.authorDid;
 
-    if (didToNotify !== repo) {
+    if (didToNotify !== authorDid) {
       await createNotification({
         commentId: dbCreatedComment.id,
         did: didToNotify,
@@ -62,12 +62,19 @@ export async function createComment({
   }
 }
 
-export async function deleteComment({ rkey }: db.DeleteCommentInput) {
+export async function deleteComment({
+  authorDid,
+  rkey,
+}: db.DeleteCommentInput) {
   const user = await ensureUser();
+
+  if (user.did !== authorDid) {
+    throw new DataLayerError("You can only delete your own comments");
+  }
 
   try {
     console.log("deleteComment", rkey);
-    await atproto.deleteComment(user.did, rkey);
+    await atproto.deleteComment(authorDid, rkey);
     await db.deleteComment({ authorDid: user.did, rkey });
   } catch (e) {
     throw new DataLayerError(`Failed to delete comment: ${e}`);

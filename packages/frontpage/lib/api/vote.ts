@@ -10,6 +10,7 @@ import { invariant } from "../utils";
 import { TID } from "@atproto/common-web";
 
 export type ApiCreateVoteInput = {
+  authorDid: DID;
   subject: {
     rkey: string;
     cid: string;
@@ -18,14 +19,18 @@ export type ApiCreateVoteInput = {
   };
 };
 
-export async function createVote({ subject }: ApiCreateVoteInput) {
+export async function createVote({ authorDid, subject }: ApiCreateVoteInput) {
   const user = await ensureUser();
+
+  if (authorDid !== user.did) {
+    throw new DataLayerError("You can only vote for yourself");
+  }
 
   const rkey = TID.next().toString();
   try {
     if (subject.collection == PostCollection) {
       const dbCreatedVote = await db.createPostVote({
-        repo: user.did,
+        repo: authorDid,
         rkey,
         subject: {
           rkey: subject.rkey,
@@ -36,7 +41,7 @@ export async function createVote({ subject }: ApiCreateVoteInput) {
       invariant(dbCreatedVote, "Failed to insert post vote in database");
     } else if (subject.collection == CommentCollection) {
       const dbCreatedVote = await db.createCommentVote({
-        repo: user.did,
+        repo: authorDid,
         rkey,
         subject: {
           rkey: subject.rkey,
@@ -65,11 +70,14 @@ export async function createVote({ subject }: ApiCreateVoteInput) {
   }
 }
 
-export async function deleteVote({ rkey }: db.DeleteVoteInput) {
+export async function deleteVote({ authorDid, rkey }: db.DeleteVoteInput) {
   const user = await ensureUser();
+  if (authorDid !== user.did) {
+    throw new DataLayerError("You can only delete your own votes");
+  }
 
   try {
-    await atproto.deleteVote(user.did, rkey);
+    await atproto.deleteVote(authorDid, rkey);
     await db.deleteVote({ authorDid: user.did, rkey });
   } catch (e) {
     throw new DataLayerError(`Failed to delete vote: ${e}`);

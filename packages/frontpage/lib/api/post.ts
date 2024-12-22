@@ -6,14 +6,24 @@ import { DataLayerError } from "../data/error";
 import { sendDiscordMessage } from "../discord";
 import { invariant } from "../utils";
 import { TID } from "@atproto/common-web";
+import { DID } from "../data/atproto/did";
 
 export type ApiCreatePostInput = {
+  authorDid: DID;
   title: string;
   url: string;
 };
 
-export async function createPost({ title, url }: ApiCreatePostInput) {
+export async function createPost({
+  authorDid,
+  title,
+  url,
+}: ApiCreatePostInput) {
   const user = await ensureUser();
+
+  if (user.did !== authorDid) {
+    throw new DataLayerError("You can only create posts for yourself");
+  }
 
   const rkey = TID.next().toString();
   try {
@@ -67,11 +77,15 @@ export async function createPost({ title, url }: ApiCreatePostInput) {
   }
 }
 
-export async function deletePost({ rkey }: db.DeletePostInput) {
+export async function deletePost({ authorDid, rkey }: db.DeletePostInput) {
   const user = await ensureUser();
 
+  if (authorDid !== user.did) {
+    throw new DataLayerError("You can only delete your own posts");
+  }
+
   try {
-    await atproto.deletePost(user.did, rkey);
+    await atproto.deletePost(authorDid, rkey);
     await db.deletePost({ authorDid: user.did, rkey });
   } catch (e) {
     throw new DataLayerError(`Failed to delete post: ${e}`);
