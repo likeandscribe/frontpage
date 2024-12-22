@@ -1,13 +1,13 @@
 import "server-only";
 import { z } from "zod";
 import { CommentCollection } from "./comment";
-import { PostCollection } from "./post";
 import { isDid } from "./did";
+import { nsids } from "./repo";
 
 // This module refers to the event emitted by Jetstream
 
 export const Collection = z.union([
-  z.literal(PostCollection),
+  z.literal(nsids.FyiUnravelFrontpagePost),
   z.literal(CommentCollection),
   z.literal("fyi.unravel.frontpage.vote"),
 ]);
