@@ -5,7 +5,7 @@ import * as atprotoPost from "@/lib/data/atproto/post";
 import * as atprotoComment from "@/lib/data/atproto/comment";
 import * as atprotoVote from "@/lib/data/atproto/vote";
 import { getPdsUrl } from "@/lib/data/atproto/did";
-import { handleComment, handlePost, handleVote } from "@/lib/api/relayHandler";
+import { handleComment, handlePost, handleVote } from "./handlers";
 import { eq } from "drizzle-orm";
 
 export async function POST(request: Request) {

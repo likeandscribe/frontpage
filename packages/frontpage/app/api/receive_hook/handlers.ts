@@ -1,15 +1,15 @@
-import * as atprotoComment from "../data/atproto/comment";
-import { DID } from "../data/atproto/did";
-import { Operation } from "../data/atproto/event";
-import * as atprotoPost from "../data/atproto/post";
-import * as atprotoVote from "../data/atproto/vote";
-import * as dbComment from "../data/db/comment";
-import * as dbNotification from "../data/db/notification";
-import * as dbPost from "../data/db/post";
-import * as dbVote from "../data/db/vote";
-import { getBlueskyProfile } from "../data/user";
-import { sendDiscordMessage } from "../discord";
-import { invariant } from "../utils";
+import * as atprotoComment from "@/lib/data/atproto/comment";
+import { DID } from "@/lib/data/atproto/did";
+import { Operation } from "@/lib/data/atproto/event";
+import * as atprotoPost from "@/lib/data/atproto/post";
+import * as atprotoVote from "@/lib/data/atproto/vote";
+import * as dbComment from "@/lib/data/db/comment";
+import * as dbNotification from "@/lib/data/db/notification";
+import * as dbPost from "@/lib/data/db/post";
+import * as dbVote from "@/lib/data/db/vote";
+import { getBlueskyProfile } from "@/lib/data/user";
+import { sendDiscordMessage } from "@/lib/discord";
+import { invariant } from "@/lib/utils";
 
 type HandlerInput = {
   op: Zod.infer<typeof Operation>;
@@ -34,11 +34,12 @@ export async function handlePost({ op, repo, rkey }: HandlerInput) {
     const post = await dbPost.uncached_doesPostExist(repo, rkey);
 
     if (!post && postRecord) {
+      const { title, url, createdAt } = postRecord.value;
       const createdDbPost = await dbPost.createPost({
         post: {
-          title: postRecord.title,
-          url: postRecord.url,
-          createdAt: new Date(postRecord.createdAt),
+          title,
+          url,
+          createdAt: new Date(createdAt),
         },
         rkey,
         cid: postRecord.cid,
@@ -52,7 +53,7 @@ export async function handlePost({ op, repo, rkey }: HandlerInput) {
         embeds: [
           {
             title: "New post on Frontpage",
-            description: postRecord.title,
+            description: title,
             url: `https://frontpage.fyi/post/${repo}/${rkey}`,
             color: 10181046,
             author: bskyProfile
@@ -65,7 +66,7 @@ export async function handlePost({ op, repo, rkey }: HandlerInput) {
             fields: [
               {
                 name: "Link",
-                value: postRecord.url,
+                value: url,
               },
             ],
           },
@@ -92,22 +93,23 @@ export async function handleComment({ op, repo, rkey }: HandlerInput) {
     const comment = await dbComment.uncached_doesCommentExist(repo, rkey);
 
     if (!comment && commentRecord) {
+      const { content, createdAt, parent, post } = commentRecord.value;
       const createdComment = await dbComment.createComment({
         cid: commentRecord.cid,
         authorDid: repo,
         rkey,
-        content: commentRecord.content,
-        createdAt: new Date(commentRecord.createdAt),
-        parent: commentRecord.parent
+        content,
+        createdAt: new Date(createdAt),
+        parent: parent
           ? {
               //TODO: is authority a DID?
-              authorDid: commentRecord.parent.uri.authority as DID,
-              rkey: commentRecord.parent.uri.rkey,
+              authorDid: parent.uri.authority as DID,
+              rkey: parent.uri.rkey,
             }
           : undefined,
         post: {
-          authorDid: commentRecord.post.uri.authority as DID,
-          rkey: commentRecord.post.uri.rkey,
+          authorDid: post.uri.authority as DID,
+          rkey: post.uri.rkey,
         },
       });
 
@@ -115,15 +117,13 @@ export async function handleComment({ op, repo, rkey }: HandlerInput) {
         throw new Error("Failed to insert comment from relay in database");
       }
 
-      const didToNotify = commentRecord.parent
-        ? commentRecord.parent.uri.authority
-        : commentRecord.post.uri.authority;
+      const didToNotify = parent ? parent.uri.authority : post.uri.authority;
 
       if (didToNotify !== repo) {
         await dbNotification.createNotification({
           commentId: createdComment.id,
           did: didToNotify as DID,
-          reason: commentRecord.parent ? "commentReply" : "postComment",
+          reason: parent ? "commentReply" : "postComment",
         });
       }
     }
@@ -141,7 +141,9 @@ export async function handleVote({ op, repo, rkey }: HandlerInput) {
 
     invariant(hydratedRecord, "atproto vote record not found");
 
-    switch (hydratedRecord.subject.uri.collection) {
+    const { subject } = hydratedRecord.value;
+
+    switch (subject.uri.collection) {
       case atprotoPost.PostCollection:
         const postVote = await dbVote.uncached_doesPostVoteExist(repo, rkey);
         if (!postVote) {
@@ -150,8 +152,8 @@ export async function handleVote({ op, repo, rkey }: HandlerInput) {
             rkey,
             cid: hydratedRecord.cid,
             subject: {
-              rkey: hydratedRecord.subject.uri.rkey,
-              authorDid: hydratedRecord.subject.uri.authority as DID,
+              rkey: subject.uri.rkey,
+              authorDid: subject.uri.authority as DID,
             },
           });
 
@@ -173,8 +175,8 @@ export async function handleVote({ op, repo, rkey }: HandlerInput) {
             rkey,
             cid: hydratedRecord.cid,
             subject: {
-              rkey: hydratedRecord.subject.uri.rkey,
-              authorDid: hydratedRecord.subject.uri.authority as DID,
+              rkey: subject.uri.rkey,
+              authorDid: subject.uri.authority as DID,
             },
           });
 
@@ -186,9 +188,7 @@ export async function handleVote({ op, repo, rkey }: HandlerInput) {
         }
         break;
       default:
-        throw new Error(
-          `Unknown collection: ${hydratedRecord.subject.uri.collection}`,
-        );
+        throw new Error(`Unknown collection: ${subject.uri.collection}`);
     }
   } else if (op.action === "delete") {
     console.log("deleting vote", rkey);

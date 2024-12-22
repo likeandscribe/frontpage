@@ -38,6 +38,7 @@ export async function atprotoCreateRecord({
       validate: false,
       record: record,
     }),
+    signal: AbortSignal.timeout(2500),
   });
 
   if (!response.ok) {
@@ -79,6 +80,7 @@ export async function atprotoDeleteRecord({
       collection,
       rkey,
     }),
+    signal: AbortSignal.timeout(2500),
   });
 
   if (!response.ok) {

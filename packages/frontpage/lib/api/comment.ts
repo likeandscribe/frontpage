@@ -22,11 +22,13 @@ export async function createComment({
 
   const rkey = TID.next().toString();
   try {
+    const sanitizedContent = content.replace(/\n\n+/g, "\n\n").trim();
+
     const dbCreatedComment = await db.createComment({
       cid: "",
       authorDid: user.did,
       rkey,
-      content,
+      content: sanitizedContent,
       createdAt: new Date(),
       parent,
       post,
@@ -37,7 +39,7 @@ export async function createComment({
     const { cid } = await atproto.createComment({
       parent,
       post,
-      content,
+      content: sanitizedContent,
       rkey,
     });
 
@@ -65,8 +67,8 @@ export async function deleteComment({ rkey }: db.DeleteCommentInput) {
 
   try {
     console.log("deleteComment", rkey);
-    await db.deleteComment({ authorDid: user.did, rkey });
     await atproto.deleteComment(user.did, rkey);
+    await db.deleteComment({ authorDid: user.did, rkey });
   } catch (e) {
     throw new DataLayerError(`Failed to delete comment: ${e}`);
   }

@@ -90,5 +90,5 @@ export async function getVote({ rkey, repo }: { rkey: string; repo: DID }) {
     rkey,
   });
 
-  return { ...VoteRecord.parse(value), cid };
+  return { value: VoteRecord.parse(value), cid };
 }

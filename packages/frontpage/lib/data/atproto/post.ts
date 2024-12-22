@@ -68,5 +68,5 @@ export async function getPost({ rkey, repo }: { rkey: string; repo: DID }) {
     rkey,
   });
 
-  return { ...PostRecord.parse(value), cid };
+  return { value: PostRecord.parse(value), cid };
 }

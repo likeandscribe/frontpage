@@ -69,9 +69,8 @@ export async function deleteVote({ rkey }: db.DeleteVoteInput) {
   const user = await ensureUser();
 
   try {
-    await db.deleteVote({ authorDid: user.did, rkey });
-
     await atproto.deleteVote(user.did, rkey);
+    await db.deleteVote({ authorDid: user.did, rkey });
   } catch (e) {
     throw new DataLayerError(`Failed to delete vote: ${e}`);
   }

@@ -25,8 +25,11 @@ export async function newPostAction(_prevState: unknown, formData: FormData) {
   }
 
   try {
-    const { rkey } = await createPost({ title, url, createdAt: new Date() });
-    const handle = await getVerifiedHandle(user.did);
+    const [{ rkey }, handle] = await Promise.all([
+      createPost({ title, url }),
+      getVerifiedHandle(user.did),
+    ]);
+
     redirect(`/post/${handle}/${rkey}`);
   } catch (error) {
     if (!(error instanceof DataLayerError)) throw error;

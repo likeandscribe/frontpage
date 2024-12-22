@@ -44,9 +44,8 @@ export async function createComment({
   rkey,
 }: CommentInput) {
   // Collapse newlines into a single \n\n and trim whitespace
-  const sanitizedContent = content.replace(/\n\n+/g, "\n\n").trim();
   const record = {
-    content: sanitizedContent,
+    content,
     parent: parent
       ? {
           cid: parent.cid,
@@ -101,5 +100,5 @@ export async function getComment({ rkey, repo }: { rkey: string; repo: DID }) {
     rkey,
   });
 
-  return { ...CommentRecord.parse(value), cid };
+  return { value: CommentRecord.parse(value), cid };
 }

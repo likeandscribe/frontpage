@@ -10,20 +10,15 @@ import { TID } from "@atproto/common-web";
 export type ApiCreatePostInput = {
   title: string;
   url: string;
-  createdAt: Date;
 };
 
-export async function createPost({
-  title,
-  url,
-  createdAt,
-}: ApiCreatePostInput) {
+export async function createPost({ title, url }: ApiCreatePostInput) {
   const user = await ensureUser();
 
   const rkey = TID.next().toString();
   try {
     const dbCreatedPost = await db.createPost({
-      post: { title, url, createdAt },
+      post: { title, url, createdAt: new Date() },
       rkey,
       authorDid: user.did,
     });
@@ -35,7 +30,7 @@ export async function createPost({
       rkey,
     });
 
-    invariant(cid, "Failed to create comment, rkey/cid missing");
+    invariant(cid, "Failed to create comment, cid missing");
 
     await db.updatePost({ authorDid: user.did, rkey, cid });
 
@@ -76,8 +71,8 @@ export async function deletePost({ rkey }: db.DeletePostInput) {
   const user = await ensureUser();
 
   try {
-    await db.deletePost({ authorDid: user.did, rkey });
     await atproto.deletePost(user.did, rkey);
+    await db.deletePost({ authorDid: user.did, rkey });
   } catch (e) {
     throw new DataLayerError(`Failed to delete post: ${e}`);
   }
