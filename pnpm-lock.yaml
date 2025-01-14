@@ -18,17 +18,17 @@ importers:
   packages/atproto-browser:
     dependencies:
       '@atproto/did':
-        specifier: ^0.1.1
-        version: 0.1.1
+        specifier: ^0.1.3
+        version: 0.1.3
       '@atproto/identity':
-        specifier: ^0.4.1
-        version: 0.4.1
+        specifier: ^0.4.5
+        version: 0.4.5
       '@atproto/repo':
-        specifier: ^0.4.3
-        version: 0.4.3
+        specifier: ^0.6.2
+        version: 0.6.2
       '@atproto/syntax':
-        specifier: ^0.3.0
-        version: 0.3.0
+        specifier: ^0.3.1
+        version: 0.3.1
       hls.js:
         specifier: ^1.5.15
         version: 1.5.15
@@ -409,23 +409,23 @@ packages:
     resolution: {integrity: sha512-30iZtAPgz+LTIYoeivqYo853f02jBYSd5uGnGpkFV0M3xOt9aN73erkgYAmZU43x4VfqcnLxW9Kpg3R5LC4YYw==}
     engines: {node: '>=6.0.0'}
 
-  '@atproto/common-web@0.3.0':
-    resolution: {integrity: sha512-67VnV6JJyX+ZWyjV7xFQMypAgDmjVaR9ZCuU/QW+mqlqI7fex2uL4Fv+7/jHadgzhuJHVd6OHOvNn0wR5WZYtA==}
-
   '@atproto/common-web@0.3.1':
     resolution: {integrity: sha512-N7wiTnus5vAr+lT//0y8m/FaHHLJ9LpGuEwkwDAeV3LCiPif4m/FS8x/QOYrx1PdZQwKso95RAPzCGWQBH5j6Q==}
 
-  '@atproto/common@0.4.1':
-    resolution: {integrity: sha512-uL7kQIcBTbvkBDNfxMXL6lBH4fO2DQpHd2BryJxMtbw/4iEPKe9xBYApwECHhEIk9+zhhpTRZ15FJ3gxTXN82Q==}
+  '@atproto/common-web@0.3.2':
+    resolution: {integrity: sha512-Vx0JtL1/CssJbFAb0UOdvTrkbUautsDfHNOXNTcX2vyPIxH9xOameSqLLunM1hZnOQbJwyjmQCt6TV+bhnanDg==}
 
-  '@atproto/crypto@0.4.1':
-    resolution: {integrity: sha512-7pQNHWYyx8jGhYdPbmcuPD9W73nd/5v3mfBlncO0sBzxnPbmA6aXAWOz+fNVZwHwBJPeb/Gzf/FT/uDx7/eYFg==}
+  '@atproto/common@0.4.6':
+    resolution: {integrity: sha512-X33ZubLPrHLNur2Ln4tRP5TY0G0u/t9DyAeA5dgtTNGIXE3iJIlfiUSR0PW5s1iAvBbrrJK4BwaA2Pqsdl+RNw==}
 
-  '@atproto/did@0.1.1':
-    resolution: {integrity: sha512-FA+U8C8ACQLjG/TSgtaQyjvXxzOYzwK0+T6FJ1oj2BtKUixq4t8zpvo4zdIrnVimXeGQWo1/U1ghke58SmRpmQ==}
+  '@atproto/crypto@0.4.3':
+    resolution: {integrity: sha512-YSSUAvkx+ldpXw97NXZWfLx/prgh5YJ2K0BCw51JCJmXSRp6KhhwvOm4J+K/s5hwpssyuDCVTXknyS4PHwaK5g==}
 
-  '@atproto/identity@0.4.1':
-    resolution: {integrity: sha512-5AoPJDSD0rAay/6Sib+n/FjfwGulM/+xCNxwwDLR9QI4EoeUlvIH8g5BNdix812v312/Qd42kJrLpCNTZ5rvew==}
+  '@atproto/did@0.1.3':
+    resolution: {integrity: sha512-ULD8Gw/KRRwLFZ2Z2L4DjmdOMrg8IYYlcjdSc+GQ2/QJSVnD2zaJJVTLd3vls121wGt/583rNaiZTT2DpBze4w==}
+
+  '@atproto/identity@0.4.5':
+    resolution: {integrity: sha512-IyW6wk+qfX+z/LmBdjatJgjSJWDTJLSCT/6yQUD/L0mkOjRdxiG7DoYIChaF3xHOPKiIuOGu/fuzhBMxVVcCcw==}
 
   '@atproto/jwk@0.1.1':
     resolution: {integrity: sha512-6h/bj1APUk7QcV9t/oA6+9DB5NZx9SZru9x+/pV5oHFI9Xz4ZuM5+dq1PfsJV54pZyqdnZ6W6M717cxoC7q7og==}
@@ -437,14 +437,20 @@ packages:
   '@atproto/lexicon@0.4.2':
     resolution: {integrity: sha512-CXoOkhcdF3XVUnR2oNgCs2ljWfo/8zUjxL5RIhJW/UNLp/FSl+KpF8Jm5fbk8Y/XXVPGRAsv9OYfxyU/14N/pw==}
 
+  '@atproto/lexicon@0.4.5':
+    resolution: {integrity: sha512-fljWqMGKn+XWtTprBcS3F1hGBREnQYh6qYHv2sjENucc7REms1gtmZXSerB9N6pVeHVNOnXiILdukeAcic5OEw==}
+
   '@atproto/oauth-types@0.1.2':
     resolution: {integrity: sha512-yySPPTLxteFJ3O3xVWEhvBFx7rczgo4LK2nQNeqAPMZdYd5dpgvuZZ88nQQge074BfuOc0MWTnr0kPdxQMjjPw==}
 
-  '@atproto/repo@0.4.3':
-    resolution: {integrity: sha512-9w4TlyxExLfFL9BysvXq4vhIsYsnmGi0uelmxJjlRXBICgLpqjqQVqhS8OBqE25ZTYvgXUi7nNqpo2llCHhOvQ==}
+  '@atproto/repo@0.6.2':
+    resolution: {integrity: sha512-0YEWJ38Sj8SwhD8GGQ7Q6GDeZppsRae4JfNLQmtPgAddt5A4iNIK5HLdpGGlT+dC0/ElsEbQpY7mXLuP92Wbtw==}
 
   '@atproto/syntax@0.3.0':
     resolution: {integrity: sha512-Weq0ZBxffGHDXHl9U7BQc2BFJi/e23AL+k+i5+D9hUq/bzT4yjGsrCejkjq0xt82xXDjmhhvQSZ0LqxyZ5woxA==}
+
+  '@atproto/syntax@0.3.1':
+    resolution: {integrity: sha512-fzW0Mg1QUOVCWUD3RgEsDt6d1OZ6DdFmbKcDdbzUfh0t4rhtRAC05KbZYmxuMPWDAiJ4BbbQ5dkAc/mNypMXkw==}
 
   '@atproto/xrpc@0.6.3':
     resolution: {integrity: sha512-S3tRvOdA9amPkKLll3rc4vphlDitLrkN5TwWh5Tu/jzk7mnobVVE3akYgICV9XCNHKjWM+IAPxFFI2qi+VW6nQ==}
@@ -1599,12 +1605,13 @@ packages:
   '@nicolo-ribaudo/eslint-scope-5-internals@5.1.1-v1':
     resolution: {integrity: sha512-54/JRvkLIzzDWshCWfuhadfrfZVPiElY8Fcgmg1HroEly/EDSszzhBAsarCux+D/kOslTRquNzuyGSmUSTTHGg==}
 
-  '@noble/curves@1.4.0':
-    resolution: {integrity: sha512-p+4cb332SFCrReJkCYe8Xzm0OWi4Jji5jVdIZRL/PmacmDkFNw6MrrV+gGpiPxLHbV+zKFRywUWbaseT+tZRXg==}
+  '@noble/curves@1.8.0':
+    resolution: {integrity: sha512-j84kjAbzEnQHaSIhRPUmB3/eVXu2k3dKPl2LOrR8fSOIL+89U+7lV117EWHtq/GHM3ReGHM46iRBdZfpc4HRUQ==}
+    engines: {node: ^14.21.3 || >=16}
 
-  '@noble/hashes@1.4.0':
-    resolution: {integrity: sha512-V1JJ1WTRUqHHrOSh597hURcMqVKVGL/ea3kv0gSnEdsEZ0/+VyPghM1lMNGc00z7CIQorSvbKpuJkxvuHbvdbg==}
-    engines: {node: '>= 16'}
+  '@noble/hashes@1.7.0':
+    resolution: {integrity: sha512-HXydb0DgzTpDPwbVeDGCG1gIu7X6+AuU6Zl6av/E/KG8LMsvPntvq+w17CHRpKBmN6Ybdrt1eP3k4cj8DJa78w==}
+    engines: {node: ^14.21.3 || >=16}
 
   '@nodelib/fs.scandir@2.1.5':
     resolution: {integrity: sha512-vq24Bq3ym5HEQm2NKCr3yXDwjc7vTsEThRDnkp2DK9p1uqLR+DHurm/NOTo0KG7HYHU7eppKZj3MyqYuMBf62g==}
@@ -3025,9 +3032,6 @@ packages:
     resolution: {integrity: sha512-M0JtH+hlOL5pLQwHOLNYZaXuhqmvS8oExsqB1SBYgA4Dk7u/xx+YdGHXaK5pyUfed5mYXdlYiphWq3G8cRi5JQ==}
     engines: {node: '>=4'}
 
-  axios@0.27.2:
-    resolution: {integrity: sha512-t+yRIyySRTp/wua5xEr+z1q60QmLq8ABsS5O9Me1AsE5dfKqgnCFzwiCZZ/cGNd1lq4/7akDWMxdhVlucjmnOQ==}
-
   axobject-query@3.2.1:
     resolution: {integrity: sha512-jsyHu61e6N4Vbz/v18DHwWYKK0bSWLqn47eeDSKPB7m8tqMHF9YJ+mhIk2lVteyZrY8tnSj/jHOv4YiTCuCJgg==}
 
@@ -3926,15 +3930,6 @@ packages:
 
   flatted@3.3.1:
     resolution: {integrity: sha512-X8cqMLLie7KsNUDSdzeN8FYK9rEt4Dt67OsG/DNGnYTSDBG4uFAJFBnUeiV+zCVAvwFy56IjM9sH51jVaEhNxw==}
-
-  follow-redirects@1.15.6:
-    resolution: {integrity: sha512-wWN62YITEaOpSK584EZXJafH1AGpO8RVgElfkuXbTOrPX4fIfOyEpW/CsiNd8JdYrAoOvafRTOEnvsO++qCqFA==}
-    engines: {node: '>=4.0'}
-    peerDependencies:
-      debug: '*'
-    peerDependenciesMeta:
-      debug:
-        optional: true
 
   for-each@0.3.3:
     resolution: {integrity: sha512-jqYfLp7mo9vIyQf8ykW2v7A+2N4QjeCeI5+Dz9XraiO1ign81wjiH7Fb9vSOWvQfNtmSa4H2RoQTrrXivdUZmw==}
@@ -6022,13 +6017,6 @@ snapshots:
       '@jridgewell/gen-mapping': 0.3.5
       '@jridgewell/trace-mapping': 0.3.25
 
-  '@atproto/common-web@0.3.0':
-    dependencies:
-      graphemer: 1.4.0
-      multiformats: 9.9.0
-      uint8arrays: 3.0.0
-      zod: 3.23.8
-
   '@atproto/common-web@0.3.1':
     dependencies:
       graphemer: 1.4.0
@@ -6036,32 +6024,36 @@ snapshots:
       uint8arrays: 3.0.0
       zod: 3.23.8
 
-  '@atproto/common@0.4.1':
+  '@atproto/common-web@0.3.2':
     dependencies:
-      '@atproto/common-web': 0.3.0
+      graphemer: 1.4.0
+      multiformats: 9.9.0
+      uint8arrays: 3.0.0
+      zod: 3.23.8
+
+  '@atproto/common@0.4.6':
+    dependencies:
+      '@atproto/common-web': 0.3.2
       '@ipld/dag-cbor': 7.0.3
       cbor-x: 1.5.9
       iso-datestring-validator: 2.2.2
       multiformats: 9.9.0
       pino: 8.21.0
 
-  '@atproto/crypto@0.4.1':
+  '@atproto/crypto@0.4.3':
     dependencies:
-      '@noble/curves': 1.4.0
-      '@noble/hashes': 1.4.0
+      '@noble/curves': 1.8.0
+      '@noble/hashes': 1.7.0
       uint8arrays: 3.0.0
 
-  '@atproto/did@0.1.1':
+  '@atproto/did@0.1.3':
     dependencies:
       zod: 3.23.8
 
-  '@atproto/identity@0.4.1':
+  '@atproto/identity@0.4.5':
     dependencies:
-      '@atproto/common-web': 0.3.0
-      '@atproto/crypto': 0.4.1
-      axios: 0.27.2
-    transitivePeerDependencies:
-      - debug
+      '@atproto/common-web': 0.3.2
+      '@atproto/crypto': 0.4.3
 
   '@atproto/jwk@0.1.1':
     dependencies:
@@ -6071,7 +6063,7 @@ snapshots:
   '@atproto/lex-cli@0.5.1':
     dependencies:
       '@atproto/lexicon': 0.4.2
-      '@atproto/syntax': 0.3.0
+      '@atproto/syntax': 0.3.1
       chalk: 4.1.2
       commander: 9.5.0
       prettier: 3.3.0
@@ -6082,7 +6074,15 @@ snapshots:
   '@atproto/lexicon@0.4.2':
     dependencies:
       '@atproto/common-web': 0.3.1
-      '@atproto/syntax': 0.3.0
+      '@atproto/syntax': 0.3.1
+      iso-datestring-validator: 2.2.2
+      multiformats: 9.9.0
+      zod: 3.23.8
+
+  '@atproto/lexicon@0.4.5':
+    dependencies:
+      '@atproto/common-web': 0.3.2
+      '@atproto/syntax': 0.3.1
       iso-datestring-validator: 2.2.2
       multiformats: 9.9.0
       zod: 3.23.8
@@ -6092,12 +6092,12 @@ snapshots:
       '@atproto/jwk': 0.1.1
       zod: 3.23.8
 
-  '@atproto/repo@0.4.3':
+  '@atproto/repo@0.6.2':
     dependencies:
-      '@atproto/common': 0.4.1
-      '@atproto/common-web': 0.3.0
-      '@atproto/crypto': 0.4.1
-      '@atproto/lexicon': 0.4.2
+      '@atproto/common': 0.4.6
+      '@atproto/common-web': 0.3.2
+      '@atproto/crypto': 0.4.3
+      '@atproto/lexicon': 0.4.5
       '@ipld/car': 3.2.4
       '@ipld/dag-cbor': 7.0.3
       multiformats: 9.9.0
@@ -6105,6 +6105,8 @@ snapshots:
       zod: 3.23.8
 
   '@atproto/syntax@0.3.0': {}
+
+  '@atproto/syntax@0.3.1': {}
 
   '@atproto/xrpc@0.6.3':
     dependencies:
@@ -6996,11 +6998,11 @@ snapshots:
     dependencies:
       eslint-scope: 5.1.1
 
-  '@noble/curves@1.4.0':
+  '@noble/curves@1.8.0':
     dependencies:
-      '@noble/hashes': 1.4.0
+      '@noble/hashes': 1.7.0
 
-  '@noble/hashes@1.4.0': {}
+  '@noble/hashes@1.7.0': {}
 
   '@nodelib/fs.scandir@2.1.5':
     dependencies:
@@ -8757,13 +8759,6 @@ snapshots:
 
   axe-core@4.7.0: {}
 
-  axios@0.27.2:
-    dependencies:
-      follow-redirects: 1.15.6
-      form-data: 4.0.0
-    transitivePeerDependencies:
-      - debug
-
   axobject-query@3.2.1:
     dependencies:
       dequal: 2.0.3
@@ -9465,13 +9460,13 @@ snapshots:
   eslint-import-resolver-typescript@3.6.1(@typescript-eslint/parser@7.14.1(eslint@8.57.0)(typescript@5.4.5))(eslint-import-resolver-node@0.3.9)(eslint-plugin-import@2.31.0)(eslint@8.57.0):
     dependencies:
       debug: 4.3.5
-      enhanced-resolve: 5.17.1
+      enhanced-resolve: 5.16.1
       eslint: 8.57.0
-      eslint-module-utils: 2.12.0(@typescript-eslint/parser@7.14.1(eslint@8.57.0)(typescript@5.4.5))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.6.1(@typescript-eslint/parser@7.14.1(eslint@8.57.0)(typescript@5.4.5))(eslint-import-resolver-node@0.3.9)(eslint-plugin-import@2.31.0)(eslint@8.57.0))(eslint@8.57.0)
+      eslint-module-utils: 2.8.1(@typescript-eslint/parser@7.14.1(eslint@8.57.0)(typescript@5.4.5))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.6.1(@typescript-eslint/parser@7.14.1(eslint@8.57.0)(typescript@5.4.5))(eslint-import-resolver-node@0.3.9)(eslint-plugin-import@2.31.0)(eslint@8.57.0))(eslint@8.57.0)
       eslint-plugin-import: 2.31.0(@typescript-eslint/parser@7.14.1(eslint@8.57.0)(typescript@5.4.5))(eslint-import-resolver-typescript@3.6.1)(eslint@8.57.0)
       fast-glob: 3.3.2
       get-tsconfig: 4.7.5
-      is-core-module: 2.15.1
+      is-core-module: 2.13.1
       is-glob: 4.0.3
     transitivePeerDependencies:
       - '@typescript-eslint/parser'
@@ -9516,13 +9511,13 @@ snapshots:
   eslint-import-resolver-typescript@3.6.1(@typescript-eslint/parser@7.2.0(eslint@8.57.0)(typescript@5.4.5))(eslint-import-resolver-node@0.3.9)(eslint-plugin-import@2.29.1)(eslint@8.57.0):
     dependencies:
       debug: 4.3.5
-      enhanced-resolve: 5.17.1
+      enhanced-resolve: 5.16.1
       eslint: 8.57.0
-      eslint-module-utils: 2.12.0(@typescript-eslint/parser@7.2.0(eslint@8.57.0)(typescript@5.4.5))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.6.1(@typescript-eslint/parser@7.2.0(eslint@8.57.0)(typescript@5.4.5))(eslint-import-resolver-node@0.3.9)(eslint-plugin-import@2.29.1)(eslint@8.57.0))(eslint@8.57.0)
+      eslint-module-utils: 2.8.1(@typescript-eslint/parser@7.2.0(eslint@8.57.0)(typescript@5.4.5))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.6.1(@typescript-eslint/parser@7.2.0(eslint@8.57.0)(typescript@5.4.5))(eslint-import-resolver-node@0.3.9)(eslint-plugin-import@2.29.1)(eslint@8.57.0))(eslint@8.57.0)
       eslint-plugin-import: 2.29.1(@typescript-eslint/parser@7.2.0(eslint@8.57.0)(typescript@5.4.5))(eslint-import-resolver-typescript@3.6.1)(eslint@8.57.0)
       fast-glob: 3.3.2
       get-tsconfig: 4.7.5
-      is-core-module: 2.15.1
+      is-core-module: 2.13.1
       is-glob: 4.0.3
     transitivePeerDependencies:
       - '@typescript-eslint/parser'
@@ -9552,14 +9547,14 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  eslint-module-utils@2.12.0(@typescript-eslint/parser@7.2.0(eslint@8.57.0)(typescript@5.4.5))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.6.1(@typescript-eslint/parser@7.2.0(eslint@8.57.0)(typescript@5.4.5))(eslint-import-resolver-node@0.3.9)(eslint-plugin-import@2.29.1)(eslint@8.57.0))(eslint@8.57.0):
+  eslint-module-utils@2.8.1(@typescript-eslint/parser@7.14.1(eslint@8.57.0)(typescript@5.4.5))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.6.1(@typescript-eslint/parser@7.14.1(eslint@8.57.0)(typescript@5.4.5))(eslint-import-resolver-node@0.3.9)(eslint-plugin-import@2.31.0)(eslint@8.57.0))(eslint@8.57.0):
     dependencies:
       debug: 3.2.7
     optionalDependencies:
-      '@typescript-eslint/parser': 7.2.0(eslint@8.57.0)(typescript@5.4.5)
+      '@typescript-eslint/parser': 7.14.1(eslint@8.57.0)(typescript@5.4.5)
       eslint: 8.57.0
       eslint-import-resolver-node: 0.3.9
-      eslint-import-resolver-typescript: 3.6.1(@typescript-eslint/parser@7.2.0(eslint@8.57.0)(typescript@5.4.5))(eslint-import-resolver-node@0.3.9)(eslint-plugin-import@2.29.1)(eslint@8.57.0)
+      eslint-import-resolver-typescript: 3.6.1(@typescript-eslint/parser@7.14.1(eslint@8.57.0)(typescript@5.4.5))(eslint-import-resolver-node@0.3.9)(eslint-plugin-import@2.31.0)(eslint@8.57.0)
     transitivePeerDependencies:
       - supports-color
 
@@ -10038,8 +10033,6 @@ snapshots:
       rimraf: 3.0.2
 
   flatted@3.3.1: {}
-
-  follow-redirects@1.15.6: {}
 
   for-each@0.3.3:
     dependencies:
