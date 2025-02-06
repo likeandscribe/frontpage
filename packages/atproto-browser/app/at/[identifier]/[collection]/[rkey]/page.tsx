@@ -139,15 +139,9 @@ async function RecordVerificationBadge({
       return <span title="Invalid record (no record)">❌</span>;
     }
 
-    // Whether we compare bytes or JSON or object value (ie. key order independent) isn't specced out. It's easiest for us to compare JSON so we'll do that.
-    // Bytes would be the most strict equality check while object value would be the least strict, JSON is somewhere in the middle in terms of strictness as it's sensitive to different key ordering.
-    if (
-      JSON.stringify(claim.record) !==
-      JSON.stringify(
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (recordResult.record as any)?.value,
-      )
-    ) {
+    // Whether we compare bytes or JSON or object value (ie. key order independent) isn't specced out.
+    // We decide to compare by object "contents" (key order independent) here. This results in the check that we want which is to make sure that no one has tampered with the JSON representation of the record.
+    if (!compareJson(claim.record, recordResult.record?.value)) {
       return (
         <div style={{ display: "inline-block" }}>
           <span title="Invalid record (mismatch)">❌</span>
@@ -259,3 +253,43 @@ const GetRecordFailure = z.object({
   error: z.string(),
   message: z.string().optional(),
 });
+
+/**
+ * Compare objects deeply, ignoring key order.
+ */
+function compareJson(a: unknown, b: unknown): boolean {
+  if (typeof a !== typeof b) {
+    return false;
+  }
+
+  if (typeof a !== "object") {
+    return a === b;
+  }
+
+  if (Array.isArray(a) !== Array.isArray(b)) {
+    return false;
+  }
+
+  if (Array.isArray(a)) {
+    if (a.length !== (b as unknown[]).length) {
+      return false;
+    }
+
+    return a.every((item, index) => compareJson(item, (b as unknown[])[index]));
+  }
+
+  if (a == null || b == null) {
+    return a === b;
+  }
+
+  const aKeys = Object.keys(a);
+
+  if (aKeys.length !== Object.keys(b).length) {
+    return false;
+  }
+
+  return aKeys.every((key) => {
+    // @ts-expect-error - We know a and b are indexable (not null)
+    return compareJson(a[key], b[key]);
+  });
+}
