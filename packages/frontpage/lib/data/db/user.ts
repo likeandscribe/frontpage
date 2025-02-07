@@ -2,6 +2,8 @@ import { db } from "@/lib/db";
 import { DID } from "../atproto/did";
 import * as schema from "@/lib/schema";
 import { isAdmin } from "../user";
+import { cache } from "react";
+import { and, eq } from "drizzle-orm";
 
 type ModerateUserInput = {
   userDid: DID;
@@ -35,3 +37,14 @@ export async function moderateUser({
       set: { isHidden: hide, labels: label, updatedAt: new Date() },
     });
 }
+
+export const isBanned = cache(async (did: DID) => {
+  const bannedUser = await db.query.LabelledProfile.findFirst({
+    where: and(
+      eq(schema.LabelledProfile.did, did),
+      eq(schema.LabelledProfile.isHidden, true),
+    ),
+  });
+
+  return Boolean(bannedUser);
+});
