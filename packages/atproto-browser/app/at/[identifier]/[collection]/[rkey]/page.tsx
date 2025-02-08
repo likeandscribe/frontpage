@@ -141,7 +141,13 @@ async function RecordVerificationBadge({
 
     // Whether we compare bytes or JSON or object value (ie. key order independent) isn't specced out.
     // We decide to compare by object "contents" (key order independent) here. This results in the check that we want which is to make sure that no one has tampered with the JSON representation of the record.
-    if (!compareJson(claim.record, recordResult.record?.value)) {
+    if (
+      !compareJson(
+        // Converting to plain object because some values are classes (eg. CIDs)
+        JSON.parse(JSON.stringify(claim.record)),
+        recordResult.record?.value,
+      )
+    ) {
       return (
         <div style={{ display: "inline-block" }}>
           <span title="Invalid record (mismatch)">❌</span>
