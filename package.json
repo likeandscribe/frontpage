@@ -1,9 +1,14 @@
 {
   "name": "monorepo",
   "private": true,
-  "packageManager": "pnpm@9.1.0",
+  "packageManager": "pnpm@10.3.0",
   "devDependencies": {
     "prettier": "^3.3.0",
     "turbo": "2.1.2"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "@vercel/speed-insights"
+    ]
   }
 }
