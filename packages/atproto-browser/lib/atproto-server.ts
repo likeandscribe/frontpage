@@ -10,7 +10,7 @@ import { unstable_cache as nextCache } from "next/cache";
 import { isValidHandle, NSID, InvalidNsidError } from "@atproto/syntax";
 import { isDid } from "@atproto/did";
 import { domainToASCII } from "url";
-import { resolveTxt, NOTFOUND } from "node:dns/promises";
+import { resolveTxt } from "node:dns/promises";
 
 function timeoutWith<T>(
   timeout: number,
