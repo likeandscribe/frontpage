@@ -75,10 +75,14 @@ export default async function RkeyPage(props: {
         </small>
       </div>
       {params.collection === "com.atproto.lexicon.schema" ? (
-        <LexiconVerification
-          did={identityResult.didDocument.id}
-          nsid={params.rkey}
-        />
+        <ErrorBoundary fallback={<div>❌ Error verifying lexicon</div>}>
+          <Suspense fallback={<div>Verifying lexicon...</div>}>
+            <LexiconVerification
+              did={identityResult.didDocument.id}
+              nsid={params.rkey}
+            />
+          </Suspense>
+        </ErrorBoundary>
       ) : null}
       <JSONValue data={getRecordResult.record.value} repo={didDocument.id} />
       <small>
