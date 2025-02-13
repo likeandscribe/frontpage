@@ -1,5 +1,5 @@
 import { JSONType, JSONValue } from "@/app/at/_lib/atproto-json";
-import { resolveIdentity } from "@/lib/atproto-server";
+import { resolveNsid, resolveIdentity } from "@/lib/atproto-server";
 import { getHandle, getKey, getPds } from "@atproto/identity";
 import { verifyRecords } from "@atproto/repo";
 import { cache, Suspense } from "react";
@@ -74,6 +74,12 @@ export default async function RkeyPage(props: {
           cid: <code>{getRecordResult.record.cid}</code>
         </small>
       </div>
+      {params.collection === "com.atproto.lexicon.schema" ? (
+        <LexiconVerification
+          did={identityResult.didDocument.id}
+          nsid={params.rkey}
+        />
+      ) : null}
       <JSONValue data={getRecordResult.record.value} repo={didDocument.id} />
       <small>
         <a href={getRecordResult.url} rel="ugc">
@@ -298,4 +304,36 @@ function compareJson(a: unknown, b: unknown): boolean {
     // @ts-expect-error - We know a and b are indexable (not null)
     return compareJson(a[key], b[key]);
   });
+}
+
+async function LexiconVerification({
+  nsid: nsidStr,
+  did,
+}: {
+  nsid: string;
+  did: string;
+}) {
+  const result = await resolveNsid(did, nsidStr);
+  if (!result.success) {
+    return <div>❌ Unverified lexicon: {result.error}</div>;
+  }
+
+  const verificationResults = result.results;
+  const verified = verificationResults.some((result) => result.verified);
+
+  return (
+    <details style={{ marginTop: "1em" }}>
+      <summary>
+        {verified ? "✅ Verified lexicon" : "❌ Unverified lexicon"}
+      </summary>
+      <ul>
+        {verificationResults.map((result) => (
+          <li key={result.domain}>
+            {result.verified ? "✅" : "❌"} {result.domain}
+            {!result.verified ? ` (${result.verifiedDescription})` : null}
+          </li>
+        ))}
+      </ul>
+    </details>
+  );
 }

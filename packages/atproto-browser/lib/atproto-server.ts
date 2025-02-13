@@ -7,9 +7,10 @@ import {
 } from "@atproto/identity";
 import { cache } from "react";
 import { unstable_cache as nextCache } from "next/cache";
-import { isValidHandle } from "@atproto/syntax";
+import { isValidHandle, NSID, InvalidNsidError } from "@atproto/syntax";
 import { isDid } from "@atproto/did";
 import { domainToASCII } from "url";
+import { resolveTxt, NOTFOUND } from "node:dns/promises";
 
 function timeoutWith<T>(
   timeout: number,
@@ -98,4 +99,74 @@ export async function resolveIdentity(
     didDocument: didDocument,
     handle: didFromHandle === didDocument.id ? handle : null,
   };
+}
+
+export async function resolveNsid(
+  did: string,
+  nsidStr: string,
+): Promise<
+  | { success: false; error: string }
+  | {
+      success: true;
+      results: {
+        domain: string;
+        verified: boolean;
+        verifiedDescription: string;
+      }[];
+    }
+> {
+  let nsid;
+  try {
+    nsid = NSID.parse(nsidStr);
+  } catch (e) {
+    if (e instanceof InvalidNsidError) {
+      return { success: false, error: e.message };
+    } else {
+      throw e;
+    }
+  }
+
+  const domainParts = nsid.segments.slice().reverse();
+
+  const possibleVerificationDomains = domainParts.map(
+    (_, i) => "_lexicon." + domainParts.slice(i).join("."),
+  );
+
+  return {
+    success: true,
+    results: await Promise.all(
+      possibleVerificationDomains.map(async (domain) => {
+        try {
+          const record = (await resolveTxt(domain))[0]?.join("");
+          if (!record) {
+            return {
+              domain,
+              verified: false,
+              verifiedDescription: "not_found",
+            };
+          }
+          const verified = record === `did=${did}`;
+
+          return {
+            domain,
+            verified,
+            verifiedDescription: verified ? "valid" : "invalid",
+          };
+        } catch (e) {
+          return {
+            domain,
+            verified: false,
+            verifiedDescription:
+              isObject(e) && "code" in e && typeof e.code === "string"
+                ? e.code
+                : "error",
+          };
+        }
+      }),
+    ),
+  };
+}
+
+function isObject(value: unknown): value is Record<string, unknown> {
+  return value !== null && typeof value === "object";
 }
