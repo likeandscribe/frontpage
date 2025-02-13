@@ -17,7 +17,7 @@ export function generateStaticParams(): Params[] {
   return [{ hash: HASH }];
 }
 
-export async function GET(_: Request, { params }: { params: Params }) {
+export async function GET(_: Request, { params }: { params: Promise<Params> }) {
   const { hash } = await params;
   if (hash !== HASH) notFound();
   return Response.json(unicorn, {
