@@ -17,9 +17,9 @@ export function generateStaticParams(): Params[] {
   return [{ hash: HASH }];
 }
 
-export function GET(_: Request, { params }: { params: Params }) {
-  console.log(params);
-  if (params.hash !== HASH) notFound();
+export async function GET(_: Request, { params }: { params: Params }) {
+  const { hash } = await params;
+  if (hash !== HASH) notFound();
   return Response.json(unicorn, {
     headers: {
       "Cache-Control": "public, max-age=31536000, immutable",
