@@ -104,17 +104,7 @@ export async function resolveIdentity(
 export async function resolveNsid(
   did: string,
   nsidStr: string,
-): Promise<
-  | { success: false; error: string }
-  | {
-      success: true;
-      results: {
-        domain: string;
-        verified: boolean;
-        verifiedDescription: string;
-      }[];
-    }
-> {
+): Promise<{ success: false; error: string } | { success: true }> {
   let nsid;
   try {
     nsid = NSID.parse(nsidStr);
@@ -127,44 +117,33 @@ export async function resolveNsid(
   }
 
   const domainParts = nsid.segments.slice().reverse();
+  const authority = "_lexicon." + domainParts.slice(1).join(".");
+  try {
+    const record = (await resolveTxt(authority))[0]?.join("");
+    if (`did=${did}` !== record) {
+      return {
+        success: false,
+        error: "invalid",
+      };
+    }
+    {
+      return {
+        success: true,
+      };
+    }
+  } catch (e) {
+    const errorMsg =
+      isObject(e) && "code" in e && typeof e.code === "string"
+        ? e.code
+        : e instanceof Error
+          ? e.message
+          : `error`;
 
-  const possibleVerificationDomains = domainParts.map(
-    (_, i) => "_lexicon." + domainParts.slice(i).join("."),
-  );
-
-  return {
-    success: true,
-    results: await Promise.all(
-      possibleVerificationDomains.map(async (domain) => {
-        try {
-          const record = (await resolveTxt(domain))[0]?.join("");
-          if (!record) {
-            return {
-              domain,
-              verified: false,
-              verifiedDescription: "not_found",
-            };
-          }
-          const verified = record === `did=${did}`;
-
-          return {
-            domain,
-            verified,
-            verifiedDescription: verified ? "valid" : "invalid",
-          };
-        } catch (e) {
-          return {
-            domain,
-            verified: false,
-            verifiedDescription:
-              isObject(e) && "code" in e && typeof e.code === "string"
-                ? e.code
-                : "error",
-          };
-        }
-      }),
-    ),
-  };
+    return {
+      success: false,
+      error: `${errorMsg} (${authority})`,
+    };
+  }
 }
 
 function isObject(value: unknown): value is Record<string, unknown> {

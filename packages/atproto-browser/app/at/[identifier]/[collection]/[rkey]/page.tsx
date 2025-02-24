@@ -318,26 +318,11 @@ async function LexiconVerification({
   did: string;
 }) {
   const result = await resolveNsid(did, nsidStr);
-  if (!result.success) {
-    return <div>❌ Unverified lexicon: {result.error}</div>;
-  }
-
-  const verificationResults = result.results;
-  const verified = verificationResults.some((result) => result.verified);
-
   return (
-    <details style={{ marginTop: "1em" }}>
-      <summary>
-        {verified ? "✅ Verified lexicon" : "❌ Unverified lexicon"}
-      </summary>
-      <ul>
-        {verificationResults.map((result) => (
-          <li key={result.domain}>
-            {result.verified ? "✅" : "❌"} {result.domain}
-            {!result.verified ? ` (${result.verifiedDescription})` : null}
-          </li>
-        ))}
-      </ul>
-    </details>
+    <div style={{ marginTop: "1em" }}>
+      {result.success
+        ? "✅ Verified lexicon"
+        : `❌ Unverified lexicon: ${result.error}`}
+    </div>
   );
 }
