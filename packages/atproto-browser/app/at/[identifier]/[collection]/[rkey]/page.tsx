@@ -1,8 +1,10 @@
 import { JSONType, JSONValue } from "@/app/at/_lib/atproto-json";
-import { resolveNsid, resolveIdentity } from "@/lib/atproto-server";
+import { resolveNsidAuthority, resolveIdentity } from "@/lib/atproto-server";
+import Link from "@/lib/link";
 import { getHandle, getKey, getPds } from "@atproto/identity";
+import { LexiconDoc, Lexicons, lexiconDoc } from "@atproto/lexicon";
 import { verifyRecords } from "@atproto/repo";
-import { cache, Suspense } from "react";
+import { cache, Fragment, ReactNode, Suspense } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import { z } from "zod";
 
@@ -77,13 +79,20 @@ export default async function RkeyPage(props: {
       {params.collection === "com.atproto.lexicon.schema" ? (
         <ErrorBoundary fallback={<div>❌ Error verifying lexicon</div>}>
           <Suspense fallback={<div>Verifying lexicon...</div>}>
-            <LexiconVerification
+            <LexiconDefinitionVerification
               did={identityResult.didDocument.id}
               nsid={params.rkey}
             />
           </Suspense>
         </ErrorBoundary>
       ) : null}
+
+      <RecordValidation
+        did={didDocument.id}
+        collection={params.collection}
+        rkey={params.rkey}
+      />
+
       <JSONValue data={getRecordResult.record.value} repo={didDocument.id} />
       <small>
         <a href={getRecordResult.url} rel="ugc">
@@ -310,19 +319,147 @@ function compareJson(a: unknown, b: unknown): boolean {
   });
 }
 
-async function LexiconVerification({
+async function LexiconDefinitionVerification({
   nsid: nsidStr,
   did,
 }: {
   nsid: string;
   did: string;
 }) {
-  const result = await resolveNsid(did, nsidStr);
+  const result = await resolveNsidAuthority(nsidStr);
+
   return (
     <div style={{ marginTop: "1em" }}>
       {result.success
-        ? "✅ Verified lexicon"
+        ? result.authorityDid === did
+          ? "✅ Verified lexicon"
+          : `❌ Unverified lexicon: ${result.authorityDid}`
         : `❌ Unverified lexicon: ${result.error}`}
     </div>
   );
+}
+
+async function RecordValidation({
+  did,
+  collection,
+  rkey,
+}: {
+  did: string;
+  collection: string;
+  rkey: string;
+}) {
+  const nsidAuthorityResult = await resolveNsidAuthority(collection);
+
+  const steps: ReactNode[] = [];
+
+  if (!nsidAuthorityResult.success) {
+    return (
+      <details>
+        <summary>❌ Record not validated</summary>
+        <pre>{nsidAuthorityResult.error}</pre>
+      </details>
+    );
+  }
+
+  steps.push(<li>Fetched authority: {nsidAuthorityResult.authorityDid}</li>);
+
+  const lexiconRecordResult = await getRecord(
+    nsidAuthorityResult.authorityDid,
+    "com.atproto.lexicon.schema",
+    collection,
+  );
+
+  if (!lexiconRecordResult.success) {
+    return (
+      <details>
+        <summary>❌ Record not validated</summary>
+        <ul>
+          {steps.map((step, i) => (
+            <Fragment key={i}>{step}</Fragment>
+          ))}
+          <li>
+            <pre>{lexiconRecordResult.error}</pre>
+          </li>
+        </ul>
+      </details>
+    );
+  }
+
+  steps.push(
+    <li>
+      Fetched lexicon doc{" "}
+      <Link href={`/at?u=${lexiconRecordResult.record.uri}`}>
+        {lexiconRecordResult.record.uri}
+      </Link>
+    </li>,
+  );
+
+  const schemaResult = lexiconDoc.safeParse(
+    omit(lexiconRecordResult.record.value as Record<string, unknown>, [
+      "$type",
+    ]),
+  );
+  if (!schemaResult.success) {
+    return (
+      <details>
+        <summary>❌ Record not validated</summary>
+        <ul>
+          {steps.map((step, i) => (
+            <Fragment key={i}>{step}</Fragment>
+          ))}
+          <li>
+            Failed to parse lexicon doc: <pre>{schemaResult.error.message}</pre>
+          </li>
+        </ul>
+      </details>
+    );
+  }
+
+  const lexicons = new Lexicons([schemaResult.data]);
+
+  const recordResult = await getRecord(did, collection, rkey);
+  if (!recordResult.success) {
+    // This should never happen, as we should have already fetched the record
+    throw new Error(recordResult.error);
+  }
+
+  const record = recordResult.record;
+
+  const validationResult = lexicons.validate(collection, record.value);
+
+  if (!validationResult.success) {
+    return (
+      <details>
+        <summary>❌ Record not validated</summary>
+        <ul>
+          {steps.map((step, i) => (
+            <Fragment key={i}>{step}</Fragment>
+          ))}
+          <li>Lexicon validation failed: {validationResult.error.message}</li>
+        </ul>
+      </details>
+    );
+  }
+
+  return (
+    <details>
+      <summary>✅ Record validated</summary>
+      <ul>
+        {steps.map((step, i) => (
+          <Fragment key={i}>{step}</Fragment>
+        ))}
+      </ul>
+    </details>
+  );
+}
+
+function omit(
+  obj: Record<string, unknown>,
+  keys: string[],
+): Record<string, unknown> {
+  const copy = { ...obj };
+  for (const key of keys) {
+    delete copy[key];
+  }
+  return copy;
 }

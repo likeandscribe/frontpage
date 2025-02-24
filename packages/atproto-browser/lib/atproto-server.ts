@@ -102,10 +102,11 @@ export async function resolveIdentity(
   };
 }
 
-export async function resolveNsid(
-  did: string,
+export async function resolveNsidAuthority(
   nsidStr: string,
-): Promise<{ success: false; error: string } | { success: true }> {
+): Promise<
+  { success: false; error: string } | { success: true; authorityDid: string }
+> {
   let nsid;
   try {
     nsid = NSID.parse(nsidStr);
@@ -122,16 +123,17 @@ export async function resolveNsid(
 
   try {
     const record = (await resolveTxt(authority))[0]?.join("");
-    if (`did=${did}` !== record) {
+    const did = record?.split("=")[1];
+    if (!did) {
       return {
         success: false,
-        error: "invalid",
-      };
-    } else {
-      return {
-        success: true,
+        error: "not found",
       };
     }
+    return {
+      success: true,
+      authorityDid: did,
+    };
   } catch (e) {
     const errorMsg =
       isObject(e) && "code" in e && typeof e.code === "string"

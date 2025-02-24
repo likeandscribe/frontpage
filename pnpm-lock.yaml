@@ -35,6 +35,9 @@ importers:
       '@atproto/identity':
         specifier: ^0.4.6
         version: 0.4.6
+      '@atproto/lexicon':
+        specifier: ^0.4.2
+        version: 0.4.7
       '@atproto/repo':
         specifier: ^0.7.0
         version: 0.7.0
@@ -5192,7 +5195,7 @@ snapshots:
 
   '@atproto/lex-cli@0.5.1':
     dependencies:
-      '@atproto/lexicon': 0.4.2
+      '@atproto/lexicon': 0.4.7
       '@atproto/syntax': 0.3.1
       chalk: 4.1.2
       commander: 9.5.0
@@ -5242,7 +5245,7 @@ snapshots:
 
   '@atproto/xrpc@0.6.3':
     dependencies:
-      '@atproto/lexicon': 0.4.2
+      '@atproto/lexicon': 0.4.7
       zod: 3.23.8
 
   '@babel/code-frame@7.24.7':
