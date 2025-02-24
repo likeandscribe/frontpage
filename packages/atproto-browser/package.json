@@ -11,6 +11,7 @@
     "test": "vitest"
   },
   "dependencies": {
+    "@atproto/api": "^0.14.5",
     "@atproto/did": "^0.1.5",
     "@atproto/identity": "^0.4.6",
     "@atproto/lexicon": "^0.4.2",

@@ -6,6 +6,7 @@ import { AtUri } from "@atproto/syntax";
 import { VideoEmbed } from "./video-embed";
 import { ErrorBoundary } from "react-error-boundary";
 import { VideoEmbedWrapper } from "./video-embed-client";
+import { BlobRef, LexValue } from "@atproto/lexicon";
 
 function naiveAtUriCheck(atUri: string) {
   if (!atUri.startsWith("at://")) {
@@ -91,9 +92,7 @@ function JSONObject({
   data: { [x: string]: JSONType };
   repo: string;
 }) {
-  const parseBlobResult = AtBlob.safeParse(data);
-
-  const rawObj = (
+  return (
     <dl>
       {Object.entries(data).map(([key, value]) => (
         <div key={key} style={{ display: "flex", gap: 10 }}>
@@ -113,45 +112,6 @@ function JSONObject({
       ))}
     </dl>
   );
-
-  if (
-    parseBlobResult.success &&
-    parseBlobResult.data.mimeType.startsWith("image/")
-  ) {
-    return (
-      <>
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={`https://cdn.bsky.app/img/feed_thumbnail/plain/${repo}/${parseBlobResult.data.ref.$link}@jpeg`}
-          alt=""
-          width={200}
-        />
-        <details>
-          <summary>View blob content</summary>
-          {rawObj}
-        </details>
-      </>
-    );
-  }
-
-  if (
-    parseBlobResult.success &&
-    parseBlobResult.data.mimeType === "video/mp4"
-  ) {
-    return (
-      <>
-        <ErrorBoundary fallback={<VideoEmbedWrapper />}>
-          <VideoEmbed cid={parseBlobResult.data.ref.$link} did={repo} />
-        </ErrorBoundary>
-        <details>
-          <summary>View blob content</summary>
-          {rawObj}
-        </details>
-      </>
-    );
-  }
-
-  return rawObj;
 }
 
 function JSONArray({ data, repo }: { data: JSONType[]; repo: string }) {
@@ -167,7 +127,7 @@ function JSONArray({ data, repo }: { data: JSONType[]; repo: string }) {
   );
 }
 
-export function JSONValue({ data, repo }: { data: JSONType; repo: string }) {
+export function JSONValue({ data, repo }: { data: LexValue; repo: string }) {
   if (typeof data === "string") {
     return <JSONString data={data} />;
   }
@@ -182,6 +142,22 @@ export function JSONValue({ data, repo }: { data: JSONType; repo: string }) {
   }
   if (Array.isArray(data)) {
     return <JSONArray data={data} repo={repo} />;
+  }
+  if (data instanceof BlobRef) {
+    return (
+      <>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={`https://cdn.bsky.app/img/feed_thumbnail/plain/${repo}/${data.ref}@jpeg`}
+          alt=""
+          width={200}
+        />
+        <details>
+          <summary>View blob content</summary>
+          <JSONObject data={data.toJSON() as any} repo={repo} />
+        </details>
+      </>
+    );
   }
   return <JSONObject data={data} repo={repo} />;
 }

@@ -103,21 +103,10 @@ export async function resolveIdentity(
 }
 
 export async function resolveNsidAuthority(
-  nsidStr: string,
+  nsid: NSID,
 ): Promise<
   { success: false; error: string } | { success: true; authorityDid: string }
 > {
-  let nsid;
-  try {
-    nsid = NSID.parse(nsidStr);
-  } catch (e) {
-    if (e instanceof InvalidNsidError) {
-      return { success: false, error: e.message };
-    } else {
-      throw e;
-    }
-  }
-
   const domainParts = nsid.segments.slice().reverse();
   const authority = "_lexicon." + domainParts.slice(1).join(".");
 
