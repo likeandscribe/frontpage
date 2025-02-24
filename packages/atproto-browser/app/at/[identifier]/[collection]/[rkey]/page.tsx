@@ -1,10 +1,21 @@
 import { JSONType, JSONValue } from "@/app/at/_lib/atproto-json";
-import { resolveNsid, resolveIdentity } from "@/lib/atproto-server";
+import { resolveNsidAuthority, resolveIdentity } from "@/lib/atproto-server";
+import Link from "@/lib/link";
 import { getHandle, getKey, getPds } from "@atproto/identity";
+import {
+  InvalidLexiconError,
+  LexValue,
+  LexiconDefNotFoundError,
+  LexiconDoc,
+  Lexicons,
+  lexiconDoc,
+} from "@atproto/lexicon";
+import { AtpBaseClient, ComAtprotoRepoGetRecord } from "@atproto/api";
 import { verifyRecords } from "@atproto/repo";
-import { cache, Suspense } from "react";
+import React, { cache, Fragment, ReactNode, Suspense } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import { z } from "zod";
+import { InvalidNsidError, NSID } from "@atproto/syntax";
 
 export default async function RkeyPage(props: {
   params: Promise<{
@@ -35,12 +46,7 @@ export default async function RkeyPage(props: {
   );
 
   if (!getRecordResult.success) {
-    return (
-      <div>
-        🚨 Failed to fetch record:{" "}
-        {getRecordResult.knownError ?? getRecordResult.error}
-      </div>
-    );
+    return <div>🚨 Failed to fetch record: {getRecordResult.error}</div>;
   }
 
   return (
@@ -77,13 +83,37 @@ export default async function RkeyPage(props: {
       {params.collection === "com.atproto.lexicon.schema" ? (
         <ErrorBoundary fallback={<div>❌ Error verifying lexicon</div>}>
           <Suspense fallback={<div>Verifying lexicon...</div>}>
-            <LexiconVerification
+            <LexiconDefinitionVerification
               did={identityResult.didDocument.id}
               nsid={params.rkey}
             />
           </Suspense>
         </ErrorBoundary>
       ) : null}
+
+      <ErrorBoundary
+        fallback={
+          <details>
+            <summary>❌ Error validating lexicon</summary>
+            <div>An unknown error occurred</div>
+          </details>
+        }
+      >
+        <Suspense
+          fallback={
+            <details aria-busy>
+              <summary>🤔 Validating against lexicon...</summary>
+            </details>
+          }
+        >
+          <RecordValidation
+            did={didDocument.id}
+            collection={params.collection}
+            rkey={params.rkey}
+          />
+        </Suspense>
+      </ErrorBoundary>
+
       <JSONValue data={getRecordResult.record.value} repo={didDocument.id} />
       <small>
         <a href={getRecordResult.url} rel="ugc">
@@ -155,7 +185,7 @@ async function RecordVerificationBadge({
       !compareJson(
         // Converting to plain object because some values are classes (eg. CIDs)
         JSON.parse(JSON.stringify(claim.record)),
-        recordResult.record?.value,
+        JSON.parse(JSON.stringify(recordResult.record?.value)),
       )
     ) {
       return (
@@ -175,21 +205,18 @@ async function RecordVerificationBadge({
   return <span title="Valid record">🔒</span>;
 }
 
-const KNOWN_GET_RECORD_ERRORS = ["RecordNotFound", "InvalidRequest"] as const;
-
 type GetRecordResult =
   | {
       success: true;
       url: string;
       record: {
         uri: string;
-        cid: string;
-        value: JSONType;
+        cid?: string;
+        value: LexValue;
       };
     }
   | {
       success: false;
-      knownError: (typeof KNOWN_GET_RECORD_ERRORS)[number] | null;
       error: string;
     };
 
@@ -214,36 +241,33 @@ const getRecord = cache(
       throw new Error("No PDS found for DID");
     }
 
-    const getRecordUrl = new URL(`${pds}/xrpc/com.atproto.repo.getRecord`);
-    getRecordUrl.searchParams.set("repo", didDocument.id);
-    getRecordUrl.searchParams.set("collection", collection);
-    getRecordUrl.searchParams.set("rkey", rkey);
+    const atpClient = new AtpBaseClient((url, init) =>
+      fetch(new URL(url, pds), init),
+    );
 
-    const response = await fetch(getRecordUrl, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
+    let response;
 
-    if (!response.ok) {
-      const parsed = GetRecordFailure.parse(await response.json());
-      const knownError =
-        KNOWN_GET_RECORD_ERRORS.find((e) => e === parsed.error) ?? null;
+    try {
+      response = await atpClient.com.atproto.repo.getRecord({
+        repo: didDocument.id,
+        collection,
+        rkey,
+      });
+    } catch (e) {
+      if (e instanceof ComAtprotoRepoGetRecord.RecordNotFoundError) {
+        return {
+          success: false as const,
+          error: "RecordNotFound",
+        };
+      }
 
-      return {
-        success: false as const,
-        knownError,
-        error: `${response.statusText}. URL: ${getRecordUrl.toString()}`,
-      };
+      throw e;
     }
-
-    const record = RecordValueSchema.parse(await response.json());
 
     return {
       success: true as const,
-      record,
-      url: getRecordUrl.toString(),
+      record: response.data,
+      url: `${pds}/xrpc/com.atproto.repo.getRecord?repo=${didDocument.id}&collection=${collection}&rkey=${rkey}`,
     };
   },
 );
@@ -310,19 +334,309 @@ function compareJson(a: unknown, b: unknown): boolean {
   });
 }
 
-async function LexiconVerification({
+async function LexiconDefinitionVerification({
   nsid: nsidStr,
   did,
 }: {
   nsid: string;
   did: string;
 }) {
-  const result = await resolveNsid(did, nsidStr);
+  let nsid;
+  try {
+    nsid = NSID.parse(nsidStr);
+  } catch (e) {
+    if (e instanceof InvalidNsidError) {
+      return <div>❌ Invalid lexicon: {e.message}</div>;
+    } else {
+      throw e;
+    }
+  }
+  const result = await resolveNsidAuthority(nsid);
+
   return (
     <div style={{ marginTop: "1em" }}>
       {result.success
-        ? "✅ Verified lexicon"
+        ? result.authorityDid === did
+          ? "✅ Verified lexicon"
+          : `❌ Unverified lexicon: ${result.authorityDid}`
         : `❌ Unverified lexicon: ${result.error}`}
     </div>
+  );
+}
+
+async function RecordValidation({
+  did,
+  collection,
+  rkey,
+}: {
+  did: string;
+  collection: string;
+  rkey: string;
+}) {
+  const successfulSteps: ReactNode[] = [];
+
+  let nsid;
+  try {
+    nsid = NSID.parse(collection);
+  } catch (e) {
+    if (e instanceof InvalidNsidError) {
+      return (
+        <RecordValidationResult error={e.message} steps={successfulSteps} />
+      );
+    } else {
+      throw e;
+    }
+  }
+
+  const nsidAuthorityResult = await resolveNsidAuthority(nsid);
+
+  if (!nsidAuthorityResult.success) {
+    return (
+      <RecordValidationResult
+        error={nsidAuthorityResult.error}
+        steps={successfulSteps}
+      />
+    );
+  }
+
+  successfulSteps.push(
+    <li>Fetched authority: {nsidAuthorityResult.authorityDid}</li>,
+  );
+
+  const lexiconRecordResult = await getRecord(
+    nsidAuthorityResult.authorityDid,
+    "com.atproto.lexicon.schema",
+    nsid.toString(),
+  );
+
+  if (!lexiconRecordResult.success) {
+    return (
+      <details>
+        <summary>❌ Record not validated</summary>
+        <pre>{lexiconRecordResult.error}</pre>
+      </details>
+    );
+  }
+
+  successfulSteps.push(
+    <li>
+      Fetched lexicon doc{" "}
+      <Link href={`/at?u=${lexiconRecordResult.record.uri}`}>
+        {lexiconRecordResult.record.uri}
+      </Link>
+    </li>,
+  );
+
+  const schemaResult = lexiconDoc.safeParse(
+    omit(lexiconRecordResult.record.value as Record<string, unknown>, [
+      "$type",
+    ]),
+  );
+
+  if (!schemaResult.success) {
+    return (
+      <RecordValidationResult
+        error={
+          <>
+            Failed to parse lexicon doc: <pre>{schemaResult.error.message}</pre>
+          </>
+        }
+        steps={successfulSteps}
+      />
+    );
+  }
+
+  const resolvedLexicon = await resolveLexiconDocs(
+    nsidAuthorityResult.authorityDid,
+    nsid,
+  );
+
+  successfulSteps.push(
+    <li>
+      Resolved {resolvedLexicon.docs.length} docs:{" "}
+      <ul>
+        {resolvedLexicon.docs.map((doc, i) => (
+          <li key={i}>
+            <Link
+              href={`/at?u=at://${nsidAuthorityResult.authorityDid}/com.atproto.lexicon.schema/${doc.id}`}
+            >
+              {doc.id}
+            </Link>
+          </li>
+        ))}
+      </ul>
+    </li>,
+  );
+
+  if (resolvedLexicon.errors.length > 0) {
+    return (
+      <RecordValidationResult
+        error={
+          <ul>
+            {resolvedLexicon.errors.map((error, i) => (
+              <li key={i}>
+                <pre>
+                  {error.nsid.toString()}: {error.error}
+                </pre>
+              </li>
+            ))}
+          </ul>
+        }
+        steps={successfulSteps}
+      />
+    );
+  }
+
+  const lexicons = new Lexicons([schemaResult.data]);
+
+  const recordResult = await getRecord(did, collection, rkey);
+  if (!recordResult.success) {
+    // This should never happen, as we should have already fetched the record
+    throw new Error(recordResult.error);
+  }
+
+  const record = recordResult.record;
+
+  let validationResult;
+  try {
+    validationResult = lexicons.validate(collection, record.value);
+  } catch (e) {
+    return (
+      <RecordValidationResult
+        error={
+          e instanceof InvalidLexiconError ||
+          e instanceof LexiconDefNotFoundError
+            ? e.message
+            : "Unknown error occurred calling validate()"
+        }
+        steps={successfulSteps}
+      />
+    );
+  }
+
+  if (!validationResult.success) {
+    return (
+      <RecordValidationResult
+        error={validationResult.error.message}
+        steps={successfulSteps}
+      />
+    );
+  }
+
+  return <RecordValidationResult steps={successfulSteps} />;
+}
+
+function RecordValidationResult({
+  error,
+  steps,
+}: {
+  error?: ReactNode;
+  steps: ReactNode[];
+}) {
+  return (
+    <details>
+      <summary>
+        {error ? "❌ Record not validated" : "✅ Record validated"}
+      </summary>
+      <ul>
+        {steps.map((step, i) => (
+          <Fragment key={i}>{step}</Fragment>
+        ))}
+        {error ? <li>{error}</li> : null}
+      </ul>
+    </details>
+  );
+}
+
+function omit(
+  obj: Record<string, unknown>,
+  keys: string[],
+): Record<string, unknown> {
+  const copy = { ...obj };
+  for (const key of keys) {
+    delete copy[key];
+  }
+  return copy;
+}
+
+async function resolveLexiconDocs(
+  did: string,
+  nsid: NSID,
+): Promise<{
+  docs: LexiconDoc[];
+  errors: {
+    nsid: NSID;
+    error: string;
+  }[];
+}> {
+  const lexiconRecordResult = await getRecord(
+    did,
+    "com.atproto.lexicon.schema",
+    nsid.toString(),
+  );
+
+  if (!lexiconRecordResult.success) {
+    return {
+      docs: [],
+      errors: [
+        {
+          nsid,
+          error: lexiconRecordResult.error,
+        },
+      ],
+    };
+  }
+
+  const lexDoc = lexiconDoc.safeParse(
+    omit(lexiconRecordResult.record.value as Record<string, unknown>, [
+      "$type",
+    ]),
+  );
+
+  if (!lexDoc.success) {
+    return {
+      docs: [],
+      errors: [
+        {
+          nsid,
+          error: lexDoc.error.message,
+        },
+      ],
+    };
+  }
+
+  const externalRefs = Object.values(lexDoc.data.defs)
+    .flatMap((def) => {
+      if (def.type !== "record") {
+        return [];
+      }
+
+      return Object.values(def.record.properties).flatMap((property) => {
+        if (property.type === "ref" && !property.ref.startsWith(`${nsid}#`)) {
+          return property.ref;
+        }
+
+        if (property.type === "union") {
+          property.refs.filter((ref) => !ref.startsWith(`${nsid}#`));
+        }
+        return [];
+      });
+    })
+    .map((ref) => ref.replace(/^lex:/, ""));
+
+  return (
+    await Promise.all(
+      externalRefs.map((ref) => resolveLexiconDocs(did, NSID.parse(ref))),
+    )
+  ).reduce(
+    (acc, { docs, errors }) => {
+      acc.docs.push(...docs);
+      acc.errors.push(...errors);
+      return acc;
+    },
+    {
+      docs: [lexDoc.data],
+      errors: [],
+    },
   );
 }
