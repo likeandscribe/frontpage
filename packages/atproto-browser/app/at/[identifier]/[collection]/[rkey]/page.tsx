@@ -87,11 +87,15 @@ export default async function RkeyPage(props: {
         </ErrorBoundary>
       ) : null}
 
-      <RecordValidation
-        did={didDocument.id}
-        collection={params.collection}
-        rkey={params.rkey}
-      />
+      <ErrorBoundary fallback={<div>❌ Error validating record</div>}>
+        <Suspense fallback={<div>Validating record...</div>}>
+          <RecordValidation
+            did={didDocument.id}
+            collection={params.collection}
+            rkey={params.rkey}
+          />
+        </Suspense>
+      </ErrorBoundary>
 
       <JSONValue data={getRecordResult.record.value} repo={didDocument.id} />
       <small>
