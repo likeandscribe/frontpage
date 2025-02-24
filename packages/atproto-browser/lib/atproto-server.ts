@@ -118,6 +118,7 @@ export async function resolveNsid(
 
   const domainParts = nsid.segments.slice().reverse();
   const authority = "_lexicon." + domainParts.slice(1).join(".");
+
   try {
     const record = (await resolveTxt(authority))[0]?.join("");
     if (`did=${did}` !== record) {
@@ -125,8 +126,7 @@ export async function resolveNsid(
         success: false,
         error: "invalid",
       };
-    }
-    {
+    } else {
       return {
         success: true,
       };
