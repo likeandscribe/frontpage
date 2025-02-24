@@ -13,6 +13,7 @@
   "dependencies": {
     "@atproto/did": "^0.1.5",
     "@atproto/identity": "^0.4.6",
+    "@atproto/lexicon": "^0.4.2",
     "@atproto/repo": "^0.7.0",
     "@atproto/syntax": "^0.3.3",
     "hls.js": "^1.5.15",
