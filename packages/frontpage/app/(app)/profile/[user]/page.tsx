@@ -23,6 +23,7 @@ import { ReportDialogDropdownButton } from "../../_components/report-dialog";
 import { reportUserAction } from "@/lib/components/user-hover-card";
 import { Metadata } from "next";
 import { LinkAlternateAtUri } from "@/lib/components/link-alternate-at";
+import { isBanned } from "@/lib/data/db/user";
 
 type Params = {
   user: string;
@@ -33,7 +34,7 @@ export async function generateMetadata(props: {
 }): Promise<Metadata> {
   const params = await props.params;
   const did = await getDidFromHandleOrDid(params.user);
-  if (!did) {
+  if (!did || (await isBanned(did))) {
     notFound();
   }
   const [handle, profile] = await Promise.all([

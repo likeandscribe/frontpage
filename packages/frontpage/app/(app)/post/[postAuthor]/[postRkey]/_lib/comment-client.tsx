@@ -22,13 +22,7 @@ import {
   reportCommentAction,
 } from "./actions";
 import { ChatBubbleIcon, TrashIcon } from "@radix-ui/react-icons";
-import {
-  useActionState,
-  useRef,
-  useState,
-  useId,
-  startTransition,
-} from "react";
+import { useRef, useState, useId, startTransition, useTransition } from "react";
 import {
   VoteButton,
   VoteButtonState,
@@ -238,22 +232,32 @@ export function NewComment({
   textAreaRef?: React.RefObject<HTMLTextAreaElement>;
 }) {
   const [input, setInput] = useState("");
-  const [_, action, isPending] = useActionState(
-    createCommentAction.bind(null, { parentRkey, postRkey, postAuthorDid }),
-    undefined,
-  );
+  const action = createCommentAction.bind(null, {
+    parentRkey,
+    postRkey,
+    postAuthorDid,
+  });
+  const [isPending, startTransition] = useTransition();
   const id = useId();
+  const { toast } = useToast();
   const textAreaId = `${id}-comment`;
 
   return (
     <form
-      action={action}
       onSubmit={(event) => {
         event.preventDefault();
-        startTransition(() => {
-          action(new FormData(event.currentTarget));
+        startTransition(async () => {
+          const result = await action(new FormData(event.currentTarget));
           onActionDone?.();
-          setInput("");
+          if (result?.error) {
+            toast({
+              title: "Failed to create comment",
+              description: result.error,
+              type: "foreground",
+            });
+          } else {
+            setInput("");
+          }
         });
       }}
       aria-busy={isPending}
