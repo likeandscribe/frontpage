@@ -402,7 +402,12 @@ async function RecordValidation({
   }
 
   successfulSteps.push(
-    <li>Fetched authority: {nsidAuthorityResult.authorityDid}</li>,
+    <li>
+      Fetched authority:{" "}
+      <Link href={getAtUriPath({ host: nsidAuthorityResult.authorityDid })}>
+        {nsidAuthorityResult.authorityDid}
+      </Link>
+    </li>,
   );
 
   const lexiconRecordResult = await getRecord(
@@ -458,7 +463,7 @@ async function RecordValidation({
       Resolved {resolvedLexicon.successes.length} docs:{" "}
       <ul>
         {resolvedLexicon.successes.map((resolution, i) => (
-          <li key={i}>
+          <li key={resolution.uri.toString()}>
             <Link href={getAtUriPath(resolution.uri)}>
               {resolution.uri.rkey}
             </Link>
@@ -474,7 +479,7 @@ async function RecordValidation({
         error={
           <ul>
             {resolvedLexicon.errors.map((error, i) => (
-              <li key={i}>
+              <li key={error.nsid.toString()}>
                 <pre>
                   {error.nsid.toString()}: {error.error}
                 </pre>
