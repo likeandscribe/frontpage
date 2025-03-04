@@ -285,17 +285,6 @@ const JsonTypeSchema: z.ZodType<JSONType> = z.lazy(() =>
   ]),
 );
 
-const RecordValueSchema = z.object({
-  uri: z.string(),
-  cid: z.string(),
-  value: JsonTypeSchema,
-});
-
-const GetRecordFailure = z.object({
-  error: z.string(),
-  message: z.string().optional(),
-});
-
 /**
  * Compare objects deeply, ignoring key order.
  */
@@ -462,7 +451,7 @@ async function RecordValidation({
     <li>
       Resolved {resolvedLexicon.successes.length} docs:{" "}
       <ul>
-        {resolvedLexicon.successes.map((resolution, i) => (
+        {resolvedLexicon.successes.map((resolution) => (
           <li key={resolution.uri.toString()}>
             <Link href={getAtUriPath(resolution.uri)}>
               {resolution.uri.rkey}
@@ -478,7 +467,7 @@ async function RecordValidation({
       <RecordValidationResult
         error={
           <ul>
-            {resolvedLexicon.errors.map((error, i) => (
+            {resolvedLexicon.errors.map((error) => (
               <li key={error.nsid.toString()}>
                 <pre>
                   {error.nsid.toString()}: {error.error}
