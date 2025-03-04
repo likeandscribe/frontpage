@@ -47,6 +47,9 @@ importers:
       '@atproto/syntax':
         specifier: ^0.3.3
         version: 0.3.3
+      '@lpm/core':
+        specifier: npm:@jsr/lpm__core@^0.2.2
+        version: '@jsr/lpm__core@0.2.2'
       hls.js:
         specifier: ^1.5.15
         version: 1.5.15
@@ -423,6 +426,9 @@ packages:
 
   '@atproto/api@0.14.5':
     resolution: {integrity: sha512-UnMOJWtZepMhWRnpL7VASp9R2lPLFjQpSSIOOBIqqhprTUot1aIxyFmz1idI58bSl6SZVA7BWRH+i8XyXSKlNg==}
+
+  '@atproto/api@0.14.7':
+    resolution: {integrity: sha512-YG2kvAtsgtajLlLrorYuHcxGgepG0c/RUB2/iJyBnwKjGqDLG8joOETf38JSNiGzs6NJbNKa9NHG6BQKourxBA==}
 
   '@atproto/common-web@0.3.1':
     resolution: {integrity: sha512-N7wiTnus5vAr+lT//0y8m/FaHHLJ9LpGuEwkwDAeV3LCiPif4m/FS8x/QOYrx1PdZQwKso95RAPzCGWQBH5j6Q==}
@@ -1270,6 +1276,9 @@ packages:
   '@jridgewell/trace-mapping@0.3.25':
     resolution: {integrity: sha512-vNk6aEwybGtawWmy/PzwnGDOjCkLWSD2wqvjGGAgOAwCGWySYXfYoxt00IJkTF+8Lb57DwOb3Aa0o9CApepiYQ==}
 
+  '@jsr/lpm__core@0.2.2':
+    resolution: {integrity: sha512-Xe+pYrnwSkllp1ppoEJcZsxo2GVESBXzQYvuKa8TJG1LJoY0SJiYmfL4Jz9pYdN0zcsQHRZ1TVtymlncztj7mw==, tarball: https://npm.jsr.io/~/11/@jsr/lpm__core/0.2.2.tgz}
+
   '@libsql/client@0.14.0':
     resolution: {integrity: sha512-/9HEKfn6fwXB5aTEEoMeFh4CtG0ZzbncBb1e++OCdVpgKZ/xyMsIVYXm0w7Pv4RUel803vE6LwniB3PqD72R0Q==}
 
@@ -1338,6 +1347,9 @@ packages:
 
   '@microsoft/tsdoc@0.14.2':
     resolution: {integrity: sha512-9b8mPpKrfeGRuhFH5iO1iwCLeIIsV6+H1sRfxbkoGXIyQE2BTsPd9zqSqQJ+pv5sJ/hT5M1zvOFL02MnEezFug==}
+
+  '@needle-di/core@0.11.2':
+    resolution: {integrity: sha512-QwvlSTfpobIGGEmO/iMjMcL9lPf53cSV8mQVTzMGO4IkcyOQEK3nn7d6fkUOaaefwyiO4HGLEMl5VDaslnUuUg==}
 
   '@neon-rs/load@0.0.4':
     resolution: {integrity: sha512-kTPhdZyTQxB+2wpiRcFWrDcejc4JI6tkPuS7UZCG4l6Zvc5kU/gGQ/ozvHTh1XR5tS+UlfAfGuPajjzQjCiHCw==}
@@ -5177,6 +5189,17 @@ snapshots:
       tlds: 1.255.0
       zod: 3.23.8
 
+  '@atproto/api@0.14.7':
+    dependencies:
+      '@atproto/common-web': 0.4.0
+      '@atproto/lexicon': 0.4.7
+      '@atproto/syntax': 0.3.3
+      '@atproto/xrpc': 0.6.9
+      await-lock: 2.2.2
+      multiformats: 9.9.0
+      tlds: 1.255.0
+      zod: 3.23.8
+
   '@atproto/common-web@0.3.1':
     dependencies:
       graphemer: 1.4.0
@@ -5914,6 +5937,14 @@ snapshots:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.4.15
 
+  '@jsr/lpm__core@0.2.2':
+    dependencies:
+      '@atproto/api': 0.14.7
+      '@atproto/identity': 0.4.6
+      '@atproto/lexicon': 0.4.7
+      '@atproto/syntax': 0.3.3
+      '@needle-di/core': 0.11.2
+
   '@libsql/client@0.14.0(bufferutil@4.0.8)(utf-8-validate@6.0.3)':
     dependencies:
       '@libsql/core': 0.14.0
@@ -5984,6 +6015,8 @@ snapshots:
       resolve: 1.19.0
 
   '@microsoft/tsdoc@0.14.2': {}
+
+  '@needle-di/core@0.11.2': {}
 
   '@neon-rs/load@0.0.4': {}
 

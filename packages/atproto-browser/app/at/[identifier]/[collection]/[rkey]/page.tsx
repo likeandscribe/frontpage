@@ -15,7 +15,9 @@ import { verifyRecords } from "@atproto/repo";
 import React, { cache, Fragment, ReactNode, Suspense } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import { z } from "zod";
-import { InvalidNsidError, NSID } from "@atproto/syntax";
+import { AtUri, InvalidNsidError, NSID } from "@atproto/syntax";
+import { resolveNSIDs } from "@lpm/core";
+import { getAtUriPath } from "@/lib/util";
 
 export default async function RkeyPage(props: {
   params: Promise<{
@@ -453,14 +455,12 @@ async function RecordValidation({
 
   successfulSteps.push(
     <li>
-      Resolved {resolvedLexicon.docs.length} docs:{" "}
+      Resolved {resolvedLexicon.successes.length} docs:{" "}
       <ul>
-        {resolvedLexicon.docs.map((doc, i) => (
+        {resolvedLexicon.successes.map((resolution, i) => (
           <li key={i}>
-            <Link
-              href={`/at?u=at://${nsidAuthorityResult.authorityDid}/com.atproto.lexicon.schema/${doc.id}`}
-            >
-              {doc.id}
+            <Link href={getAtUriPath(resolution.uri)}>
+              {resolution.uri.rkey}
             </Link>
           </li>
         ))}
@@ -487,7 +487,7 @@ async function RecordValidation({
     );
   }
 
-  const lexicons = new Lexicons([schemaResult.data]);
+  const lexicons = new Lexicons(resolvedLexicon.successes.map((r) => r.doc));
 
   const recordResult = await getRecord(did, collection, rkey);
   if (!recordResult.success) {
@@ -506,7 +506,7 @@ async function RecordValidation({
         error={
           e instanceof InvalidLexiconError ||
           e instanceof LexiconDefNotFoundError
-            ? e.message
+            ? `Error validating record: ${e.message}`
             : "Unknown error occurred calling validate()"
         }
         steps={successfulSteps}
@@ -563,80 +563,41 @@ async function resolveLexiconDocs(
   did: string,
   nsid: NSID,
 ): Promise<{
-  docs: LexiconDoc[];
+  successes: Array<{
+    doc: LexiconDoc;
+    uri: AtUri;
+  }>;
   errors: {
     nsid: NSID;
     error: string;
   }[];
 }> {
-  const lexiconRecordResult = await getRecord(
-    did,
-    "com.atproto.lexicon.schema",
-    nsid.toString(),
-  );
-
-  if (!lexiconRecordResult.success) {
-    return {
-      docs: [],
-      errors: [
-        {
-          nsid,
-          error: lexiconRecordResult.error,
-        },
-      ],
-    };
+  const resolutions = [];
+  for await (const resolution of resolveNSIDs([nsid.toString()])) {
+    resolutions.push(resolution);
   }
 
-  const lexDoc = lexiconDoc.safeParse(
-    omit(lexiconRecordResult.record.value as Record<string, unknown>, [
-      "$type",
-    ]),
+  const successes = resolutions.filter((resolution) => resolution.success);
+  const errors = resolutions
+    .filter((resolution) => !resolution.success)
+    .map((resolution) => ({
+      error: resolution.errorCode,
+      nsid: resolution.nsid,
+    }));
+
+  const mainResolution = resolutions.find(
+    (resolution) =>
+      resolution.success &&
+      resolution.nsid.toString() === nsid.toString() &&
+      resolution.uri.host === did,
   );
 
-  if (!lexDoc.success) {
-    return {
-      docs: [],
-      errors: [
-        {
-          nsid,
-          error: lexDoc.error.message,
-        },
-      ],
-    };
+  if (!mainResolution) {
+    throw new Error("Main resolution not found");
   }
 
-  const externalRefs = Object.values(lexDoc.data.defs)
-    .flatMap((def) => {
-      if (def.type !== "record") {
-        return [];
-      }
-
-      return Object.values(def.record.properties).flatMap((property) => {
-        if (property.type === "ref" && !property.ref.startsWith(`${nsid}#`)) {
-          return property.ref;
-        }
-
-        if (property.type === "union") {
-          property.refs.filter((ref) => !ref.startsWith(`${nsid}#`));
-        }
-        return [];
-      });
-    })
-    .map((ref) => ref.replace(/^lex:/, ""));
-
-  return (
-    await Promise.all(
-      externalRefs.map((ref) => resolveLexiconDocs(did, NSID.parse(ref))),
-    )
-  ).reduce(
-    (acc, { docs, errors }) => {
-      acc.docs.push(...docs);
-      acc.errors.push(...errors);
-      return acc;
-    },
-    {
-      docs: [lexDoc.data],
-      errors: [],
-    },
-  );
+  return {
+    successes,
+    errors,
+  };
 }
