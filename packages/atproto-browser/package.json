@@ -35,7 +35,7 @@
     "@types/react": "^18.3.10",
     "@types/react-dom": "^18.3.0",
     "eslint": "^8",
-    "eslint-config-next": "15.0.3",
+    "eslint-config-next": "catalog:",
     "tsx": "^4.16.5",
     "typescript": "^5",
     "vite-tsconfig-paths": "^4.3.2",
