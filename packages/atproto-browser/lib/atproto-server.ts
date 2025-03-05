@@ -85,8 +85,9 @@ export async function resolveIdentity(
   const handle = getHandle(didDocument);
   if (!handle) {
     return {
-      success: false,
-      error: `Could not find handle in DID document: ${didStr}`,
+      success: true,
+      didDocument,
+      handle: null,
     };
   }
 
