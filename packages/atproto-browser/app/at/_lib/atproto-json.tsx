@@ -36,7 +36,7 @@ function JSONString({ data }: { data: string }) {
       ) : URL.canParse(data) ? (
         <>
           &quot;
-          <a href={data} rel="noopener noreferer">
+          <a href={data} rel="noopener noreferer ugc">
             {data}
           </a>
           &quot;

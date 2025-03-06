@@ -30,6 +30,8 @@ export const listRecords = cache(
   },
 );
 
+const DESCRIBE_REPO_KNOWN_ERRORS = ["RepoTakenDown", "RepoNotFound"] as const;
+
 export const describeRepo = cache(async (pds: string, repo: string) => {
   const describeRepoUrl = new URL(`${pds}/xrpc/com.atproto.repo.describeRepo`);
   describeRepoUrl.searchParams.set("repo", repo);
@@ -39,11 +41,33 @@ export const describeRepo = cache(async (pds: string, repo: string) => {
   }
   const body = await res.json();
 
-  if (res.status === 400 && "error" in body && body.error === "RepoNotFound") {
-    return null;
+  if (res.status >= 500) {
+    throw new Error(`Failed to describe repo: ${res.statusText}`);
   }
 
-  return body as {
-    collections: string[];
+  if (!res.ok) {
+    const parsed = DescribeRespoFailure.parse(body);
+    const knownError =
+      DESCRIBE_REPO_KNOWN_ERRORS.find((e) => e === parsed.error) ?? null;
+
+    return {
+      success: false as const,
+      knownError,
+      ...parsed,
+    };
+  }
+
+  return {
+    success: true as const,
+    ...DescribeRepoSuccess.parse(body),
   };
+});
+
+const DescribeRepoSuccess = z.object({
+  collections: z.array(z.string()),
+});
+
+const DescribeRespoFailure = z.object({
+  error: z.string(),
+  message: z.string().optional(),
 });

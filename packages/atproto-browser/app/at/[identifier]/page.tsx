@@ -8,7 +8,6 @@ import { resolveIdentity } from "@/lib/atproto-server";
 import { AtUri } from "@atproto/syntax";
 import { DidCollections } from "../_lib/collection-server";
 import { getPds } from "@atproto/identity";
-import { describeRepo } from "@/lib/atproto";
 import { isDidWeb } from "@atproto/did";
 
 export default async function IdentifierPage(props: {
@@ -21,9 +20,6 @@ export default async function IdentifierPage(props: {
   }
 
   const pds = getPds(identityResult.didDocument);
-  const repo = pds
-    ? await describeRepo(pds, identityResult.didDocument.id)
-    : null;
 
   return (
     <>
@@ -36,8 +32,6 @@ export default async function IdentifierPage(props: {
 
       {!pds ? (
         <p>🚨 Failed to fetch collections (No PDS).</p>
-      ) : !repo ? (
-        <p>🚨 Failed to fetch collections (repo not found)</p>
       ) : (
         <ErrorBoundary fallback={<p>🚨 Failed to fetch collections.</p>}>
           <DidCollections identifier={identityResult.didDocument.id} />

@@ -7,9 +7,10 @@ import {
 } from "@atproto/identity";
 import { cache } from "react";
 import { unstable_cache as nextCache } from "next/cache";
-import { isValidHandle } from "@atproto/syntax";
+import { isValidHandle, NSID, InvalidNsidError } from "@atproto/syntax";
 import { isDid } from "@atproto/did";
 import { domainToASCII } from "url";
+import { resolveTxt } from "node:dns/promises";
 
 function timeoutWith<T>(
   timeout: number,
@@ -84,8 +85,9 @@ export async function resolveIdentity(
   const handle = getHandle(didDocument);
   if (!handle) {
     return {
-      success: false,
-      error: `Could not find handle in DID document: ${didStr}`,
+      success: true,
+      didDocument,
+      handle: null,
     };
   }
 
@@ -98,4 +100,53 @@ export async function resolveIdentity(
     didDocument: didDocument,
     handle: didFromHandle === didDocument.id ? handle : null,
   };
+}
+
+export async function resolveNsid(
+  did: string,
+  nsidStr: string,
+): Promise<{ success: false; error: string } | { success: true }> {
+  let nsid;
+  try {
+    nsid = NSID.parse(nsidStr);
+  } catch (e) {
+    if (e instanceof InvalidNsidError) {
+      return { success: false, error: e.message };
+    } else {
+      throw e;
+    }
+  }
+
+  const domainParts = nsid.segments.slice().reverse();
+  const authority = "_lexicon." + domainParts.slice(1).join(".");
+
+  try {
+    const record = (await resolveTxt(authority))[0]?.join("");
+    if (`did=${did}` !== record) {
+      return {
+        success: false,
+        error: "invalid",
+      };
+    } else {
+      return {
+        success: true,
+      };
+    }
+  } catch (e) {
+    const errorMsg =
+      isObject(e) && "code" in e && typeof e.code === "string"
+        ? e.code
+        : e instanceof Error
+          ? e.message
+          : `error`;
+
+    return {
+      success: false,
+      error: `${errorMsg} (${authority})`,
+    };
+  }
+}
+
+function isObject(value: unknown): value is Record<string, unknown> {
+  return value !== null && typeof value === "object";
 }

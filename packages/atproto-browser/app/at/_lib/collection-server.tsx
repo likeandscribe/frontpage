@@ -14,7 +14,17 @@ export async function DidCollections({ identifier }: { identifier: string }) {
     throw new Error(`No PDS found for DID: ${didDocument.id}`);
   }
 
-  const { collections } = (await describeRepo(pds, didDocument.id))!;
+  const repoResult = await describeRepo(pds, didDocument.id);
+  if (!repoResult.success) {
+    return (
+      <p>
+        🚨 Failed to fetch collections (
+        {repoResult.knownError ?? repoResult.error}).
+      </p>
+    );
+  }
+
+  const { collections } = repoResult;
 
   return (
     <ul>
