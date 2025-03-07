@@ -1,6 +1,6 @@
 import { getAtUriPath, isNotNull, utcDateFormatter } from "@/lib/util";
 import Link from "@/lib/link";
-import { Fragment, Suspense } from "react";
+import { cache, Fragment, Suspense } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import { z } from "zod";
 import { DidDoc, DidHandle } from "../_lib/did-components";
@@ -41,15 +41,22 @@ export default async function IdentifierPage(props: {
       <h2>DID Doc</h2>
       <DidDoc did={identityResult.didDocument.id} />
 
-      <h2>History</h2>
-      {isDidWeb(identityResult.didDocument.id) ? (
-        <p>🚨 Failed to fetch history. (No history on did:web)</p>
-      ) : (
-        <Suspense fallback={<p>Loading history...</p>}>
-          <ErrorBoundary fallback={<p>🚨 Failed to fetch history.</p>}>
-            <DidHistory identifier={params.identifier} />
-          </ErrorBoundary>
-        </Suspense>
+      {isDidWeb(identityResult.didDocument.id) ? null : (
+        <>
+          <h2>Rotation Keys</h2>
+          <Suspense fallback={<p>Loading rotation keys...</p>}>
+            <ErrorBoundary fallback={<p>🚨 Failed to fetch rotation keys.</p>}>
+              <DidRotationKeys identifier={params.identifier} />
+            </ErrorBoundary>
+          </Suspense>
+
+          <h2>History</h2>
+          <Suspense fallback={<p>Loading history...</p>}>
+            <ErrorBoundary fallback={<p>🚨 Failed to fetch history.</p>}>
+              <DidHistory identifier={params.identifier} />
+            </ErrorBoundary>
+          </Suspense>
+        </>
       )}
     </>
   );
@@ -336,3 +343,35 @@ const PlcLogAuditResponse = z.array(
     ]),
   }),
 );
+
+const DidDataResponse = z.object({
+  rotationKeys: z.array(z.string()),
+});
+
+const getDidData = cache(async (identifier: string) => {
+  const identity = await resolveIdentity(identifier);
+
+  if (!identity.success) {
+    // Should have already been handled
+    throw new Error(identity.error);
+  }
+
+  const did = identity.didDocument.id;
+  const response = await fetch(`https://plc.directory/${did}/data`);
+
+  return DidDataResponse.parse(await response.json());
+});
+
+async function DidRotationKeys({ identifier }: { identifier: string }) {
+  const data = await getDidData(identifier);
+
+  return (
+    <ul>
+      {data.rotationKeys.map((key) => (
+        <li key={key}>
+          <code>{key}</code>
+        </li>
+      ))}
+    </ul>
+  );
+}
