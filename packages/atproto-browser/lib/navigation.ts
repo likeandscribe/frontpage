@@ -1,12 +1,13 @@
 import "server-only";
 
 import { getAtUriPath } from "./util";
-import { isValidHandle } from "@atproto/syntax";
+import { isValidHandle, NSID } from "@atproto/syntax";
 import { redirect } from "next/navigation";
 import { parse as parseHtml } from "node-html-parser";
 import { parse as parseLinkHeader } from "http-link-header";
 import { domainToASCII } from "url";
 import { isDid } from "@atproto/did";
+import { getRegistry as getLexiconRegistry } from "@lpm/core";
 
 export async function navigateAtUri(input: string) {
   // Remove all zero-width characters and weird control codes from the input
@@ -32,12 +33,9 @@ export async function navigateAtUri(input: string) {
     sanitizedInput.startsWith("http://") ||
     sanitizedInput.startsWith("https://")
       ? await getAtUriFromHttp(sanitizedInput)
-      : parseUri(
-          // Add at:// to start if it's missing
-          sanitizedInput.startsWith("at://")
-            ? sanitizedInput
-            : `at://${sanitizedInput}`,
-        );
+      : isLexUri(sanitizedInput)
+        ? await getAtUriFromLexUri(sanitizedInput)
+        : parseUri(sanitizedInput);
 
   if ("error" in result) {
     return result;
@@ -167,4 +165,32 @@ function parseHandle(input: string): string | null {
   }
   // We check for the punycode encoded version of the handle but always return the preserved input so that we can display the original handle
   return handle;
+}
+
+async function getAtUriFromLexUri(
+  uri: `lex:${string}`,
+): Promise<UriParseResult> {
+  const nsidStr = uri.slice(4);
+  if (!NSID.isValid(nsidStr)) {
+    return {
+      error: `Invalid NSID: ${nsidStr}`,
+    };
+  }
+  const nsid = NSID.parse(uri.slice(4));
+  const registry = getLexiconRegistry();
+  const node = registry.get(nsid);
+  const resolution = await node.resolve();
+  if (!resolution.success) {
+    return {
+      error: `Could not resolve NSID(${nsidStr}): ${resolution.errorCode}`,
+    };
+  }
+
+  return {
+    uri: resolution.uri,
+  };
+}
+
+function isLexUri(uri: string): uri is `lex:${string}` {
+  return uri.startsWith("lex:");
 }
