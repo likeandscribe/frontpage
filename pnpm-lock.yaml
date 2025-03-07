@@ -48,8 +48,8 @@ importers:
         specifier: ^0.3.3
         version: 0.3.3
       '@lpm/core':
-        specifier: npm:@jsr/lpm__core@^0.2.4
-        version: '@jsr/lpm__core@0.2.4'
+        specifier: npm:@jsr/lpm__core@^0.2.8
+        version: '@jsr/lpm__core@0.2.8'
       hls.js:
         specifier: ^1.5.15
         version: 1.5.15
@@ -1276,8 +1276,8 @@ packages:
   '@jridgewell/trace-mapping@0.3.25':
     resolution: {integrity: sha512-vNk6aEwybGtawWmy/PzwnGDOjCkLWSD2wqvjGGAgOAwCGWySYXfYoxt00IJkTF+8Lb57DwOb3Aa0o9CApepiYQ==}
 
-  '@jsr/lpm__core@0.2.4':
-    resolution: {integrity: sha512-E2qURmHbtBU4vEz2VgXwj0oTAAzkoTFYO/b3kMhztnXCxd6eDO6tpmGsyvGwWdP6AU4Ms/UeNCxSdZvmrtrakg==, tarball: https://npm.jsr.io/~/11/@jsr/lpm__core/0.2.4.tgz}
+  '@jsr/lpm__core@0.2.8':
+    resolution: {integrity: sha512-43OdY4DEShjB5wwpP2152w0gWxs5soLxgWVrOIABWcyIZaKMGZf3T05Og7BZpJDvij4Nrv3yMP/gAVFRO1GeWQ==, tarball: https://npm.jsr.io/~/11/@jsr/lpm__core/0.2.8.tgz}
 
   '@libsql/client@0.14.0':
     resolution: {integrity: sha512-/9HEKfn6fwXB5aTEEoMeFh4CtG0ZzbncBb1e++OCdVpgKZ/xyMsIVYXm0w7Pv4RUel803vE6LwniB3PqD72R0Q==}
@@ -5937,7 +5937,7 @@ snapshots:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.4.15
 
-  '@jsr/lpm__core@0.2.4':
+  '@jsr/lpm__core@0.2.8':
     dependencies:
       '@atproto/api': 0.14.7
       '@atproto/identity': 0.4.6
