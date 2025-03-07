@@ -7,7 +7,7 @@ import {
 } from "@atproto/identity";
 import { cache } from "react";
 import { unstable_cache as nextCache } from "next/cache";
-import { isValidHandle, NSID, InvalidNsidError } from "@atproto/syntax";
+import { isValidHandle, NSID } from "@atproto/syntax";
 import { isDid } from "@atproto/did";
 import { domainToASCII } from "url";
 import { resolveTxt } from "node:dns/promises";

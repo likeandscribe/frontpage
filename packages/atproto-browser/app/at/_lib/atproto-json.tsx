@@ -1,6 +1,5 @@
 import { isDid } from "@atproto/did";
 import Link from "@/lib/link";
-import { AtBlob } from "../../../lib/at-blob";
 import { getAtUriPath } from "@/lib/util";
 import { AtUri } from "@atproto/syntax";
 import { VideoEmbed } from "./video-embed";
@@ -143,23 +142,59 @@ export function JSONValue({ data, repo }: { data: LexValue; repo: string }) {
   if (Array.isArray(data)) {
     return <JSONArray data={data} repo={repo} />;
   }
+
   if (data instanceof BlobRef) {
-    return (
-      <>
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={`https://cdn.bsky.app/img/feed_thumbnail/plain/${repo}/${data.ref}@jpeg`}
-          alt=""
-          width={200}
-        />
-        <details>
-          <summary>View blob content</summary>
-          <JSONObject data={data.toJSON() as any} repo={repo} />
-        </details>
-      </>
+    const blobContent = (
+      <JSONObject
+        data={
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          data.toJSON() as any
+        }
+        repo={repo}
+      />
     );
+
+    if (data.mimeType.startsWith("image/")) {
+      return (
+        <>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={`https://cdn.bsky.app/img/feed_thumbnail/plain/${repo}/${data.ref}@jpeg`}
+            alt=""
+            width={200}
+          />
+          <details>
+            <summary>View blob content</summary>
+            {blobContent}
+          </details>
+        </>
+      );
+    }
+
+    if (data.mimeType === "video/mp4") {
+      return (
+        <>
+          <ErrorBoundary fallback={<VideoEmbedWrapper />}>
+            <VideoEmbed cid={data.ref.toString()} did={repo} />
+          </ErrorBoundary>
+          <details>
+            <summary>View blob content</summary>
+            {blobContent}
+          </details>
+        </>
+      );
+    }
   }
-  return <JSONObject data={data} repo={repo} />;
+
+  return (
+    <JSONObject
+      data={
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        data as any
+      }
+      repo={repo}
+    />
+  );
 }
 
 export type JSONType =
