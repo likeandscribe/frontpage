@@ -2,6 +2,7 @@ import { cache } from "react";
 import { z } from "zod";
 
 import { FETCH_LIMIT } from "@/app/consts";
+import { AtpBaseClient } from "@atproto/api";
 
 const ListRecordsResponse = z.object({
   records: z.array(
@@ -15,18 +16,18 @@ const ListRecordsResponse = z.object({
 
 export const listRecords = cache(
   async (pds: string, repo: string, collection: string, cursor?: string) => {
-    const listRecordsUrl = new URL(`${pds}/xrpc/com.atproto.repo.listRecords`);
-    listRecordsUrl.searchParams.set("repo", repo);
-    listRecordsUrl.searchParams.set("collection", collection);
-    listRecordsUrl.searchParams.set("limit", FETCH_LIMIT);
-    if (cursor) {
-      listRecordsUrl.searchParams.set("cursor", cursor);
+    const client = new AtpBaseClient(pds);
+    const response = await client.com.atproto.repo.listRecords({
+      limit: Number(FETCH_LIMIT),
+      repo,
+      collection,
+      cursor,
+    });
+    if (!response.success) {
+      throw new Error(`Failed to list records.`);
     }
-    const res = await fetch(listRecordsUrl.toString());
-    if (!res.ok) {
-      throw new Error(`Failed to list records: ${res.statusText}`);
-    }
-    return ListRecordsResponse.parse(await res.json());
+
+    return ListRecordsResponse.parse(JSON.parse(JSON.stringify(response.data)));
   },
 );
 
