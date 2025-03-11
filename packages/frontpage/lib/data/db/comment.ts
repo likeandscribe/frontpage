@@ -1,12 +1,19 @@
 import "server-only";
 import { cache } from "react";
 import { db } from "@/lib/db";
-import { eq, sql, desc, and, InferSelectModel, isNotNull } from "drizzle-orm";
+import {
+  eq,
+  sql,
+  desc,
+  and,
+  InferSelectModel,
+  isNotNull,
+  ne,
+} from "drizzle-orm";
 import * as schema from "@/lib/schema";
 import { getUser, isAdmin } from "../user";
 import { DID } from "../atproto/did";
-import * as atprotoComment from "../atproto/comment";
-import { Prettify } from "@/lib/utils";
+import { invariant, Prettify } from "@/lib/utils";
 import {
   deleteCommentAggregateTrigger,
   newCommentAggregateTrigger,
@@ -174,11 +181,31 @@ export const getComment = cache(async (rkey: string) => {
   return rows[0] ?? null;
 });
 
-export async function uncached_doesCommentExist(rkey: string) {
+type UpdateCommentInput = Partial<Omit<CommentRow, "id">> & {
+  rkey: string;
+  authorDid: DID;
+};
+
+export const updateComment = async (input: UpdateCommentInput) => {
+  const { rkey, authorDid, ...updateFields } = input;
+  await db
+    .update(schema.Comment)
+    .set(updateFields)
+    .where(
+      and(
+        eq(schema.Comment.rkey, rkey),
+        eq(schema.Comment.authorDid, authorDid),
+      ),
+    );
+};
+
+export async function uncached_doesCommentExist(repo: DID, rkey: string) {
   const row = await db
     .select({ id: schema.Comment.id })
     .from(schema.Comment)
-    .where(eq(schema.Comment.rkey, rkey))
+    .where(
+      and(eq(schema.Comment.rkey, rkey), eq(schema.Comment.authorDid, repo)),
+    )
     .limit(1);
 
   return Boolean(row[0]);
@@ -253,63 +280,85 @@ export async function moderateComment({
     );
 }
 
-export type UnauthedCreateCommentInput = {
-  cid: string;
-  comment: atprotoComment.Comment;
-  repo: DID;
+export type CreateCommentInput = {
+  cid?: string;
+  authorDid: DID;
   rkey: string;
+  content: string;
+  createdAt: Date;
+  parent?: {
+    authorDid: DID;
+    rkey: string;
+  };
+  post: {
+    authorDid: DID;
+    rkey: string;
+  };
 };
 
-export async function unauthed_createComment({
+export async function createComment({
   cid,
-  comment,
-  repo,
+  authorDid,
   rkey,
-}: UnauthedCreateCommentInput) {
+  content,
+  createdAt,
+  parent,
+  post,
+}: CreateCommentInput) {
   return await db.transaction(async (tx) => {
-    const parentComment =
-      comment.parent != null
-        ? (
-            await tx
-              .select()
-              .from(schema.Comment)
-              .where(eq(schema.Comment.cid, comment.parent.cid))
-          )[0]
-        : null;
-
-    const post = (
+    const existingPost = (
       await tx
-        .select()
+        .select({ id: schema.Post.id, status: schema.Post.status })
         .from(schema.Post)
-        .where(eq(schema.Post.cid, comment.post.cid))
+        .where(
+          and(
+            eq(schema.Post.rkey, post.rkey),
+            eq(schema.Post.authorDid, post.authorDid),
+          ),
+        )
+        .limit(1)
     )[0];
 
-    if (!post) {
-      throw new Error("Post not found");
+    let existingParent;
+    if (parent) {
+      existingParent = (
+        await tx
+          .select({ id: schema.Comment.id })
+          .from(schema.Comment)
+          .where(
+            and(
+              eq(schema.Comment.rkey, parent.rkey),
+              eq(schema.Comment.authorDid, parent.authorDid),
+            ),
+          )
+          .limit(1)
+      )[0];
     }
 
-    if (post.status !== "live") {
-      throw new Error(`[naughty] Cannot comment on deleted post. ${repo}`);
+    invariant(existingPost, "Post not found");
+
+    if (existingPost.status !== "live") {
+      throw new Error(`[naughty] Cannot comment on deleted post. ${authorDid}`);
     }
+
     const [insertedComment] = await tx
       .insert(schema.Comment)
       .values({
-        cid,
+        cid: cid ?? "",
         rkey,
-        body: comment.content,
-        postId: post.id,
-        authorDid: repo,
-        createdAt: new Date(comment.createdAt),
-        parentCommentId: parentComment?.id ?? null,
+        body: content,
+        postId: existingPost.id,
+        authorDid,
+        createdAt: createdAt,
+        parentCommentId: existingParent?.id ?? null,
       })
       .returning({
         id: schema.Comment.id,
         postId: schema.Comment.postId,
+        parentCommentId: schema.Comment.parentCommentId,
       });
 
-    if (!insertedComment) {
-      throw new Error("Failed to insert comment");
-    }
+    invariant(insertedComment, "Failed to insert comment");
 
     await newCommentAggregateTrigger(
       insertedComment.postId,
@@ -317,49 +366,40 @@ export async function unauthed_createComment({
       tx,
     );
 
-    return {
-      id: insertedComment.id,
-      parent: parentComment
-        ? {
-            id: parentComment.id,
-            authorDid: parentComment.authorDid,
-          }
-        : null,
-      post: {
-        authordid: post.authorDid,
-      },
-    };
+    return insertedComment;
   });
 }
 
-export type UnauthedDeleteCommentInput = {
+export type DeleteCommentInput = {
   rkey: string;
-  repo: DID;
+  authorDid: DID;
 };
 
-export async function unauthed_deleteComment({
-  rkey,
-  repo,
-}: UnauthedDeleteCommentInput) {
+export async function deleteComment({ rkey, authorDid }: DeleteCommentInput) {
   await db.transaction(async (tx) => {
-    const [deletedComment] = await tx
+    const [updatedComment] = await tx
       .update(schema.Comment)
       .set({ status: "deleted" })
       .where(
-        and(eq(schema.Comment.rkey, rkey), eq(schema.Comment.authorDid, repo)),
+        and(
+          eq(schema.Comment.rkey, rkey),
+          eq(schema.Comment.authorDid, authorDid),
+          ne(schema.Comment.status, "deleted"),
+        ),
       )
       .returning({
         id: schema.Comment.id,
         postId: schema.Comment.postId,
       });
 
-    if (!deletedComment) {
-      throw new Error("Failed to delete comment");
-    }
+    invariant(
+      updatedComment,
+      "Failed to update comment status to deleted or comment not found",
+    );
 
     await deleteCommentAggregateTrigger(
-      deletedComment.postId,
-      deletedComment.id,
+      updatedComment.postId,
+      updatedComment.id,
       tx,
     );
   });
