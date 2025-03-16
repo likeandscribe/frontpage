@@ -17,6 +17,7 @@ import {
   unauthed_createCommentVote,
 } from "@/lib/data/db/vote";
 import { unauthed_createNotification } from "@/lib/data/db/notification";
+import { isBanned } from "@/lib/data/db/user";
 
 export async function POST(request: Request) {
   const auth = request.headers.get("Authorization");
@@ -31,6 +32,10 @@ export async function POST(request: Request) {
   }
 
   const { ops, repo, seq } = commit.data;
+  if (await isBanned(repo)) {
+    throw new Error("[naughty] User is banned");
+  }
+
   const service = await getPdsUrl(repo);
   if (!service) {
     throw new Error("No AtprotoPersonalDataServer service found");
