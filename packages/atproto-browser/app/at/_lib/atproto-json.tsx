@@ -6,6 +6,7 @@ import { VideoEmbed } from "./video-embed";
 import { ErrorBoundary } from "react-error-boundary";
 import { VideoEmbedWrapper } from "./video-embed-client";
 import { BlobRef, LexValue } from "@atproto/lexicon";
+import { CID } from "multiformats/cid";
 
 function naiveAtUriCheck(atUri: string) {
   if (!atUri.startsWith("at://")) {
@@ -184,6 +185,16 @@ export function JSONValue({ data, repo }: { data: LexValue; repo: string }) {
         </>
       );
     }
+
+    return blobContent;
+  }
+
+  if (data instanceof CID) {
+    return (
+      <pre>
+        <Link href={`/blob/${repo}/${data.toString()}`}>{data.toString()}</Link>
+      </pre>
+    );
   }
 
   return (

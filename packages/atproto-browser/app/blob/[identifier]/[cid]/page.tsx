@@ -69,7 +69,14 @@ export default async function BlobPage(props: {
     );
   }
 
-  return <p>Unsupported content type: {contentType}</p>;
+  return (
+    <p>
+      Unsupported content type: {contentType}.{" "}
+      <a target="download" href={getBlobUrl.toString()}>
+        Download instead.
+      </a>
+    </p>
+  );
 }
 
 function Wrapper({ children }: { children: ReactNode }) {
