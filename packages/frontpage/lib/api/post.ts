@@ -3,7 +3,6 @@ import * as db from "../data/db/post";
 import * as atproto from "../data/atproto/post";
 import { ensureUser, getBlueskyProfile } from "../data/user";
 import { DataLayerError } from "../data/error";
-import { sendDiscordMessage } from "../discord";
 import { invariant } from "../utils";
 import { TID } from "@atproto/common-web";
 import { DID } from "../data/atproto/did";
@@ -43,32 +42,6 @@ export async function createPost({
     invariant(cid, "Failed to create comment, cid missing");
 
     await db.updatePost({ authorDid: user.did, rkey, cid });
-
-    const bskyProfile = await getBlueskyProfile(user.did);
-
-    await sendDiscordMessage({
-      embeds: [
-        {
-          title: "New post on Frontpage",
-          description: title,
-          url: `https://frontpage.fyi/post/${user.did}/${rkey}`,
-          color: 10181046,
-          author: bskyProfile
-            ? {
-                name: `@${bskyProfile.handle}`,
-                icon_url: bskyProfile.avatar,
-                url: `https://frontpage.fyi/profile/${bskyProfile.handle}`,
-              }
-            : undefined,
-          fields: [
-            {
-              name: "Link",
-              value: url,
-            },
-          ],
-        },
-      ],
-    });
 
     return { rkey, cid };
   } catch (e) {

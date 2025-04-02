@@ -32,9 +32,9 @@ export async function handlePost({ op, repo, rkey }: HandlerInput) {
     invariant(postRecord, "atproto post record not found");
 
     const post = await dbPost.uncached_doesPostExist(repo, rkey);
+    const { title, url, createdAt } = postRecord.value;
 
     if (!post && postRecord) {
-      const { title, url, createdAt } = postRecord.value;
       const createdDbPost = await dbPost.createPost({
         post: {
           title,
@@ -47,32 +47,32 @@ export async function handlePost({ op, repo, rkey }: HandlerInput) {
       });
 
       invariant(createdDbPost, "Failed to insert post from relay in database");
-
-      const bskyProfile = await getBlueskyProfile(repo);
-      await sendDiscordMessage({
-        embeds: [
-          {
-            title: "New post on Frontpage",
-            description: title,
-            url: `https://frontpage.fyi/post/${repo}/${rkey}`,
-            color: 10181046,
-            author: bskyProfile
-              ? {
-                  name: `@${bskyProfile.handle}`,
-                  icon_url: bskyProfile.avatar,
-                  url: `https://frontpage.fyi/profile/${bskyProfile.handle}`,
-                }
-              : undefined,
-            fields: [
-              {
-                name: "Link",
-                value: url,
-              },
-            ],
-          },
-        ],
-      });
     }
+
+    const bskyProfile = await getBlueskyProfile(repo);
+    await sendDiscordMessage({
+      embeds: [
+        {
+          title: "New post on Frontpage",
+          description: title,
+          url: `https://frontpage.fyi/post/${repo}/${rkey}`,
+          color: 10181046,
+          author: bskyProfile
+            ? {
+                name: `@${bskyProfile.handle}`,
+                icon_url: bskyProfile.avatar,
+                url: `https://frontpage.fyi/profile/${bskyProfile.handle}`,
+              }
+            : undefined,
+          fields: [
+            {
+              name: "Link",
+              value: url,
+            },
+          ],
+        },
+      ],
+    });
   } else if (op.action === "delete") {
     await dbPost.deletePost({
       authorDid: repo,
