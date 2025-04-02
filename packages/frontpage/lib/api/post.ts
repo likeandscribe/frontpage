@@ -1,7 +1,7 @@
 import "server-only";
 import * as db from "../data/db/post";
 import * as atproto from "../data/atproto/post";
-import { ensureUser, getBlueskyProfile } from "../data/user";
+import { ensureUser } from "../data/user";
 import { DataLayerError } from "../data/error";
 import { invariant } from "../utils";
 import { TID } from "@atproto/common-web";
