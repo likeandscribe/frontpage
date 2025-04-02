@@ -35,6 +35,7 @@ export async function createVote({ authorDid, subject }: ApiCreateVoteInput) {
         subject: {
           rkey: subject.rkey,
           authorDid: subject.authorDid,
+          cid: subject.cid,
         },
       });
 
@@ -46,6 +47,7 @@ export async function createVote({ authorDid, subject }: ApiCreateVoteInput) {
         subject: {
           rkey: subject.rkey,
           authorDid: subject.authorDid,
+          cid: subject.cid,
         },
       });
 

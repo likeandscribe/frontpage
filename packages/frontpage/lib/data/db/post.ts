@@ -79,7 +79,7 @@ export const getFrontpagePosts = cache(async (offset: number) => {
   const posts = rows.map((row) => ({
     id: row.id,
     rkey: row.rkey,
-    cid: row.cid!,
+    cid: row.cid || null,
     title: row.title,
     url: row.url,
     createdAt: row.createdAt,
@@ -154,6 +154,7 @@ export const getPost = cache(async (authorDid: DID, rkey: string) => {
 
   return {
     ...row.posts,
+    cid: row.posts.cid || null,
     commentCount: row.post_aggregates.commentCount,
     voteCount: row.post_aggregates.voteCount,
     userHasVoted: Boolean(row.hasVoted),
@@ -212,19 +213,17 @@ export async function createPost({
 
 type UpdatePostInput = Partial<
   Omit<InferSelectModel<typeof schema.Post>, "id">
-> & {
-  authorDid: DID;
-  rkey: string;
-};
+>;
 
-export const updatePost = async (input: UpdatePostInput) => {
-  const { rkey, authorDid, ...updateFields } = input;
+export const updatePost = async (
+  repo: DID,
+  rkey: string,
+  input: UpdatePostInput,
+) => {
   await db
     .update(schema.Post)
-    .set(updateFields)
-    .where(
-      and(eq(schema.Post.rkey, rkey), eq(schema.Post.authorDid, authorDid)),
-    );
+    .set(input)
+    .where(and(eq(schema.Post.authorDid, repo), eq(schema.Post.rkey, rkey)));
 };
 
 export type DeletePostInput = {

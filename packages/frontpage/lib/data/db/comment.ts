@@ -19,7 +19,9 @@ import {
   newCommentAggregateTrigger,
 } from "./triggers";
 
-type CommentRow = InferSelectModel<typeof schema.Comment>;
+type CommentRow = Omit<InferSelectModel<typeof schema.Comment>, "cid"> & {
+  cid: string | null;
+};
 
 type CommentExtras = {
   children?: CommentModel[];
@@ -31,7 +33,7 @@ type CommentExtras = {
   postRkey?: string;
 };
 
-type LiveComment = CommentRow & CommentExtras & { status: "live" };
+type LiveComment = CommentRow & CommentExtras & { status: "live" | "pending" };
 
 type HiddenComment = Omit<CommentRow, "status" | "body"> &
   CommentExtras & {
@@ -94,7 +96,15 @@ export const getCommentsForPost = cache(async (postId: number) => {
     .leftJoin(hasVoted, eq(hasVoted.commentId, schema.Comment.id))
     .orderBy(desc(schema.CommentAggregates.rank));
 
-  return nestCommentRows(rows);
+  const currentUserDid = (await getUser())?.did;
+
+  return nestCommentRows(
+    rows
+      .map((row) => ({ ...row, cid: row.cid || null }))
+      .filter(
+        (row) => row.status !== "pending" || row.authorDid === currentUserDid,
+      ),
+  );
 });
 
 export const getCommentWithChildren = cache(
@@ -127,7 +137,7 @@ const nestCommentRows = (
       voteCount: item.voteCount,
       rank: item.rank,
     };
-    if (item.status === "live") {
+    if (item.status === "live" || item.status === "pending") {
       comments.push({
         ...item,
         ...transformed,
@@ -181,21 +191,21 @@ export const getComment = cache(async (rkey: string) => {
   return rows[0] ?? null;
 });
 
-type UpdateCommentInput = Partial<Omit<CommentRow, "id">> & {
-  rkey: string;
-  authorDid: DID;
-};
+type UpdateCommentInput = Partial<Omit<CommentRow, "id">>;
 
-export const updateComment = async (input: UpdateCommentInput) => {
-  const { rkey, authorDid, ...updateFields } = input;
+export const updateComment = async (
+  repo: DID,
+  rkey: string,
+  input: UpdateCommentInput,
+) => {
   await db
     .update(schema.Comment)
-    .set(updateFields)
+    .set({
+      ...input,
+      cid: input.cid ?? undefined,
+    })
     .where(
-      and(
-        eq(schema.Comment.rkey, rkey),
-        eq(schema.Comment.authorDid, authorDid),
-      ),
+      and(eq(schema.Comment.authorDid, repo), eq(schema.Comment.rkey, rkey)),
     );
 };
 
@@ -241,7 +251,15 @@ export const getUserComments = cache(async (userDid: DID) => {
   return comments as LiveComment[];
 });
 
-export function shouldHideComment(comment: CommentModel) {
+// TODO: This shouldn't be in the database layer.
+// We need to properly design the API layer to handle hidden comments, and this can be moved there.
+export async function shouldHideComment(comment: CommentModel) {
+  if (
+    comment.status === "pending" &&
+    (await getUser())?.did === comment.authorDid
+  ) {
+    return false;
+  }
   return (
     comment.status !== "live" &&
     comment.children &&
@@ -294,6 +312,7 @@ export type CreateCommentInput = {
     authorDid: DID;
     rkey: string;
   };
+  status?: "live" | "pending";
 };
 
 export async function createComment({
@@ -304,6 +323,7 @@ export async function createComment({
   createdAt,
   parent,
   post,
+  status = "live",
 }: CreateCommentInput) {
   return await db.transaction(async (tx) => {
     const existingPost = (
@@ -351,6 +371,7 @@ export async function createComment({
         authorDid,
         createdAt: createdAt,
         parentCommentId: existingParent?.id ?? null,
+        status,
       })
       .returning({
         id: schema.Comment.id,

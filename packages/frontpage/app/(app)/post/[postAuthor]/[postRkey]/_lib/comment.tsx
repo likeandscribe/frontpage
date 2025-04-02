@@ -4,7 +4,7 @@ import {
   CommentLevel,
   NestComment,
 } from "./comment-client";
-import { CommentModel } from "@/lib/data/db/comment";
+import { CommentModel, shouldHideComment } from "@/lib/data/db/comment";
 import { TimeAgo } from "@/lib/components/time-ago";
 import { AvatarFallback, UserAvatar } from "@/lib/components/user-avatar";
 import Link from "next/link";
@@ -14,6 +14,8 @@ import {
 } from "@/lib/data/atproto/identity";
 import { UserHoverCard } from "@/lib/components/user-hover-card";
 import { cn } from "@/lib/utils";
+import { Spinner } from "@/lib/components/ui/spinner";
+import { SimpleTooltip } from "@/lib/components/ui/tooltip";
 
 type CommentProps = {
   comment: CommentModel;
@@ -23,12 +25,15 @@ type CommentProps = {
   allowReply: boolean;
 };
 
-export function Comment({ comment, level, ...props }: CommentProps) {
+export async function Comment({ comment, level, ...props }: CommentProps) {
   if (
-    comment.status !== "live" &&
-    comment.children &&
-    comment.children.length === 0
+    comment.status === "pending" &&
+    comment.authorDid === (await getUser())?.did
   ) {
+    return <LiveComment {...props} level={level} comment={comment} />;
+  }
+
+  if (await shouldHideComment(comment)) {
     return null;
   }
 
@@ -38,6 +43,9 @@ export function Comment({ comment, level, ...props }: CommentProps) {
 
   return <DeletedComment {...props} level={level} comment={comment} />;
 }
+
+const PENDING_COMMENT_COPY =
+  "Travelling through the atmosphere. Will appear for others soon.";
 
 async function LiveComment({
   comment,
@@ -89,12 +97,18 @@ async function LiveComment({
               <div className="font-medium">@{handle}</div>
             </Link>
           </UserHoverCard>
-          <Link
-            href={commentHref}
-            className="text-gray-500 text-xs dark:text-gray-400 hover:underline"
-          >
-            <TimeAgo createdAt={comment.createdAt} side="bottom" />
-          </Link>
+          {comment.status === "pending" ? (
+            <SimpleTooltip content={PENDING_COMMENT_COPY}>
+              <Spinner aria-label={PENDING_COMMENT_COPY} />
+            </SimpleTooltip>
+          ) : (
+            <Link
+              href={commentHref}
+              className="text-gray-500 text-xs dark:text-gray-400 hover:underline"
+            >
+              <TimeAgo createdAt={comment.createdAt} side="bottom" />
+            </Link>
+          )}
         </div>
         {comment.body ? <CommentBody body={comment.body} /> : null}
       </CommentClientWrapperWithToolbar>

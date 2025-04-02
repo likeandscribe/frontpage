@@ -33,7 +33,9 @@ const dateIsoText = customType<{ data: Date; driverData: string }>({
 });
 
 const createStatusColumn = (col: string) =>
-  text(col, { enum: ["live", "deleted", "moderator_hidden"] }).default("live");
+  text(col, {
+    enum: ["live", "deleted", "moderator_hidden", "pending"],
+  }).default("live");
 
 export type NumberColumn = SQLiteColumn<ColumnBaseConfig<"number", string>>;
 

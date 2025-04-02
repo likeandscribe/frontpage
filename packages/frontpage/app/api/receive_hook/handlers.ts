@@ -34,8 +34,13 @@ export async function handlePost({ op, repo, rkey }: HandlerInput) {
     const post = await dbPost.uncached_doesPostExist(repo, rkey);
     const { title, url, createdAt } = postRecord.value;
 
-    if (!post && postRecord) {
-      const createdDbPost = await dbPost.createPost({
+    if (post) {
+      await dbPost.updatePost(repo, rkey, {
+        status: "live",
+        cid: postRecord.cid,
+      });
+    } else {
+      await dbPost.createPost({
         post: {
           title,
           url,
@@ -45,8 +50,6 @@ export async function handlePost({ op, repo, rkey }: HandlerInput) {
         cid: postRecord.cid,
         authorDid: repo,
       });
-
-      invariant(createdDbPost, "Failed to insert post from relay in database");
     }
 
     const bskyProfile = await getBlueskyProfile(repo);
@@ -92,7 +95,13 @@ export async function handleComment({ op, repo, rkey }: HandlerInput) {
 
     const comment = await dbComment.uncached_doesCommentExist(repo, rkey);
 
-    if (!comment && commentRecord) {
+    if (comment) {
+      console.log("comment already exists", commentRecord.value);
+      await dbComment.updateComment(repo, rkey, {
+        status: "live",
+        cid: commentRecord.cid,
+      });
+    } else {
       const { content, createdAt, parent, post } = commentRecord.value;
       const createdComment = await dbComment.createComment({
         cid: commentRecord.cid,
@@ -154,6 +163,7 @@ export async function handleVote({ op, repo, rkey }: HandlerInput) {
             subject: {
               rkey: subject.uri.rkey,
               authorDid: subject.uri.authority as DID,
+              cid: subject.cid,
             },
           });
 
@@ -177,6 +187,7 @@ export async function handleVote({ op, repo, rkey }: HandlerInput) {
             subject: {
               rkey: subject.uri.rkey,
               authorDid: subject.uri.authority as DID,
+              cid: subject.cid,
             },
           });
 

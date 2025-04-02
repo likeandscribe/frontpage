@@ -11,6 +11,7 @@ import { ensureUser } from "@/lib/data/user";
 import { revalidatePath } from "next/cache";
 import { createComment, deleteComment } from "@/lib/api/comment";
 import { createVote, deleteVote } from "@/lib/api/vote";
+import { invariant } from "@/lib/utils";
 
 export async function createCommentAction(
   input: { parentRkey?: string; postRkey: string; postAuthorDid: DID },
@@ -30,17 +31,22 @@ export async function createCommentAction(
       : undefined,
   ]);
 
-  if (!post) {
-    throw new Error("Post not found");
-  }
+  invariant(post, "Post not found");
 
-  if (post.status !== "live") {
-    throw new Error(`[naughty] Cannot comment on deleted post. ${user.did}`);
-  }
+  invariant(
+    post.status === "live",
+    `[naughty] Cannot comment on deleted post. ${user.did}`,
+  );
+
+  invariant(post.cid, "Post cid is missing");
 
   await createComment({
     parent: comment,
-    post,
+    post: {
+      authorDid: post.authorDid,
+      rkey: post.rkey,
+      cid: post.cid,
+    },
     content,
     authorDid: user.did,
   });

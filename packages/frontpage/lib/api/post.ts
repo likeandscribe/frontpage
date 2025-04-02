@@ -6,6 +6,7 @@ import { DataLayerError } from "../data/error";
 import { invariant } from "../utils";
 import { TID } from "@atproto/common-web";
 import { DID } from "../data/atproto/did";
+import { after } from "next/server";
 
 export type ApiCreatePostInput = {
   authorDid: DID;
@@ -33,17 +34,15 @@ export async function createPost({
     });
     invariant(dbCreatedPost, "Failed to insert post in database");
 
-    const { cid } = await atproto.createPost({
-      title: title,
-      url: url,
-      rkey,
-    });
+    after(() =>
+      atproto.createPost({
+        title: title,
+        url: url,
+        rkey,
+      }),
+    );
 
-    invariant(cid, "Failed to create comment, cid missing");
-
-    await db.updatePost({ authorDid: user.did, rkey, cid });
-
-    return { rkey, cid };
+    return { rkey };
   } catch (e) {
     await db.deletePost({ authorDid: user.did, rkey });
     throw new DataLayerError(`Failed to create post: ${e}`);

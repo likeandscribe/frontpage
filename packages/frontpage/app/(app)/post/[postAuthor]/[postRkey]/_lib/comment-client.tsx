@@ -102,7 +102,7 @@ export function CommentClientWrapperWithToolbar({
               initialState={initialVoteState}
               voteAction={commentVoteAction.bind(null, {
                 authorDid,
-                cid,
+                cid: cid!,
                 rkey,
               })}
               unvoteAction={commentUnvoteAction.bind(null, id)}
@@ -113,7 +113,7 @@ export function CommentClientWrapperWithToolbar({
               variant="ghost"
               size="icon"
               onClick={() => setShowNewComment(true)}
-              disabled={!allowReply}
+              disabled={!allowReply || cid === null}
             >
               <ChatBubbleIcon className="w-4 h-4" />
               <span className="sr-only">Reply</span>
@@ -122,13 +122,16 @@ export function CommentClientWrapperWithToolbar({
           <SimpleTooltip content="action-menu" side="bottom">
             <EllipsisDropdown>
               <ShareDropdownButton path={commentHref} />
-              <ReportDialogDropdownButton
-                reportAction={reportCommentAction.bind(null, {
-                  authorDid: authorDid,
-                  cid: cid,
-                  rkey: rkey,
-                })}
-              />
+              {cid && !hasAuthored ? (
+                <ReportDialogDropdownButton
+                  reportAction={reportCommentAction.bind(null, {
+                    authorDid: authorDid,
+                    cid,
+                    rkey: rkey,
+                  })}
+                />
+              ) : null}
+
               {hasAuthored ? (
                 <DeleteButton
                   deleteAction={deleteCommentAction.bind(null, rkey)}

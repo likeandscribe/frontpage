@@ -16,6 +16,7 @@ import { DeleteButton } from "./delete-button";
 import { ShareDropdownButton } from "./share-button";
 import { createVote, deleteVote } from "@/lib/api/vote";
 import { deletePost } from "@/lib/api/post";
+import { invariant } from "@/lib/utils";
 
 type PostProps = {
   id: number;
@@ -26,7 +27,7 @@ type PostProps = {
   createdAt: Date;
   commentCount: number;
   rkey: string;
-  cid: string;
+  cid: string | null;
   isUpvoted: boolean;
 };
 
@@ -53,8 +54,10 @@ export async function PostCard({
     <article className="flex items-center gap-4 shadow-sm rounded-lg p-4 bg-white dark:bg-slate-900">
       <div className="flex flex-col items-center">
         <VoteButton
+          disabled={!cid}
           voteAction={async () => {
             "use server";
+            invariant(cid, "Vote action requires cid");
             const user = await ensureUser();
             await createVote({
               authorDid: user.did,
@@ -161,7 +164,7 @@ export async function deletePostAction(rkey: string) {
 export async function reportPostAction(
   input: {
     rkey: string;
-    cid: string;
+    cid: string | null;
     author: DID;
   },
   formData: FormData,
@@ -180,6 +183,6 @@ export async function reportPostAction(
     subjectDid: input.author,
     subjectCollection: PostCollection,
     subjectRkey: input.rkey,
-    subjectCid: input.cid,
+    subjectCid: input.cid ?? undefined,
   });
 }

@@ -91,6 +91,7 @@ export type CreateVoteInput = {
   subject: {
     rkey: string;
     authorDid: DID;
+    cid: string;
   };
 };
 
@@ -109,11 +110,15 @@ export const createPostVote = async ({
           and(
             eq(schema.Post.rkey, subject.rkey),
             eq(schema.Post.authorDid, subject.authorDid),
+            eq(schema.Post.cid, subject.cid),
           ),
         )
     )[0];
 
-    invariant(post, `Post not found with rkey: ${subject.rkey}`);
+    invariant(
+      post,
+      `Post not found with rkey: ${subject.rkey} repo: ${subject.authorDid} cid: ${subject.cid}`,
+    );
 
     if (post.authorDid === repo) {
       throw new Error(`[naughty] Cannot vote on own content ${repo}`);

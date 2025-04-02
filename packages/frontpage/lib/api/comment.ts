@@ -7,6 +7,7 @@ import { DID } from "../data/atproto/did";
 import { createNotification } from "../data/db/notification";
 import { invariant } from "../utils";
 import { TID } from "@atproto/common-web";
+import { after } from "next/server";
 
 export type ApiCreateCommentInput = Omit<atproto.CommentInput, "rkey"> & {
   authorDid: DID;
@@ -25,27 +26,25 @@ export async function createComment({
     const sanitizedContent = content.replace(/\n\n+/g, "\n\n").trim();
 
     const dbCreatedComment = await db.createComment({
-      cid: "",
       authorDid: user.did,
       rkey,
       content: sanitizedContent,
       createdAt: new Date(),
       parent,
       post,
+      status: "pending",
     });
 
     invariant(dbCreatedComment, "Failed to insert comment in database");
 
-    const { cid } = await atproto.createComment({
-      parent,
-      post,
-      content: sanitizedContent,
-      rkey,
-    });
-
-    invariant(cid, "Failed to create comment, rkey/cid missing");
-
-    await db.updateComment({ authorDid: user.did, rkey, cid });
+    after(() =>
+      atproto.createComment({
+        parent,
+        post,
+        content: sanitizedContent,
+        rkey,
+      }),
+    );
 
     const didToNotify = parent ? parent.authorDid : post.authorDid;
 

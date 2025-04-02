@@ -22,7 +22,7 @@ export async function GET(
   { params }: { params: CommentPageParams },
 ) {
   const { comment } = await getCommentPageData(params);
-  if (shouldHideComment(comment) || comment.status !== "live") {
+  if ((await shouldHideComment(comment)) || comment.status !== "live") {
     notFound();
   }
 
