@@ -2,13 +2,21 @@ import "server-only";
 
 import { cache } from "react";
 import { db } from "@/lib/db";
-import { eq, sql, desc, and, isNull, or } from "drizzle-orm";
+import {
+  eq,
+  sql,
+  desc,
+  and,
+  isNull,
+  or,
+  InferSelectModel,
+  ne,
+} from "drizzle-orm";
 import * as schema from "@/lib/schema";
-import { getBlueskyProfile, getUser, isAdmin } from "../user";
-import * as atprotoPost from "../atproto/post";
+import { getUser, isAdmin } from "../user";
 import { DID } from "../atproto/did";
-import { sendDiscordMessage } from "@/lib/discord";
 import { newPostAggregateTrigger } from "./triggers";
+import { invariant } from "@/lib/utils";
 
 const buildUserHasVotedQuery = cache(async () => {
   const user = await getUser();
@@ -71,7 +79,7 @@ export const getFrontpagePosts = cache(async (offset: number) => {
   const posts = rows.map((row) => ({
     id: row.id,
     rkey: row.rkey,
-    cid: row.cid,
+    cid: row.cid!,
     title: row.title,
     url: row.url,
     createdAt: row.createdAt,
@@ -164,31 +172,29 @@ export async function uncached_doesPostExist(authorDid: DID, rkey: string) {
   return Boolean(row[0]);
 }
 
-type CreatePostInput = {
-  post: atprotoPost.Post;
+export type CreatePostInput = {
+  post: { title: string; url: string; createdAt: Date };
   authorDid: DID;
   rkey: string;
-  cid: string;
-  offset: number;
+  cid?: string;
 };
 
-export async function unauthed_createPost({
+export async function createPost({
   post,
-  rkey,
   authorDid,
+  rkey,
   cid,
-  offset,
 }: CreatePostInput) {
-  await db.transaction(async (tx) => {
+  return await db.transaction(async (tx) => {
     const [insertedPostRow] = await tx
       .insert(schema.Post)
       .values({
         rkey,
-        cid,
+        cid: cid ?? "",
         authorDid,
         title: post.title,
         url: post.url,
-        createdAt: new Date(post.createdAt),
+        createdAt: post.createdAt,
       })
       .returning({ postId: schema.Post.id });
 
@@ -198,61 +204,57 @@ export async function unauthed_createPost({
 
     await newPostAggregateTrigger(insertedPostRow.postId, tx);
 
-    await tx.insert(schema.ConsumedOffset).values({ offset });
-  });
-
-  const bskyProfile = await getBlueskyProfile(authorDid);
-  await sendDiscordMessage({
-    embeds: [
-      {
-        title: "New post on Frontpage",
-        description: post.title,
-        url: `https://frontpage.fyi/post/${authorDid}/${rkey}`,
-        color: 10181046,
-        author: bskyProfile
-          ? {
-              name: `@${bskyProfile.handle}`,
-              icon_url: bskyProfile.avatar,
-              url: `https://frontpage.fyi/profile/${bskyProfile.handle}`,
-            }
-          : undefined,
-        fields: [
-          {
-            name: "Link",
-            value: post.url,
-          },
-        ],
-      },
-    ],
+    return {
+      postId: insertedPostRow.postId,
+    };
   });
 }
 
-type DeletePostInput = {
-  rkey: string;
+type UpdatePostInput = Partial<
+  Omit<InferSelectModel<typeof schema.Post>, "id">
+> & {
   authorDid: DID;
-  offset: number;
+  rkey: string;
 };
 
-export async function unauthed_deletePost({
-  rkey,
-  authorDid,
-  offset,
-}: DeletePostInput) {
-  console.log("Deleting post", rkey, offset);
+export const updatePost = async (input: UpdatePostInput) => {
+  const { rkey, authorDid, ...updateFields } = input;
+  await db
+    .update(schema.Post)
+    .set(updateFields)
+    .where(
+      and(eq(schema.Post.rkey, rkey), eq(schema.Post.authorDid, authorDid)),
+    );
+};
+
+export type DeletePostInput = {
+  authorDid: DID;
+  rkey: string;
+};
+
+export async function deletePost({ authorDid, rkey }: DeletePostInput) {
+  console.log("Deleting post", rkey);
   await db.transaction(async (tx) => {
     console.log("Updating post status to deleted", rkey);
-    await tx
+    const [updatedPost] = await tx
       .update(schema.Post)
       .set({ status: "deleted" })
       .where(
-        and(eq(schema.Post.rkey, rkey), eq(schema.Post.authorDid, authorDid)),
-      );
+        and(
+          eq(schema.Post.rkey, rkey),
+          eq(schema.Post.authorDid, authorDid),
+          ne(schema.Post.status, "deleted"),
+        ),
+      )
+      .returning({ id: schema.Post.id });
 
-    console.log("Inserting consumed offset", offset);
-    await tx.insert(schema.ConsumedOffset).values({ offset });
-    console.log("Done deleting post");
+    invariant(
+      updatedPost,
+      "Failed to update post status to deleted or post not found",
+    );
+
+    console.log("Done deleting post transaction");
   });
-  console.log("Done deleting post transaction");
 }
 
 type ModeratePostInput = {
