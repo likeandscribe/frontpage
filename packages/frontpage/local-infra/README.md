@@ -9,7 +9,8 @@ Docker compose file that runs the required peices of infrastructure for frontpag
 
 - ATProto [PLC server](https://github.com/did-method-plc/did-method-plc) (http://localhost:4000 & https://plc.dev.unravel.fyi)
 - ATProto [PDS](https://github.com/bluesky-social/pds) (http://localhost:4001 & https://pds.dev.unravel.fyi)
-- [Drainpipe](../../../packages-rs/drainpipe/README.md) (pushes data from the PDS to the Frontpage Next.js app)
+- Jetstream (transforms the event stream from the PDS to JSON)
+- [Drainpipe](../../../packages-rs/drainpipe/README.md) (pushes data from the Jetstream to the Frontpage Next.js app)
 - Turso sqlite server (http://localhost:4002 && https://turso.dev.unravel.fyi)
 - [Caddy](https://caddyserver.com/) reverse proxy (it provides the above services over HTTPS)
 - [`cloudflared`](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/do-more-with-tunnels/trycloudflare/) (a public https tunnel to the local Frontpage Next.js app)
