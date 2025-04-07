@@ -76,6 +76,10 @@ async function DidHistory({ identifier }: { identifier: string }) {
 
   const auditLog = PlcLogAuditResponse.parse(await response.json());
 
+  if (auditLog.length <= 1) {
+    return <p>No history found.</p>;
+  }
+
   return (
     <ol>
       {auditLog.map((previous, index) => {
