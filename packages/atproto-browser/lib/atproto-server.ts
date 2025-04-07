@@ -25,7 +25,12 @@ function timeoutWith<T>(
   ]);
 }
 
-const didResolver = new DidResolver({});
+const didResolver = new DidResolver({
+  plcUrl: process.env.PLC_URL,
+});
+
+export const PLC_URL = process.env.PLC_URL ?? "https://plc.directory";
+
 const resolveDid = cache(
   nextCache(
     cache((did: string) =>

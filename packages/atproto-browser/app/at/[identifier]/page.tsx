@@ -4,7 +4,7 @@ import { cache, Fragment, Suspense } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import { z } from "zod";
 import { DidDoc, DidHandle } from "../_lib/did-components";
-import { resolveIdentity } from "@/lib/atproto-server";
+import { PLC_URL, resolveIdentity } from "@/lib/atproto-server";
 import { AtUri } from "@atproto/syntax";
 import { DidCollections } from "../_lib/collection-server";
 import { getPds } from "@atproto/identity";
@@ -69,7 +69,7 @@ async function DidHistory({ identifier }: { identifier: string }) {
   }
   const did = identity.didDocument.id;
 
-  const response = await fetch(`https://plc.directory/${did}/log/audit`);
+  const response = await fetch(`${PLC_URL}/${did}/log/audit`);
   if (!response.ok) {
     throw new Error(`Failed to fetch history: ${response.statusText}`);
   }
@@ -361,7 +361,7 @@ const getDidData = cache(async (identifier: string) => {
   }
 
   const did = identity.didDocument.id;
-  const response = await fetch(`https://plc.directory/${did}/data`);
+  const response = await fetch(`${PLC_URL}/${did}/data`);
 
   return DidDataResponse.parse(await response.json());
 });
