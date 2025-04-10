@@ -14,14 +14,25 @@ import { createReport } from "@/lib/data/db/report";
 import { getVoteForComment } from "@/lib/data/db/vote";
 import { ensureUser } from "@/lib/data/user";
 import { revalidatePath } from "next/cache";
+import { isBanned } from "@/lib/data/db/user";
+import { TextLink } from "@/lib/components/ui/typography";
 
 export async function createCommentAction(
   input: { parentRkey?: string; postRkey: string; postAuthorDid: DID },
-  _prevState: unknown,
   formData: FormData,
 ) {
   const content = formData.get("comment") as string;
   const user = await ensureUser();
+  if (await isBanned(user.did)) {
+    return {
+      error: (
+        <>
+          Your account is currently banned from creating new comments.{" "}
+          <TextLink href="/about#contact">Contact us</TextLink> to appeal.
+        </>
+      ),
+    };
+  }
 
   const [post, comment] = await Promise.all([
     getPost(input.postAuthorDid, input.postRkey),
@@ -34,7 +45,7 @@ export async function createCommentAction(
   ]);
 
   if (!post) {
-    throw new Error("Post not found");
+    return { error: "Failed to create comment. Post not found." };
   }
 
   if (post.status !== "live") {
@@ -99,7 +110,10 @@ export async function commentVoteAction(input: {
   rkey: string;
   authorDid: DID;
 }) {
-  await ensureUser();
+  const user = await ensureUser();
+  if (await isBanned(user.did)) {
+    throw new Error("Author is banned");
+  }
   await createVote({
     subjectAuthorDid: input.authorDid,
     subjectCid: input.cid,

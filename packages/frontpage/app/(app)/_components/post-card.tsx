@@ -15,6 +15,7 @@ import { revalidatePath } from "next/cache";
 import { ReportDialogDropdownButton } from "./report-dialog";
 import { DeleteButton } from "./delete-button";
 import { ShareDropdownButton } from "./share-button";
+import { isBanned } from "@/lib/data/db/user";
 
 type PostProps = {
   id: number;
@@ -54,7 +55,10 @@ export async function PostCard({
         <VoteButton
           voteAction={async () => {
             "use server";
-            await ensureUser();
+            const user = await ensureUser();
+            if (await isBanned(user.did)) {
+              throw new Error("Author is banned");
+            }
             await createVote({
               subjectAuthorDid: author,
               subjectCid: cid,
@@ -64,7 +68,10 @@ export async function PostCard({
           }}
           unvoteAction={async () => {
             "use server";
-            await ensureUser();
+            const user = await ensureUser();
+            if (await isBanned(user.did)) {
+              throw new Error("Author is banned");
+            }
             const vote = await getVoteForPost(id);
             if (!vote) {
               // TODO: Show error notification
