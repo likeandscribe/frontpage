@@ -113,9 +113,9 @@ checksum = "1505bd5d3d116872e7271a6d4e16d81d0c8570876c8de68093a09ac269d8aac0"
 
 [[package]]
 name = "atrium-api"
-version = "0.24.7"
+version = "0.24.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ee68ddf7cde9eb121eed3a28b138f6a9b4c4a90ab0c5c2e38bc2817af0b06da3"
+checksum = "1c4e5d077f7941ec5484964fba8697b7571a964b0a714e02ae7bc7332833c36b"
 dependencies = [
  "atrium-xrpc",
  "chrono",
@@ -133,9 +133,9 @@ dependencies = [
 
 [[package]]
 name = "atrium-xrpc"
-version = "0.11.6"
+version = "0.12.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "737eea1de2eb174bbfe720619cb25a22c30b9640ae0d3b78386cedf007712963"
+checksum = "f223b98be2acdd7afe5b867744aee8258413ed09993099de0a036b247db0ec4c"
 dependencies = [
  "http",
  "serde",
@@ -431,24 +431,19 @@ version = "0.2.0"
 dependencies = [
  "anyhow",
  "atrium-api",
- "bincode",
  "chrono",
  "dotenv-flow",
  "drainpipe-store",
  "env_logger",
- "flume",
  "futures-util",
+ "jetstream",
  "log",
  "reqwest",
  "serde",
  "serde_json",
  "sled",
- "thiserror 2.0.3",
  "tokio",
  "tokio-metrics",
- "tokio-tungstenite",
- "url",
- "zstd",
 ]
 
 [[package]]
@@ -466,8 +461,10 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "bincode",
+ "jetstream",
  "log",
  "serde",
+ "serde_json",
  "sled",
 ]
 
@@ -1044,6 +1041,24 @@ name = "itoa"
 version = "1.0.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "49f1f14873335454500d59611f1cf4a4b0f786f9ac11f4312a78e4cf2566695b"
+
+[[package]]
+name = "jetstream"
+version = "0.1.0"
+dependencies = [
+ "atrium-api",
+ "chrono",
+ "flume",
+ "futures-util",
+ "log",
+ "serde",
+ "serde_json",
+ "thiserror 2.0.3",
+ "tokio",
+ "tokio-tungstenite",
+ "url",
+ "zstd",
+]
 
 [[package]]
 name = "jobserver"
@@ -1665,9 +1680,9 @@ dependencies = [
 
 [[package]]
 name = "serde_json"
-version = "1.0.132"
+version = "1.0.133"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d726bfaff4b320266d395898905d0eba0345aae23b54aee3a737e260fd46db03"
+checksum = "c7fceb2473b9166b2294ef05efcb65a3db80803f0b03ef86a5fc88a2b85ee377"
 dependencies = [
  "itoa",
  "memchr",
@@ -2139,9 +2154,9 @@ checksum = "8ecb6da28b8a351d773b68d5825ac39017e680750f980f3a1a85cd8dd28a47c1"
 
 [[package]]
 name = "url"
-version = "2.5.3"
+version = "2.5.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8d157f1b96d14500ffdc1f10ba712e780825526c03d9a49b4d0324b0d9113ada"
+checksum = "32f8b686cadd1473f4bd0117a5d28d36b1ade384ea9b5069a1c40aefed7fda60"
 dependencies = [
  "form_urlencoded",
  "idna",
