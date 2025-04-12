@@ -33,7 +33,9 @@ const dateIsoText = customType<{ data: Date; driverData: string }>({
 });
 
 const createStatusColumn = (col: string) =>
-  text(col, { enum: ["live", "deleted", "moderator_hidden"] }).default("live");
+  text(col, {
+    enum: ["live", "deleted", "moderator_hidden", "pending"],
+  }).default("live");
 
 export type NumberColumn = SQLiteColumn<ColumnBaseConfig<"number", string>>;
 
@@ -46,7 +48,7 @@ export const Post = sqliteTable(
   {
     id: integer("id").primaryKey(),
     rkey: text("rkey").notNull(),
-    cid: text("cid").notNull().unique(),
+    cid: text("cid").notNull().default(""),
     title: text("title", {
       length: MAX_POST_TITLE_LENGTH,
     }).notNull(),
@@ -72,8 +74,9 @@ export const PostVote = sqliteTable(
       .references(() => Post.id),
     createdAt: dateIsoText("created_at").notNull(),
     authorDid: did("author_did").notNull(),
-    cid: text("cid").notNull().unique(),
+    cid: text("cid").notNull().default(""),
     rkey: text("rkey").notNull(),
+    status: createStatusColumn("status"),
   },
   (t) => ({
     unique_authr_rkey: unique().on(t.authorDid, t.rkey),
@@ -108,7 +111,7 @@ export const Comment = sqliteTable(
   {
     id: integer("id").primaryKey(),
     rkey: text("rkey").notNull(),
-    cid: text("cid").notNull().unique(),
+    cid: text("cid").notNull().default(""),
     postId: integer("post_id")
       .notNull()
       .references(() => Post.id),
@@ -159,8 +162,9 @@ export const CommentVote = sqliteTable(
       .references(() => Comment.id),
     createdAt: dateIsoText("created_at").notNull(),
     authorDid: did("author_did").notNull(),
-    cid: text("cid").notNull().unique(),
+    cid: text("cid").notNull().default(""),
     rkey: text("rkey").notNull(),
+    status: createStatusColumn("status"),
   },
   (t) => ({
     unique_authr_rkey: unique().on(t.authorDid, t.rkey),

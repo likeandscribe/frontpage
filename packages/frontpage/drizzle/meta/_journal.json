@@ -36,6 +36,20 @@
       "when": 1730554481486,
       "tag": "0004_illegal_boomerang",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "6",
+      "when": 1733119575838,
+      "tag": "0005_slimy_unus",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "6",
+      "when": 1744475828986,
+      "tag": "0006_thankful_namorita",
+      "breakpoints": true
     }
   ]
 }
