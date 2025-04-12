@@ -7,7 +7,7 @@ import {
 } from "@atproto/identity";
 import { cache } from "react";
 import { unstable_cache as nextCache } from "next/cache";
-import { isValidHandle, NSID, InvalidNsidError } from "@atproto/syntax";
+import { isValidHandle, NSID } from "@atproto/syntax";
 import { isDid } from "@atproto/did";
 import { domainToASCII } from "url";
 import { resolveTxt } from "node:dns/promises";
@@ -25,7 +25,12 @@ function timeoutWith<T>(
   ]);
 }
 
-const didResolver = new DidResolver({});
+const didResolver = new DidResolver({
+  plcUrl: process.env.PLC_URL,
+});
+
+export const PLC_URL = process.env.PLC_URL ?? "https://plc.directory";
+
 const resolveDid = cache(
   nextCache(
     cache((did: string) =>
@@ -102,36 +107,27 @@ export async function resolveIdentity(
   };
 }
 
-export async function resolveNsid(
-  did: string,
-  nsidStr: string,
-): Promise<{ success: false; error: string } | { success: true }> {
-  let nsid;
-  try {
-    nsid = NSID.parse(nsidStr);
-  } catch (e) {
-    if (e instanceof InvalidNsidError) {
-      return { success: false, error: e.message };
-    } else {
-      throw e;
-    }
-  }
-
+export async function resolveNsidAuthority(
+  nsid: NSID,
+): Promise<
+  { success: false; error: string } | { success: true; authorityDid: string }
+> {
   const domainParts = nsid.segments.slice().reverse();
   const authority = "_lexicon." + domainParts.slice(1).join(".");
 
   try {
     const record = (await resolveTxt(authority))[0]?.join("");
-    if (`did=${did}` !== record) {
+    const did = record?.split("=")[1];
+    if (!did) {
       return {
         success: false,
-        error: "invalid",
-      };
-    } else {
-      return {
-        success: true,
+        error: "not found",
       };
     }
+    return {
+      success: true,
+      authorityDid: did,
+    };
   } catch (e) {
     const errorMsg =
       isObject(e) && "code" in e && typeof e.code === "string"

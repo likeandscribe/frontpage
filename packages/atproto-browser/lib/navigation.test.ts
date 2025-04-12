@@ -121,3 +121,13 @@ test("valid http input without included at uri", async () => {
     error: "No AT URI found in http://example.com",
   });
 });
+
+test("lex input with invalid NSID", async () => {
+  // Numbers in NSID are not allowed
+  expect(await navigateAtUri("lex:com.example.invalid1")).toEqual({
+    error: "Invalid NSID: com.example.invalid1",
+  });
+});
+
+test.todo("lex input with valid resolvable NSID");
+test.todo("lex input with valid unresolvable NSID");

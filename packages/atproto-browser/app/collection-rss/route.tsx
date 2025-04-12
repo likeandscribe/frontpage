@@ -28,7 +28,17 @@ export async function GET(request: Request) {
     return new Response(`No handle found for ${didDoc.id}`, { status: 400 });
   }
 
-  const { records } = await listRecords(pds, didDoc.id, uri.collection);
+  let records;
+
+  try {
+    records = (await listRecords(pds, didDoc.id, uri.collection)).records;
+  } catch (e) {
+    if (e instanceof Error && e.message.startsWith("Could not find repo: ")) {
+      return new Response("Could not find repo", { status: 404 });
+    } else {
+      throw e;
+    }
+  }
 
   const rss = `
   <rss version="2.0">

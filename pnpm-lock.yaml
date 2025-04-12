@@ -32,24 +32,36 @@ importers:
 
   packages/atproto-browser:
     dependencies:
+      '@atproto/api':
+        specifier: ^0.14.5
+        version: 0.14.5
       '@atproto/did':
         specifier: ^0.1.5
         version: 0.1.5
       '@atproto/identity':
         specifier: ^0.4.6
         version: 0.4.6
+      '@atproto/lexicon':
+        specifier: ^0.4.2
+        version: 0.4.7
       '@atproto/repo':
         specifier: ^0.7.0
         version: 0.7.0
       '@atproto/syntax':
         specifier: ^0.3.3
         version: 0.3.3
+      '@lpm/core':
+        specifier: npm:@jsr/lpm__core@^0.2.9
+        version: '@jsr/lpm__core@0.2.9'
       hls.js:
         specifier: ^1.5.15
         version: 1.5.15
       http-link-header:
         specifier: ^1.1.3
         version: 1.1.3
+      multiformats:
+        specifier: ^13.3.0
+        version: 13.3.0
       next:
         specifier: 'catalog:'
         version: 15.1.7(@babel/core@7.24.7)(@opentelemetry/api@1.9.0)(babel-plugin-react-compiler@19.0.0-beta-8a03594-20241020)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
@@ -421,6 +433,12 @@ packages:
     resolution: {integrity: sha512-30iZtAPgz+LTIYoeivqYo853f02jBYSd5uGnGpkFV0M3xOt9aN73erkgYAmZU43x4VfqcnLxW9Kpg3R5LC4YYw==}
     engines: {node: '>=6.0.0'}
 
+  '@atproto/api@0.14.5':
+    resolution: {integrity: sha512-UnMOJWtZepMhWRnpL7VASp9R2lPLFjQpSSIOOBIqqhprTUot1aIxyFmz1idI58bSl6SZVA7BWRH+i8XyXSKlNg==}
+
+  '@atproto/api@0.14.7':
+    resolution: {integrity: sha512-YG2kvAtsgtajLlLrorYuHcxGgepG0c/RUB2/iJyBnwKjGqDLG8joOETf38JSNiGzs6NJbNKa9NHG6BQKourxBA==}
+
   '@atproto/common-web@0.3.1':
     resolution: {integrity: sha512-N7wiTnus5vAr+lT//0y8m/FaHHLJ9LpGuEwkwDAeV3LCiPif4m/FS8x/QOYrx1PdZQwKso95RAPzCGWQBH5j6Q==}
 
@@ -473,6 +491,9 @@ packages:
 
   '@atproto/xrpc@0.6.3':
     resolution: {integrity: sha512-S3tRvOdA9amPkKLll3rc4vphlDitLrkN5TwWh5Tu/jzk7mnobVVE3akYgICV9XCNHKjWM+IAPxFFI2qi+VW6nQ==}
+
+  '@atproto/xrpc@0.6.9':
+    resolution: {integrity: sha512-vQGA7++DYMNaHx3C7vEjT+2X6hYYLG7JNbBnDLWu0km1/1KYXgRkAz4h+FfYqg1mvzvIorHU7DAs5wevkJDDlw==}
 
   '@babel/code-frame@7.24.7':
     resolution: {integrity: sha512-BcYH1CVJBO9tvyIZ2jVeXgSIMvGZ2FDRvDdOIVQyuklNKSsx+eppDEBq/g47Ayw+RqNFE+URvOShmf+f/qwAlA==}
@@ -1280,6 +1301,9 @@ packages:
   '@jridgewell/trace-mapping@0.3.25':
     resolution: {integrity: sha512-vNk6aEwybGtawWmy/PzwnGDOjCkLWSD2wqvjGGAgOAwCGWySYXfYoxt00IJkTF+8Lb57DwOb3Aa0o9CApepiYQ==}
 
+  '@jsr/lpm__core@0.2.9':
+    resolution: {integrity: sha512-K3Wrv70eBSGvOEIPNNAYtbGnUocGsiYlAU6gx6D0O5pTT0+aPe92Rvibuaf53cgVXWmrGnDtuQ6KL7Iq9bWkzg==, tarball: https://npm.jsr.io/~/11/@jsr/lpm__core/0.2.9.tgz}
+
   '@libsql/client@0.14.0':
     resolution: {integrity: sha512-/9HEKfn6fwXB5aTEEoMeFh4CtG0ZzbncBb1e++OCdVpgKZ/xyMsIVYXm0w7Pv4RUel803vE6LwniB3PqD72R0Q==}
 
@@ -1348,6 +1372,9 @@ packages:
 
   '@microsoft/tsdoc@0.14.2':
     resolution: {integrity: sha512-9b8mPpKrfeGRuhFH5iO1iwCLeIIsV6+H1sRfxbkoGXIyQE2BTsPd9zqSqQJ+pv5sJ/hT5M1zvOFL02MnEezFug==}
+
+  '@needle-di/core@0.11.2':
+    resolution: {integrity: sha512-QwvlSTfpobIGGEmO/iMjMcL9lPf53cSV8mQVTzMGO4IkcyOQEK3nn7d6fkUOaaefwyiO4HGLEMl5VDaslnUuUg==}
 
   '@neon-rs/load@0.0.4':
     resolution: {integrity: sha512-kTPhdZyTQxB+2wpiRcFWrDcejc4JI6tkPuS7UZCG4l6Zvc5kU/gGQ/ozvHTh1XR5tS+UlfAfGuPajjzQjCiHCw==}
@@ -2413,6 +2440,9 @@ packages:
   available-typed-arrays@1.0.7:
     resolution: {integrity: sha512-wvUjBtSGN7+7SjNpq/9M2Tg350UZD3q62IFZLbRAR1bSMlCo1ZaeW+BJ+D090e4hIIZLBcTDWe4Mh4jvUDajzQ==}
     engines: {node: '>= 0.4'}
+
+  await-lock@2.2.2:
+    resolution: {integrity: sha512-aDczADvlvTGajTDjcjpJMqRkOF6Qdz3YbPZm/PyW6tKPkx2hlYBzxMhEywM/tU72HrVZjgl5VCdRuMlA7pZ8Gw==}
 
   axe-core@4.10.1:
     resolution: {integrity: sha512-qPC9o+kD8Tir0lzNGLeghbOrWMr3ZJpaRlCIb6Uobt/7N4FiEDvqUMnxzCHRHmg8vOg14kr5gVNyScRmbMaJ9g==}
@@ -4732,6 +4762,10 @@ packages:
     resolution: {integrity: sha512-n1cw8k1k0x4pgA2+9XrOkFydTerNcJ1zWCO5Nn9scWHTD+5tp8dghT2x1uduQePZTZgd3Tupf+x9BxJjeJi77Q==}
     engines: {node: '>=14.0.0'}
 
+  tlds@1.255.0:
+    resolution: {integrity: sha512-tcwMRIioTcF/FcxLev8MJWxCp+GUALRhFEqbDoZrnowmKSGqPrl5pqS+Sut2m8BgJ6S4FExCSSpGffZ0Tks6Aw==}
+    hasBin: true
+
   to-fast-properties@2.0.0:
     resolution: {integrity: sha512-/OaKK0xYrs3DmxRYqL/yDc+FxFUVYhDlXMhRmv3z915w2HF1tnN1omB354j8VUGO/hbRzyD6Y3sA7v7GS/ceog==}
     engines: {node: '>=4'}
@@ -5159,6 +5193,28 @@ snapshots:
       '@jridgewell/gen-mapping': 0.3.5
       '@jridgewell/trace-mapping': 0.3.25
 
+  '@atproto/api@0.14.5':
+    dependencies:
+      '@atproto/common-web': 0.4.0
+      '@atproto/lexicon': 0.4.7
+      '@atproto/syntax': 0.3.3
+      '@atproto/xrpc': 0.6.9
+      await-lock: 2.2.2
+      multiformats: 9.9.0
+      tlds: 1.255.0
+      zod: 3.23.8
+
+  '@atproto/api@0.14.7':
+    dependencies:
+      '@atproto/common-web': 0.4.0
+      '@atproto/lexicon': 0.4.7
+      '@atproto/syntax': 0.3.3
+      '@atproto/xrpc': 0.6.9
+      await-lock: 2.2.2
+      multiformats: 9.9.0
+      tlds: 1.255.0
+      zod: 3.23.8
+
   '@atproto/common-web@0.3.1':
     dependencies:
       graphemer: 1.4.0
@@ -5204,7 +5260,7 @@ snapshots:
 
   '@atproto/lex-cli@0.5.1':
     dependencies:
-      '@atproto/lexicon': 0.4.2
+      '@atproto/lexicon': 0.4.7
       '@atproto/syntax': 0.3.1
       chalk: 4.1.2
       commander: 9.5.0
@@ -5254,7 +5310,12 @@ snapshots:
 
   '@atproto/xrpc@0.6.3':
     dependencies:
-      '@atproto/lexicon': 0.4.2
+      '@atproto/lexicon': 0.4.7
+      zod: 3.23.8
+
+  '@atproto/xrpc@0.6.9':
+    dependencies:
+      '@atproto/lexicon': 0.4.7
       zod: 3.23.8
 
   '@babel/code-frame@7.24.7':
@@ -5910,6 +5971,14 @@ snapshots:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.5.0
 
+  '@jsr/lpm__core@0.2.9':
+    dependencies:
+      '@atproto/api': 0.14.7
+      '@atproto/identity': 0.4.6
+      '@atproto/lexicon': 0.4.7
+      '@atproto/syntax': 0.3.3
+      '@needle-di/core': 0.11.2
+
   '@libsql/client@0.14.0(bufferutil@4.0.8)(utf-8-validate@6.0.3)':
     dependencies:
       '@libsql/core': 0.14.0
@@ -5980,6 +6049,8 @@ snapshots:
       resolve: 1.19.0
 
   '@microsoft/tsdoc@0.14.2': {}
+
+  '@needle-di/core@0.11.2': {}
 
   '@neon-rs/load@0.0.4': {}
 
@@ -7167,6 +7238,8 @@ snapshots:
   available-typed-arrays@1.0.7:
     dependencies:
       possible-typed-array-names: 1.0.0
+
+  await-lock@2.2.2: {}
 
   axe-core@4.10.1: {}
 
@@ -9890,6 +9963,8 @@ snapshots:
   tinyrainbow@1.2.0: {}
 
   tinyspy@3.0.2: {}
+
+  tlds@1.255.0: {}
 
   to-fast-properties@2.0.0: {}
 

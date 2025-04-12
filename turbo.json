@@ -17,7 +17,8 @@
         "CRON_SECRET",
         "NEXT_RUNTIME",
         "VERCEL_GIT_COMMIT_SHA",
-        "PLC_DIRECTORY_URL"
+        "PLC_DIRECTORY_URL",
+        "PLC_URL"
       ]
     },
     "type-check": {},
