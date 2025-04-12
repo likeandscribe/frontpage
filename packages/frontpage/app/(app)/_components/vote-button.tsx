@@ -12,6 +12,7 @@ type VoteButtonProps = {
   unvoteAction: () => Promise<void>;
   initialState: VoteButtonState;
   votes?: number;
+  disabled?: boolean;
 };
 
 export function VoteButton({
@@ -19,6 +20,7 @@ export function VoteButton({
   unvoteAction,
   initialState,
   votes,
+  disabled,
 }: VoteButtonProps) {
   // TODO: useOptimistic here to fix cached vote count bug
   const [hasOptimisticallyVoted, setHasOptimisticallyVoted] = useState<
@@ -71,7 +73,7 @@ export function VoteButton({
       <Button
         variant="ghost"
         size="icon"
-        disabled={initialState === "authored"}
+        disabled={disabled || initialState === "authored"}
         name={hasVoted ? "unvote" : "vote"}
       >
         <ChevronUpIcon

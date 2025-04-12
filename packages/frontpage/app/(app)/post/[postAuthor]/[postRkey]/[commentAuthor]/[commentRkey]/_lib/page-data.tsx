@@ -36,7 +36,7 @@ export async function getCommentPageData(params: CommentPageParams) {
     notFound();
   }
 
-  if (shouldHideComment(comment)) {
+  if (await shouldHideComment(comment)) {
     notFound();
   }
 

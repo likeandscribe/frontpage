@@ -19,12 +19,13 @@ export const PostRecord = z.object({
 
 export type Post = z.infer<typeof PostRecord>;
 
-type PostInput = {
+export type PostInput = {
   title: string;
   url: string;
+  rkey: string;
 };
 
-export async function createPost({ title, url }: PostInput) {
+export async function createPost({ title, url, rkey }: PostInput) {
   const record = { title, url, createdAt: new Date().toISOString() };
   const parseResult = PostRecord.safeParse(record);
   if (!parseResult.success) {
@@ -36,17 +37,20 @@ export async function createPost({ title, url }: PostInput) {
   const result = await atprotoCreateRecord({
     record,
     collection: PostCollection,
+    rkey,
   });
 
   return {
     rkey: result.uri.rkey,
+    cid: result.cid,
   };
 }
 
-export async function deletePost(rkey: string) {
+export async function deletePost(authorDid: DID, rkey: string) {
   await atprotoDeleteRecord({
-    rkey,
+    authorDid,
     collection: PostCollection,
+    rkey,
   });
 }
 
@@ -57,12 +61,12 @@ export async function getPost({ rkey, repo }: { rkey: string; repo: DID }) {
     throw new DataLayerError("Failed to get service url");
   }
 
-  const { value } = await atprotoGetRecord({
+  const { value, cid } = await atprotoGetRecord({
     serviceEndpoint: service,
     repo,
     collection: PostCollection,
     rkey,
   });
 
-  return PostRecord.parse(value);
+  return { value: PostRecord.parse(value), cid };
 }

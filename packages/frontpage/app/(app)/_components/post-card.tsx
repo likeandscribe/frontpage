@@ -1,10 +1,9 @@
 import Link from "next/link";
-import { createVote, deleteVote } from "@/lib/data/atproto/vote";
 import { getVoteForPost } from "@/lib/data/db/vote";
 import { ensureUser, getUser } from "@/lib/data/user";
 import { TimeAgo } from "@/lib/components/time-ago";
 import { VoteButton } from "./vote-button";
-import { PostCollection, deletePost } from "@/lib/data/atproto/post";
+import { PostCollection } from "@/lib/data/atproto/post";
 import { getVerifiedHandle } from "@/lib/data/atproto/identity";
 import { UserHoverCard } from "@/lib/components/user-hover-card";
 import type { DID } from "@/lib/data/atproto/did";
@@ -15,6 +14,9 @@ import { revalidatePath } from "next/cache";
 import { ReportDialogDropdownButton } from "./report-dialog";
 import { DeleteButton } from "./delete-button";
 import { ShareDropdownButton } from "./share-button";
+import { createVote, deleteVote } from "@/lib/api/vote";
+import { deletePost } from "@/lib/api/post";
+import { invariant } from "@/lib/utils";
 
 type PostProps = {
   id: number;
@@ -25,7 +27,7 @@ type PostProps = {
   createdAt: Date;
   commentCount: number;
   rkey: string;
-  cid: string;
+  cid: string | null;
   isUpvoted: boolean;
 };
 
@@ -52,26 +54,31 @@ export async function PostCard({
     <article className="flex items-center gap-4 shadow-sm rounded-lg p-4 bg-white dark:bg-slate-900">
       <div className="flex flex-col items-center">
         <VoteButton
+          disabled={!cid}
           voteAction={async () => {
             "use server";
-            await ensureUser();
+            invariant(cid, "Vote action requires cid");
+            const user = await ensureUser();
             await createVote({
-              subjectAuthorDid: author,
-              subjectCid: cid,
-              subjectRkey: rkey,
-              subjectCollection: PostCollection,
+              authorDid: user.did,
+              subject: {
+                rkey,
+                cid,
+                authorDid: author,
+                collection: PostCollection,
+              },
             });
           }}
           unvoteAction={async () => {
             "use server";
-            await ensureUser();
+            const user = await ensureUser();
             const vote = await getVoteForPost(id);
             if (!vote) {
               // TODO: Show error notification
               console.error("Vote not found for post", id);
               return;
             }
-            await deleteVote(vote.rkey);
+            await deleteVote({ authorDid: user.did, rkey: vote.rkey });
           }}
           initialState={
             (await getUser())?.did === author
@@ -131,6 +138,7 @@ export async function PostCard({
                     author,
                   })}
                 />
+                {/* TODO: there's a bug here where delete shows on deleted posts */}
                 {user?.did === author ? (
                   <DeleteButton
                     deleteAction={deletePostAction.bind(null, rkey)}
@@ -147,8 +155,8 @@ export async function PostCard({
 
 export async function deletePostAction(rkey: string) {
   "use server";
-  await ensureUser();
-  await deletePost(rkey);
+  const user = await ensureUser();
+  await deletePost({ authorDid: user.did, rkey });
 
   revalidatePath("/");
 }
@@ -156,7 +164,7 @@ export async function deletePostAction(rkey: string) {
 export async function reportPostAction(
   input: {
     rkey: string;
-    cid: string;
+    cid: string | null;
     author: DID;
   },
   formData: FormData,
@@ -175,6 +183,6 @@ export async function reportPostAction(
     subjectDid: input.author,
     subjectCollection: PostCollection,
     subjectRkey: input.rkey,
-    subjectCid: input.cid,
+    subjectCid: input.cid ?? undefined,
   });
 }

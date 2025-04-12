@@ -4,6 +4,7 @@ import { PostCard } from "../../../_components/post-card";
 import { getPost } from "@/lib/data/db/post";
 import { getDidFromHandleOrDid } from "@/lib/data/atproto/identity";
 import { Alert, AlertTitle, AlertDescription } from "@/lib/components/ui/alert";
+import { Spinner } from "@/lib/components/ui/spinner";
 
 type Params = {
   postRkey: string;
@@ -42,7 +43,18 @@ export default async function Post(props: {
         cid={post.cid}
         isUpvoted={post.userHasVoted}
       />
-      {post.status !== "live" ? (
+      {post.status === "pending" ? (
+        // TODO: This should have a spinner and refresh on an interval
+        <Alert>
+          <AlertTitle className="flex items-center gap-2">
+            <Spinner /> Posting...
+          </AlertTitle>
+          <AlertDescription>
+            This post is traversing the atmosphere. Check back in a few seconds
+            to see if it has landed and is ready to be discussed.
+          </AlertDescription>
+        </Alert>
+      ) : post.status !== "live" ? (
         <Alert>
           <AlertTitle>This post has been deleted</AlertTitle>
           <AlertDescription>

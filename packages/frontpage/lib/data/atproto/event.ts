@@ -40,7 +40,7 @@ const Path = z.string().transform((p, ctx) => {
   };
 });
 
-const Operation = z.union([
+export const Operation = z.union([
   z.object({
     action: z.union([z.literal("create"), z.literal("update")]),
     path: Path,

@@ -1,18 +1,27 @@
 import "server-only";
 import { cache } from "react";
 import { db } from "@/lib/db";
-import { eq, sql, desc, and, InferSelectModel, isNotNull } from "drizzle-orm";
+import {
+  eq,
+  sql,
+  desc,
+  and,
+  InferSelectModel,
+  isNotNull,
+  ne,
+} from "drizzle-orm";
 import * as schema from "@/lib/schema";
 import { getUser, isAdmin } from "../user";
 import { DID } from "../atproto/did";
-import * as atprotoComment from "../atproto/comment";
-import { Prettify } from "@/lib/utils";
+import { invariant, Prettify } from "@/lib/utils";
 import {
   deleteCommentAggregateTrigger,
   newCommentAggregateTrigger,
 } from "./triggers";
 
-type CommentRow = InferSelectModel<typeof schema.Comment>;
+type CommentRow = Omit<InferSelectModel<typeof schema.Comment>, "cid"> & {
+  cid: string | null;
+};
 
 type CommentExtras = {
   children?: CommentModel[];
@@ -24,7 +33,7 @@ type CommentExtras = {
   postRkey?: string;
 };
 
-type LiveComment = CommentRow & CommentExtras & { status: "live" };
+type LiveComment = CommentRow & CommentExtras & { status: "live" | "pending" };
 
 type HiddenComment = Omit<CommentRow, "status" | "body"> &
   CommentExtras & {
@@ -87,7 +96,15 @@ export const getCommentsForPost = cache(async (postId: number) => {
     .leftJoin(hasVoted, eq(hasVoted.commentId, schema.Comment.id))
     .orderBy(desc(schema.CommentAggregates.rank));
 
-  return nestCommentRows(rows);
+  const currentUserDid = (await getUser())?.did;
+
+  return nestCommentRows(
+    rows
+      .map((row) => ({ ...row, cid: row.cid || null }))
+      .filter(
+        (row) => row.status !== "pending" || row.authorDid === currentUserDid,
+      ),
+  );
 });
 
 export const getCommentWithChildren = cache(
@@ -120,7 +137,7 @@ const nestCommentRows = (
       voteCount: item.voteCount,
       rank: item.rank,
     };
-    if (item.status === "live") {
+    if (item.status === "live" || item.status === "pending") {
       comments.push({
         ...item,
         ...transformed,
@@ -174,11 +191,31 @@ export const getComment = cache(async (rkey: string) => {
   return rows[0] ?? null;
 });
 
-export async function uncached_doesCommentExist(rkey: string) {
+type UpdateCommentInput = Partial<Omit<CommentRow, "id">>;
+
+export const updateComment = async (
+  repo: DID,
+  rkey: string,
+  input: UpdateCommentInput,
+) => {
+  await db
+    .update(schema.Comment)
+    .set({
+      ...input,
+      cid: input.cid ?? undefined,
+    })
+    .where(
+      and(eq(schema.Comment.authorDid, repo), eq(schema.Comment.rkey, rkey)),
+    );
+};
+
+export async function uncached_doesCommentExist(repo: DID, rkey: string) {
   const row = await db
     .select({ id: schema.Comment.id })
     .from(schema.Comment)
-    .where(eq(schema.Comment.rkey, rkey))
+    .where(
+      and(eq(schema.Comment.rkey, rkey), eq(schema.Comment.authorDid, repo)),
+    )
     .limit(1);
 
   return Boolean(row[0]);
@@ -214,7 +251,15 @@ export const getUserComments = cache(async (userDid: DID) => {
   return comments as LiveComment[];
 });
 
-export function shouldHideComment(comment: CommentModel) {
+// TODO: This shouldn't be in the database layer.
+// We need to properly design the API layer to handle hidden comments, and this can be moved there.
+export async function shouldHideComment(comment: CommentModel) {
+  if (
+    comment.status === "pending" &&
+    (await getUser())?.did === comment.authorDid
+  ) {
+    return false;
+  }
   return (
     comment.status !== "live" &&
     comment.children &&
@@ -253,63 +298,88 @@ export async function moderateComment({
     );
 }
 
-export type UnauthedCreateCommentInput = {
-  cid: string;
-  comment: atprotoComment.Comment;
-  repo: DID;
+export type CreateCommentInput = {
+  cid?: string;
+  authorDid: DID;
   rkey: string;
+  content: string;
+  createdAt: Date;
+  parent?: {
+    authorDid: DID;
+    rkey: string;
+  };
+  post: {
+    authorDid: DID;
+    rkey: string;
+  };
+  status: "live" | "pending";
 };
 
-export async function unauthed_createComment({
+export async function createComment({
   cid,
-  comment,
-  repo,
+  authorDid,
   rkey,
-}: UnauthedCreateCommentInput) {
+  content,
+  createdAt,
+  parent,
+  post,
+  status,
+}: CreateCommentInput) {
   return await db.transaction(async (tx) => {
-    const parentComment =
-      comment.parent != null
-        ? (
-            await tx
-              .select()
-              .from(schema.Comment)
-              .where(eq(schema.Comment.cid, comment.parent.cid))
-          )[0]
-        : null;
-
-    const post = (
+    const existingPost = (
       await tx
-        .select()
+        .select({ id: schema.Post.id, status: schema.Post.status })
         .from(schema.Post)
-        .where(eq(schema.Post.cid, comment.post.cid))
+        .where(
+          and(
+            eq(schema.Post.rkey, post.rkey),
+            eq(schema.Post.authorDid, post.authorDid),
+          ),
+        )
+        .limit(1)
     )[0];
 
-    if (!post) {
-      throw new Error("Post not found");
+    let existingParent;
+    if (parent) {
+      existingParent = (
+        await tx
+          .select({ id: schema.Comment.id })
+          .from(schema.Comment)
+          .where(
+            and(
+              eq(schema.Comment.rkey, parent.rkey),
+              eq(schema.Comment.authorDid, parent.authorDid),
+            ),
+          )
+          .limit(1)
+      )[0];
     }
 
-    if (post.status !== "live") {
-      throw new Error(`[naughty] Cannot comment on deleted post. ${repo}`);
+    invariant(existingPost, "Post not found");
+
+    if (existingPost.status !== "live") {
+      throw new Error(`[naughty] Cannot comment on deleted post. ${authorDid}`);
     }
+
     const [insertedComment] = await tx
       .insert(schema.Comment)
       .values({
-        cid,
+        cid: cid ?? "",
         rkey,
-        body: comment.content,
-        postId: post.id,
-        authorDid: repo,
-        createdAt: new Date(comment.createdAt),
-        parentCommentId: parentComment?.id ?? null,
+        body: content,
+        postId: existingPost.id,
+        authorDid,
+        createdAt: createdAt,
+        parentCommentId: existingParent?.id ?? null,
+        status,
       })
       .returning({
         id: schema.Comment.id,
         postId: schema.Comment.postId,
+        parentCommentId: schema.Comment.parentCommentId,
       });
 
-    if (!insertedComment) {
-      throw new Error("Failed to insert comment");
-    }
+    invariant(insertedComment, "Failed to insert comment");
 
     await newCommentAggregateTrigger(
       insertedComment.postId,
@@ -317,49 +387,40 @@ export async function unauthed_createComment({
       tx,
     );
 
-    return {
-      id: insertedComment.id,
-      parent: parentComment
-        ? {
-            id: parentComment.id,
-            authorDid: parentComment.authorDid,
-          }
-        : null,
-      post: {
-        authordid: post.authorDid,
-      },
-    };
+    return insertedComment;
   });
 }
 
-export type UnauthedDeleteCommentInput = {
+export type DeleteCommentInput = {
   rkey: string;
-  repo: DID;
+  authorDid: DID;
 };
 
-export async function unauthed_deleteComment({
-  rkey,
-  repo,
-}: UnauthedDeleteCommentInput) {
+export async function deleteComment({ rkey, authorDid }: DeleteCommentInput) {
   await db.transaction(async (tx) => {
-    const [deletedComment] = await tx
+    const [updatedComment] = await tx
       .update(schema.Comment)
       .set({ status: "deleted" })
       .where(
-        and(eq(schema.Comment.rkey, rkey), eq(schema.Comment.authorDid, repo)),
+        and(
+          eq(schema.Comment.rkey, rkey),
+          eq(schema.Comment.authorDid, authorDid),
+          ne(schema.Comment.status, "deleted"),
+        ),
       )
       .returning({
         id: schema.Comment.id,
         postId: schema.Comment.postId,
       });
 
-    if (!deletedComment) {
-      throw new Error("Failed to delete comment");
-    }
+    invariant(
+      updatedComment,
+      "Failed to update comment status to deleted or comment not found",
+    );
 
     await deleteCommentAggregateTrigger(
-      deletedComment.postId,
-      deletedComment.id,
+      updatedComment.postId,
+      updatedComment.id,
       tx,
     );
   });
