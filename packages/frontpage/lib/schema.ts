@@ -76,6 +76,7 @@ export const PostVote = sqliteTable(
     authorDid: did("author_did").notNull(),
     cid: text("cid").notNull().default(""),
     rkey: text("rkey").notNull(),
+    status: createStatusColumn("status"),
   },
   (t) => ({
     unique_authr_rkey: unique().on(t.authorDid, t.rkey),
@@ -163,6 +164,7 @@ export const CommentVote = sqliteTable(
     authorDid: did("author_did").notNull(),
     cid: text("cid").notNull().default(""),
     rkey: text("rkey").notNull(),
+    status: createStatusColumn("status"),
   },
   (t) => ({
     unique_authr_rkey: unique().on(t.authorDid, t.rkey),
