@@ -58,7 +58,7 @@ export async function deletePost({ authorDid, rkey }: db.DeletePostInput) {
   }
 
   try {
-    await atproto.deletePost(authorDid, rkey);
+    after(() => atproto.deletePost(authorDid, rkey));
     await db.deletePost({ authorDid: user.did, rkey });
   } catch (e) {
     throw new DataLayerError(`Failed to delete post: ${e}`);

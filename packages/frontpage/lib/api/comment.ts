@@ -72,8 +72,7 @@ export async function deleteComment({
   }
 
   try {
-    console.log("deleteComment", rkey);
-    await atproto.deleteComment(authorDid, rkey);
+    after(() => atproto.deleteComment(authorDid, rkey));
     await db.deleteComment({ authorDid: user.did, rkey });
   } catch (e) {
     throw new DataLayerError(`Failed to delete comment: ${e}`);
