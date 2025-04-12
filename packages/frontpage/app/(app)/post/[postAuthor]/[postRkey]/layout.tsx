@@ -46,7 +46,7 @@ export default async function Post(props: {
       {post.status === "pending" ? (
         // TODO: This should have a spinner and refresh on an interval
         <Alert>
-          <AlertTitle>
+          <AlertTitle className="flex items-center gap-2">
             <Spinner /> Posting...
           </AlertTitle>
           <AlertDescription>
