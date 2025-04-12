@@ -49,6 +49,7 @@ export async function handlePost({ op, repo, rkey }: HandlerInput) {
         rkey,
         cid: postRecord.cid,
         authorDid: repo,
+        status: "live",
       });
     }
 
@@ -120,6 +121,7 @@ export async function handleComment({ op, repo, rkey }: HandlerInput) {
           authorDid: post.uri.authority as DID,
           rkey: post.uri.rkey,
         },
+        status: "live",
       });
 
       if (!createdComment) {

@@ -312,7 +312,7 @@ export type CreateCommentInput = {
     authorDid: DID;
     rkey: string;
   };
-  status?: "live" | "pending";
+  status: "live" | "pending";
 };
 
 export async function createComment({
@@ -323,7 +323,7 @@ export async function createComment({
   createdAt,
   parent,
   post,
-  status = "live",
+  status,
 }: CreateCommentInput) {
   return await db.transaction(async (tx) => {
     const existingPost = (

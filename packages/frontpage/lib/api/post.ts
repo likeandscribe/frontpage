@@ -31,6 +31,7 @@ export async function createPost({
       post: { title, url, createdAt: new Date() },
       rkey,
       authorDid: user.did,
+      status: "pending",
     });
     invariant(dbCreatedPost, "Failed to insert post in database");
 

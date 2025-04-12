@@ -178,6 +178,7 @@ export type CreatePostInput = {
   authorDid: DID;
   rkey: string;
   cid?: string;
+  status: "live" | "pending";
 };
 
 export async function createPost({
@@ -185,6 +186,7 @@ export async function createPost({
   authorDid,
   rkey,
   cid,
+  status,
 }: CreatePostInput) {
   return await db.transaction(async (tx) => {
     const [insertedPostRow] = await tx
@@ -196,6 +198,7 @@ export async function createPost({
         title: post.title,
         url: post.url,
         createdAt: post.createdAt,
+        status,
       })
       .returning({ postId: schema.Post.id });
 
