@@ -157,7 +157,14 @@ export async function handleVote({ op, repo, rkey }: HandlerInput) {
     switch (subject.uri.collection) {
       case atprotoPost.PostCollection:
         const postVote = await dbVote.uncached_doesPostVoteExist(repo, rkey);
-        if (!postVote) {
+        if (postVote) {
+          await dbVote.updatePostVote({
+            authorDid: repo,
+            rkey,
+            status: "live",
+            cid: hydratedRecord.cid,
+          });
+        } else {
           const createdDbPostVote = await dbVote.createPostVote({
             repo,
             rkey,
@@ -167,6 +174,7 @@ export async function handleVote({ op, repo, rkey }: HandlerInput) {
               authorDid: subject.uri.authority as DID,
               cid: subject.cid,
             },
+            status: "live",
           });
 
           if (!createdDbPostVote) {
@@ -181,7 +189,14 @@ export async function handleVote({ op, repo, rkey }: HandlerInput) {
           repo,
           rkey,
         );
-        if (!commentVote) {
+        if (commentVote) {
+          await dbVote.updateCommentVote({
+            authorDid: repo,
+            rkey,
+            status: "live",
+            cid: hydratedRecord.cid,
+          });
+        } else {
           const createdDbCommentVote = await dbVote.createCommentVote({
             repo,
             rkey,
@@ -191,6 +206,7 @@ export async function handleVote({ op, repo, rkey }: HandlerInput) {
               authorDid: subject.uri.authority as DID,
               cid: subject.cid,
             },
+            status: "live",
           });
 
           if (!createdDbCommentVote) {

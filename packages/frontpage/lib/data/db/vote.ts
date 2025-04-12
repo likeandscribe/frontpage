@@ -93,6 +93,7 @@ export type CreateVoteInput = {
     authorDid: DID;
     cid: string;
   };
+  status: "live" | "pending";
 };
 
 export const createPostVote = async ({

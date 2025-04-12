@@ -8,6 +8,7 @@ import { DID } from "../data/atproto/did";
 import { CommentCollection } from "../data/atproto/comment";
 import { invariant } from "../utils";
 import { TID } from "@atproto/common-web";
+import { after } from "next/server";
 
 export type ApiCreateVoteInput = {
   authorDid: DID;
@@ -37,6 +38,7 @@ export async function createVote({ authorDid, subject }: ApiCreateVoteInput) {
           authorDid: subject.authorDid,
           cid: subject.cid,
         },
+        status: "pending",
       });
 
       invariant(dbCreatedVote, "Failed to insert post vote in database");
@@ -49,23 +51,18 @@ export async function createVote({ authorDid, subject }: ApiCreateVoteInput) {
           authorDid: subject.authorDid,
           cid: subject.cid,
         },
+        status: "pending",
       });
 
       invariant(dbCreatedVote, "Failed to insert post vote in database");
     }
 
-    const { cid } = await atproto.createVote({
-      rkey,
-      subject,
-    });
-
-    invariant(cid, "Failed to create vote, cid missing");
-
-    if (subject.collection == PostCollection) {
-      await db.updatePostVote({ authorDid: user.did, rkey, cid });
-    } else if (subject.collection == CommentCollection) {
-      await db.updateCommentVote({ authorDid: user.did, rkey, cid });
-    }
+    after(() =>
+      atproto.createVote({
+        rkey,
+        subject,
+      }),
+    );
   } catch (e) {
     await db.deleteVote({ authorDid: user.did, rkey });
     throw new DataLayerError(`Failed to create post vote: ${e}`);
