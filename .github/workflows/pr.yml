@@ -1,13 +1,18 @@
 name: PR
 on: pull_request
 
+env:
+  # https://github.com/vercel/turborepo/issues/9320#issuecomment-2499219314
+  TURBO_SCM_BASE: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.event.before }}
+
 jobs:
   test:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 2
+          fetch-depth: 0
+          filter: "blob:none"
 
       - name: Cache turbo build setup
         uses: actions/cache@v4
@@ -34,7 +39,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 2
+          fetch-depth: 0
+          filter: "blob:none"
 
       - name: Cache turbo build setup
         uses: actions/cache@v4
@@ -61,7 +67,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 2
+          fetch-depth: 0
+          filter: "blob:none"
 
       - name: Cache turbo build setup
         uses: actions/cache@v4
