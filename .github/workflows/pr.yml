@@ -8,6 +8,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          filter: "blob:none"
 
       - name: Cache turbo build setup
         uses: actions/cache@v4
@@ -35,6 +36,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          filter: "blob:none"
 
       - name: Cache turbo build setup
         uses: actions/cache@v4
@@ -62,6 +64,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          filter: "blob:none"
 
       - name: Cache turbo build setup
         uses: actions/cache@v4
