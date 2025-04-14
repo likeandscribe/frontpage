@@ -1,0 +1,35 @@
+{
+  "lexicon": 1,
+  "id": "fyi.unravel.frontpage.richtext.block",
+  "defs": {
+    "main": {
+      "type": "union",
+      "refs": ["#paragraph"]
+    },
+    "paragraph": {
+      "type": "object",
+      "properties": {
+        "content": { "type": "ref", "ref": "#richtext" }
+      }
+    },
+    "richtext": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["text"],
+        "properties": {
+          "text": {
+            "type": "string"
+          },
+          "facets": {
+            "type": "array",
+            "items": {
+              "type": "ref",
+              "ref": "fyi.frontpage.richtext.facet"
+            }
+          }
+        }
+      }
+    }
+  }
+}

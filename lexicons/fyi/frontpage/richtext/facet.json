@@ -1,0 +1,10 @@
+{
+  "lexicon": 1,
+  "id": "app.bsky.richtext.facet",
+  "defs": {
+    "main": {
+      "type": "union",
+      "refs": []
+    }
+  }
+}
