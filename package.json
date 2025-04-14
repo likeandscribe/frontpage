@@ -4,7 +4,8 @@
   "packageManager": "pnpm@10.3.0",
   "devDependencies": {
     "prettier": "^3.3.0",
-    "turbo": "2.1.2"
+    "turbo": "2.1.2",
+    "typescript": "catalog:"
   },
   "pnpm": {
     "onlyBuiltDependencies": [
