@@ -1,0 +1,17 @@
+{
+  "lexicon": 1,
+  "id": "fyi.frontpage.subject.url",
+  "description": "A link to a webpage URL.",
+  "defs": {
+    "main": {
+      "type": "object",
+      "required": ["url"],
+      "properties": {
+        "url": {
+          "type": "string",
+          "format": "uri"
+        }
+      }
+    }
+  }
+}
