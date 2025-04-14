@@ -165,6 +165,9 @@ importers:
       '@libsql/client':
         specifier: ^0.14.0
         version: 0.14.0(bufferutil@4.0.8)(utf-8-validate@6.0.3)
+      '@markdoc/markdoc':
+        specifier: ^0.4.0
+        version: 0.4.0(@types/react@18.3.10)(react@19.0.0)
       '@next/env':
         specifier: ^14.2.4
         version: 14.2.4
@@ -255,6 +258,9 @@ importers:
       server-only:
         specifier: ^0.0.1
         version: 0.0.1
+      slugify:
+        specifier: ^1.6.6
+        version: 1.6.6
       swr:
         specifier: 2.2.6-beta.4
         version: 2.2.6-beta.4(react@19.0.0)
@@ -361,9 +367,6 @@ importers:
 
   packages/unravel:
     dependencies:
-      '@markdoc/markdoc':
-        specifier: ^0.4.0
-        version: 0.4.0(@types/react@18.3.10)(react@19.0.0)
       clsx:
         specifier: ^2.1.1
         version: 2.1.1
@@ -382,18 +385,12 @@ importers:
       server-only:
         specifier: ^0.0.1
         version: 0.0.1
-      slugify:
-        specifier: ^1.6.6
-        version: 1.6.6
       tailwind-merge:
         specifier: ^2.3.0
         version: 2.3.0
       tailwindcss-animate:
         specifier: ^1.0.7
         version: 1.0.7(tailwindcss@3.4.3)
-      zod:
-        specifier: ^3.23.8
-        version: 3.23.8
     devDependencies:
       '@repo/typescript-config':
         specifier: workspace:*
@@ -3788,6 +3785,7 @@ packages:
 
   libsql@0.4.6:
     resolution: {integrity: sha512-F5M+ltteK6dCcpjMahrkgT96uFJvVI8aQ4r9f2AzHQjC7BkAYtvfMSTWGvRBezRgMUIU2h1Sy0pF9nOGOD5iyA==}
+    cpu: [x64, arm64, wasm32]
     os: [darwin, linux, win32]
 
   lilconfig@2.1.0:

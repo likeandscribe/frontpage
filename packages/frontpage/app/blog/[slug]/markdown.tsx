@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import "server-only";
 import { parse, transform, Tag } from "@markdoc/markdoc";
 import type {
@@ -14,11 +15,13 @@ import { createElement, memo } from "react";
 
 type Component = ComponentType<any>;
 
+export type ComponentConfig = Record<string, Component>;
+
 export default memo(function Markdown({
   components = {},
   content,
 }: {
-  components?: Record<string, Component>;
+  components?: ComponentConfig;
   content: string;
 }) {
   const ast = parse(content);
