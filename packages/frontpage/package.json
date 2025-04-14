@@ -66,7 +66,7 @@
     "@types/react": "^18.3.10",
     "@types/react-dom": "^18.3.0",
     "@vitejs/plugin-react": "^4.3.1",
-    "babel-plugin-react-compiler": "19.0.0-beta-8a03594-20241020",
+    "babel-plugin-react-compiler": "19.0.0-beta-ebf51a3-20250411",
     "drizzle-kit": "^0.25.0",
     "eslint": "^8",
     "eslint-config-next": "catalog:",
