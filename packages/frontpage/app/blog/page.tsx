@@ -6,7 +6,7 @@ import { Badge } from "@/lib/components/ui/badge";
 import { UserAvatar } from "@/lib/components/user-avatar";
 import { TimeAgo } from "@/lib/components/time-ago";
 
-export const revalidate = 60;
+export const revalidate = 120;
 
 export default async function Blog() {
   const blogList = await listBlogs();

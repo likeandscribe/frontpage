@@ -9,6 +9,8 @@ interface Props {
   params: Promise<{ slug: string }>;
 }
 
+export const revalidate = 60;
+
 export default async function BlogPost(props: Props) {
   const { slug } = await props.params;
   const rkey = slug.split("-")[0];
