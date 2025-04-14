@@ -1,6 +1,10 @@
 name: PR
 on: pull_request
 
+env:
+  # https://github.com/vercel/turborepo/issues/9320#issuecomment-2499219314
+  TURBO_SCM_BASE: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.event.before }}
+
 jobs:
   test:
     runs-on: ubuntu-latest
