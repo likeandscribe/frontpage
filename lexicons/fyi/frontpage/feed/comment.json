@@ -8,10 +8,14 @@
       "key": "tid",
       "record": {
         "type": "object",
-        "required": ["createdAt", "post"],
+        "required": ["createdAt", "post", "blocks"],
         "properties": {
-          "content": {
-            // TODO: richtext
+          "blocks": {
+            "type": "array",
+            "items": {
+              "type": "ref",
+              "ref": "fyi.unravel.frontpage.richtext.block"
+            }
           },
           "createdAt": {
             "type": "string",
