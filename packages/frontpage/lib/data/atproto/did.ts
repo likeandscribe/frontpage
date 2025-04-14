@@ -8,6 +8,10 @@ export function isDid(s: string): s is DID {
   return s.startsWith("did:");
 }
 
+export const didSchema = z.string().refine((s) => isDid(s), {
+  message: "Invalid DID",
+});
+
 export function parseDid(s: string): DID | null {
   if (!isDid(s)) {
     return null;
