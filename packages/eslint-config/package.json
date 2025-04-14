@@ -11,7 +11,7 @@
     "@vercel/style-guide": "^6.0.0",
     "eslint-config-turbo": "^2.0.5",
     "eslint-plugin-react-compiler": "0.0.0-experimental-0998c1e-20240625",
-    "typescript": "^5.5.2",
+    "typescript": "catalog:",
     "typescript-eslint": "^7.14.1"
   }
 }
