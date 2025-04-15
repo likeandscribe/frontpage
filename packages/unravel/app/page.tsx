@@ -4,6 +4,7 @@ import { useLayoutEffect } from "react";
 export default function Home() {
   useLayoutEffect(() => {
     // @ts-expect-error UnicornStudio is on the window
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
     UnicornStudio.init();
   }, []);
 

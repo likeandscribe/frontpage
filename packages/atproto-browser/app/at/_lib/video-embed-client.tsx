@@ -28,6 +28,7 @@ export function VideoEmbedClient({
           url.searchParams.set("session_id", sessionId);
         }
 
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
         return new Request(url, initParams);
       },
     });

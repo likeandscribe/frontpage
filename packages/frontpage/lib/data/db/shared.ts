@@ -27,7 +27,7 @@ export const createFrontPageLink = async (
     case CommentCollection: {
       const { postAuthor, postRkey } = (await getPostFromComment({
         rkey: rkey!,
-        did: author!,
+        did: author,
       }))!;
       return `/post/${postAuthor}/${postRkey}/${author}/${rkey}/`;
     }

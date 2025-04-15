@@ -102,5 +102,7 @@ async function getHoverCardData(
   did: DID,
 ): Promise<ApiRouteResponse<typeof GetHoverCardContent>> {
   const response = await fetch(`/api/hover-card-content?did=${did}`);
-  return response.json();
+  return response.json() as Promise<
+    ApiRouteResponse<typeof GetHoverCardContent>
+  >;
 }

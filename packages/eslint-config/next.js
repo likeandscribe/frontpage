@@ -21,7 +21,7 @@ export function defineConfig(baseDirectory, configs = []) {
     next.flatConfig.coreWebVitals,
 
     eslint.configs.recommended,
-    tseslint.configs.recommended,
+    tseslint.configs.recommendedTypeChecked,
     reactCompiler.configs.recommended,
     reactHooks.configs["recommended-latest"],
     // @ts-expect-error
@@ -45,6 +45,7 @@ export function defineConfig(baseDirectory, configs = []) {
         "react/react-in-jsx-scope": "off",
         "react/prop-types": "off",
         "react/no-array-index-key": "error",
+        "@typescript-eslint/no-unsafe-assignment": "off",
         "@typescript-eslint/no-floating-promises": "error",
         "@typescript-eslint/no-misused-promises": "error",
         "@typescript-eslint/consistent-type-imports": [

@@ -9,7 +9,7 @@ import * as dbPost from "@/lib/data/db/post";
 import * as dbVote from "@/lib/data/db/vote";
 import { getBlueskyProfile } from "@/lib/data/user";
 import { sendDiscordMessage } from "@/lib/discord";
-import { invariant } from "@/lib/utils";
+import { exhaustiveCheck, invariant } from "@/lib/utils";
 
 type HandlerInput = {
   op: Zod.infer<typeof Operation>;
@@ -219,7 +219,7 @@ export async function handleVote({ op, repo, rkey }: HandlerInput) {
         break;
       }
       default:
-        throw new Error(`Unknown collection: ${subject.uri.collection}`);
+        exhaustiveCheck(subject.uri.collection, "Unknown collection");
     }
   } else if (op.action === "delete") {
     console.log("deleting vote", rkey);

@@ -18,6 +18,7 @@ export function invariant(
   }
 }
 
-export function exhaustiveCheck(value: never): never {
-  throw new Error(`Unhandled value: ${value}`);
+export function exhaustiveCheck(value: never, message?: string): never {
+  // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+  throw new Error(`Unhandled value (${message}): ${value}`);
 }

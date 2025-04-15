@@ -47,7 +47,7 @@ export function CollectionItems({
             repo={repo}
             collection={collection}
             pds={pds}
-            cursor={data.cursor!}
+            cursor={data.cursor}
             fetchKey={`listCollections/collection:${collection}/cursor:${data.cursor!}`}
           />
         </Suspense>

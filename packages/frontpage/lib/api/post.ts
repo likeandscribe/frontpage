@@ -46,6 +46,7 @@ export async function createPost({
     return { rkey };
   } catch (e) {
     await db.deletePost({ authorDid: user.did, rkey });
+    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
     throw new DataLayerError(`Failed to create post: ${e}`);
   }
 }
@@ -61,6 +62,7 @@ export async function deletePost({ authorDid, rkey }: db.DeletePostInput) {
     after(() => atproto.deletePost(authorDid, rkey));
     await db.deletePost({ authorDid: user.did, rkey });
   } catch (e) {
+    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
     throw new DataLayerError(`Failed to delete post: ${e}`);
   }
 }

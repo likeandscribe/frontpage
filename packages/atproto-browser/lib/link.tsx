@@ -7,6 +7,7 @@ import { type ComponentProps } from "react";
 export default function Link(props: ComponentProps<typeof NextLink>) {
   const router = useRouter();
   function prefetch() {
+    // eslint-disable-next-line @typescript-eslint/no-base-to-string
     router.prefetch(props.href.toString());
   }
 

@@ -17,7 +17,7 @@ type UserAvatarProps = {
   size?: Size;
 };
 
-export async function UserAvatar(props: UserAvatarProps) {
+export function UserAvatar(props: UserAvatarProps) {
   return (
     <Suspense fallback={<AvatarFallback size={props.size} />}>
       <AvatarImage {...props} />

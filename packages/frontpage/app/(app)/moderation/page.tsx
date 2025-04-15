@@ -64,7 +64,7 @@ export async function performModerationAction(
       case PostCollection:
         return await moderatePost({
           rkey: report.subjectRkey!,
-          authorDid: report.subjectDid! as DID,
+          authorDid: report.subjectDid as DID,
           cid: report.subjectCid!,
           hide: input.status === "accepted",
         });
@@ -72,7 +72,7 @@ export async function performModerationAction(
       case CommentCollection:
         return await moderateComment({
           rkey: report.subjectRkey!,
-          authorDid: report.subjectDid! as DID,
+          authorDid: report.subjectDid as DID,
           cid: report.subjectCid!,
           hide: input.status === "accepted",
         });

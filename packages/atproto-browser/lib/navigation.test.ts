@@ -14,7 +14,7 @@ class RedirectError extends Error {
 }
 
 vi.mock("next/navigation", () => ({
-  redirect: vi.fn((path) => {
+  redirect: vi.fn((path: string) => {
     throw new RedirectError(path);
   }),
 }));

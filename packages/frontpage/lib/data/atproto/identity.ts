@@ -61,10 +61,14 @@ async function getAtprotoDidFromDns(handle: string) {
   const { Answer } = DnsQueryResponse.parse(await response.json());
   // Answer[0].data is "\"did=...\"" (with quotes)
   const val = Answer[0]?.data
-    ? JSON.parse(Answer[0]?.data).split("did=")[1]
+    ? // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
+      JSON.parse(Answer[0]?.data).split("did=")[1]
     : null;
 
-  return val ? parseDid(val) : null;
+  return val
+    ? // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+      parseDid(val)
+    : null;
 }
 
 const getAtprotoFromHttps = unstable_cache(

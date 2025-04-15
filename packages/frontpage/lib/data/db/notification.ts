@@ -12,7 +12,7 @@ declare const tag: unique symbol;
 export type Cursor = { readonly [tag]: "Cursor" };
 
 function cursorToDate(cursor: Cursor): Date {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-argument
   return new Date(cursor as any);
 }
 

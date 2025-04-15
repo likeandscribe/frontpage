@@ -8,7 +8,7 @@ type VideoEmbedProps = {
   did: string;
 };
 
-export async function VideoEmbed({ cid, did }: VideoEmbedProps) {
+export function VideoEmbed({ cid, did }: VideoEmbedProps) {
   return (
     <Suspense fallback={<VideoEmbedWrapper />}>
       <VideoEmbedInner cid={cid} did={did} />

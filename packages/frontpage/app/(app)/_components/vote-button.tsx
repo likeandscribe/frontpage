@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/lib/components/ui/button";
-import { cn } from "@/lib/utils";
+import { cn, exhaustiveCheck } from "@/lib/utils";
 import { ChevronUpIcon } from "@radix-ui/react-icons";
 import { useState } from "react";
 
@@ -50,8 +50,7 @@ export function VoteButton({
   } else if (initialState === "unvoted") {
     actualVotes += hasOptimisticallyVoted === true ? 2 : 1;
   } else {
-    const _exhaustedCheck: never = initialState;
-    throw new Error(`Invalid state: ${initialState}`);
+    exhaustiveCheck(initialState, "Invalid state");
   }
 
   return (

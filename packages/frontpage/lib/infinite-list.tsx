@@ -1,7 +1,12 @@
 "use client";
 
 import useSWRInfinite, { unstable_serialize } from "swr/infinite";
-import { createContext, Fragment, type ReactNode, startTransition } from "react";
+import {
+  createContext,
+  Fragment,
+  type ReactNode,
+  startTransition,
+} from "react";
 import { useInView } from "react-intersection-observer";
 import { mutate, SWRConfig } from "swr";
 
@@ -40,8 +45,10 @@ export function InfiniteList<TCursor>({ fallback, ...props }: Props<TCursor>) {
   );
 }
 
-export const InfiniteListContext = createContext({
-  revalidatePage: async (): Promise<void> => {
+export const InfiniteListContext = createContext<{
+  revalidatePage: () => Promise<void>;
+}>({
+  revalidatePage: () => {
     throw new Error(
       "Cannot call InfiniteListContext.revalidate when not inside of an InfiniteList",
     );
@@ -87,7 +94,7 @@ function InfinteListInner<TCursor>({
                   await mutate(data, {
                     revalidate: (_data, args) =>
                       !currentCursor ||
-                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                      // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
                       (args as any)[1] === currentCursor,
                   });
                 },

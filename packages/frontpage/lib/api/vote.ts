@@ -65,6 +65,7 @@ export async function createVote({ authorDid, subject }: ApiCreateVoteInput) {
     );
   } catch (e) {
     await db.deleteVote({ authorDid: user.did, rkey });
+    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
     throw new DataLayerError(`Failed to create post vote: ${e}`);
   }
 }
@@ -79,6 +80,7 @@ export async function deleteVote({ authorDid, rkey }: db.DeleteVoteInput) {
     after(() => atproto.deleteVote(authorDid, rkey));
     await db.deleteVote({ authorDid: user.did, rkey });
   } catch (e) {
+    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
     throw new DataLayerError(`Failed to delete vote: ${e}`);
   }
 }

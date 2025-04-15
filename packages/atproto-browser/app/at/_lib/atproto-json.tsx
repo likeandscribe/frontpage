@@ -160,7 +160,7 @@ export function JSONValue({ data, repo }: { data: LexValue; repo: string }) {
         <>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            src={`https://cdn.bsky.app/img/feed_thumbnail/plain/${repo}/${data.ref}@jpeg`}
+            src={`https://cdn.bsky.app/img/feed_thumbnail/plain/${repo}/${data.ref.toString()}@jpeg`}
             alt=""
             width={200}
           />

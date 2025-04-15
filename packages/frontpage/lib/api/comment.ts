@@ -57,6 +57,7 @@ export async function createComment({
     }
   } catch (e) {
     await db.deleteComment({ authorDid: user.did, rkey });
+    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
     throw new DataLayerError(`Failed to create comment: ${e}`);
   }
 }
@@ -75,6 +76,7 @@ export async function deleteComment({
     after(() => atproto.deleteComment(authorDid, rkey));
     await db.deleteComment({ authorDid: user.did, rkey });
   } catch (e) {
+    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
     throw new DataLayerError(`Failed to delete comment: ${e}`);
   }
 }

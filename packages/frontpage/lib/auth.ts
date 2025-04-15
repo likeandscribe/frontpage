@@ -35,11 +35,16 @@ import { getDidFromHandleOrDid } from "./data/atproto/identity";
 const USER_AGENT = "appview/@frontpage.fyi (@tom-sherman.com)";
 
 export const getPrivateJwk = cache(() =>
-  importJWK(JSON.parse(process.env.PRIVATE_JWK!), USER_SESSION_JWT_ALG),
+  importJWK(
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+    JSON.parse(process.env.PRIVATE_JWK!),
+    USER_SESSION_JWT_ALG,
+  ),
 );
 
 export const getPublicJwk = cache(async () => {
   const jwk = await importJWK(
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
     JSON.parse(process.env.PUBLIC_JWK!),
     USER_SESSION_JWT_ALG,
   );
@@ -424,6 +429,7 @@ export async function importDpopJwks({
   const [privateDpopKey, publicDpopKey] = await Promise.all([
     crypto.subtle.importKey(
       "jwk",
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
       JSON.parse(privateJwk),
       { name: "RSASSA-PKCS1-v1_5", hash: "SHA-256" },
       true,
@@ -431,6 +437,7 @@ export async function importDpopJwks({
     ),
     crypto.subtle.importKey(
       "jwk",
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
       JSON.parse(publicJwk),
       { name: "RSASSA-PKCS1-v1_5", hash: "SHA-256" },
       true,

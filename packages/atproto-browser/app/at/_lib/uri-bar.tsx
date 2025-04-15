@@ -7,7 +7,7 @@ import { AtUriForm } from "../../aturi-form";
 export function UriBar() {
   const searchParams = useSearchParams();
   const pathname = usePathname();
-  const params = useParams() as {
+  const params = useParams() satisfies {
     identifier?: string;
     collection?: string;
     rkey?: string;

@@ -7,6 +7,7 @@ import * as atprotoVote from "@/lib/data/atproto/vote";
 import { getPdsUrl } from "@/lib/data/atproto/did";
 import { handleComment, handlePost, handleVote } from "./handlers";
 import { eq } from "drizzle-orm";
+import { exhaustiveCheck } from "@/lib/utils";
 
 export async function POST(request: Request) {
   const auth = request.headers.get("Authorization");
@@ -52,7 +53,7 @@ export async function POST(request: Request) {
         await handleVote({ op, repo, rkey });
         break;
       default:
-        throw new Error(`Unknown collection: ${collection}, ${op}`);
+        exhaustiveCheck(collection, `Unknown collection ${JSON.stringify(op)}`);
     }
   });
 

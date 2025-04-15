@@ -1,3 +1,6 @@
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
+/* eslint-disable @typescript-eslint/no-unsafe-return */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import "server-only";
 import { parse, transform, Tag } from "@markdoc/markdoc";
@@ -28,7 +31,7 @@ export default memo(function Markdown({
   const tree = transform(ast, {
     nodes: { heading: createHeadingSchema() },
   });
-  return render(tree) as any;
+  return render(tree);
 
   function deepRender(value: any): any {
     if (value == null || typeof value !== "object") return value;
