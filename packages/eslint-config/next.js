@@ -1,17 +1,17 @@
 import eslint from "@eslint/js";
 import tseslint from "typescript-eslint";
-import { FlatCompat } from "@eslint/eslintrc";
 import reactCompiler from "eslint-plugin-react-compiler";
 // @ts-ignore no types
 import next from "@next/eslint-plugin-next";
 import jsxA11y from "eslint-plugin-jsx-a11y";
+import reactHooks from "eslint-plugin-react-hooks";
+import react from "eslint-plugin-react";
+import { version as reactVersion } from "react";
 
 /**
  * @param {string} baseDirectory
  */
 export function defineConfig(baseDirectory) {
-  const compat = new FlatCompat({ baseDirectory });
-
   return tseslint.config(
     {
       ignores: ["**/.next/**", "**/.vercel/**"],
@@ -22,6 +22,9 @@ export function defineConfig(baseDirectory) {
     eslint.configs.recommended,
     tseslint.configs.recommended,
     reactCompiler.configs.recommended,
+    reactHooks.configs["recommended-latest"],
+    // @ts-expect-error
+    react.configs.flat.recommended,
     jsxA11y.flatConfigs.recommended,
     {
       languageOptions: {
@@ -31,7 +34,16 @@ export function defineConfig(baseDirectory) {
         },
       },
 
+      settings: {
+        react: {
+          version: reactVersion,
+        },
+      },
+
       rules: {
+        "react/react-in-jsx-scope": "off",
+        "react/prop-types": "off",
+        "react/no-array-index-key": "error",
         "@typescript-eslint/no-floating-promises": "error",
         "@typescript-eslint/no-misused-promises": "error",
         "@typescript-eslint/no-unused-vars": [
