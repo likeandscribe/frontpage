@@ -9,9 +9,11 @@
   "include": [
     "**/*.ts",
     "**/*.tsx",
+    "**/*.mts",
     "**/*.mjs",
     "next-env.d.ts",
-    ".next/types/**/*.ts"
+    ".next/types/**/*.ts",
+    "vite.config.mts"
   ],
   "exclude": ["node_modules"]
 }
