@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils";
 import { Toaster } from "@/lib/components/ui/toaster";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Analytics } from "@vercel/analytics/react";
-import { Metadata } from "next";
+import { type Metadata } from "next";
 import { ThemeProvider } from "@/lib/components/theme-provider";
 
 const sourceSerif = Source_Serif_4({

@@ -1,7 +1,7 @@
 import "server-only";
 import { getBlueskyProfile } from "@/lib/data/user";
 import { Suspense } from "react";
-import { DID } from "../data/atproto/did";
+import { type DID } from "../data/atproto/did";
 
 const userAvatarSizes = {
   small: 22,

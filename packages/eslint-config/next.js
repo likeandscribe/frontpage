@@ -47,6 +47,17 @@ export function defineConfig(baseDirectory, configs = []) {
         "react/no-array-index-key": "error",
         "@typescript-eslint/no-floating-promises": "error",
         "@typescript-eslint/no-misused-promises": "error",
+        "@typescript-eslint/consistent-type-imports": [
+          "error",
+          {
+            fixStyle: "inline-type-imports",
+            prefer: "type-imports",
+          },
+        ],
+        "@typescript-eslint/consistent-type-exports": [
+          "error",
+          { fixMixedExportsWithInlineTypeSpecifier: true },
+        ],
         "@typescript-eslint/no-unused-vars": [
           "error",
           {

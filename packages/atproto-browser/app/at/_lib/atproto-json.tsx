@@ -5,7 +5,7 @@ import { AtUri } from "@atproto/syntax";
 import { VideoEmbed } from "./video-embed";
 import { ErrorBoundary } from "react-error-boundary";
 import { VideoEmbedWrapper } from "./video-embed-client";
-import { BlobRef, LexValue } from "@atproto/lexicon";
+import { BlobRef, type LexValue } from "@atproto/lexicon";
 import { CID } from "multiformats/cid";
 
 function naiveAtUriCheck(atUri: string) {

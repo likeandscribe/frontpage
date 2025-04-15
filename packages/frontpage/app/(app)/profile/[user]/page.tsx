@@ -21,7 +21,7 @@ import {
 import { EllipsisDropdown } from "../../_components/ellipsis-dropdown";
 import { ReportDialogDropdownButton } from "../../_components/report-dialog";
 import { reportUserAction } from "@/lib/components/user-hover-card";
-import { Metadata } from "next";
+import { type Metadata } from "next";
 import { LinkAlternateAtUri } from "@/lib/components/link-alternate-at";
 
 type Params = {

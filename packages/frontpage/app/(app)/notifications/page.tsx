@@ -1,11 +1,11 @@
 import { TimeAgo } from "@/lib/components/time-ago";
 import { getVerifiedHandle } from "@/lib/data/atproto/identity";
 import {
-  Cursor,
+  type Cursor,
   getNotifications,
-  Notification as NotificationType,
+  type Notification as NotificationType,
 } from "@/lib/data/db/notification";
-import { InfiniteList, Page } from "@/lib/infinite-list";
+import { InfiniteList, type Page } from "@/lib/infinite-list";
 import { exhaustiveCheck } from "@/lib/utils";
 import { ChatBubbleIcon, Link1Icon } from "@radix-ui/react-icons";
 import {

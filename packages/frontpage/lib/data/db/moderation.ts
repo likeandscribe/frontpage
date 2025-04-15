@@ -1,7 +1,7 @@
 import "server-only";
 import { db } from "@/lib/db";
 import * as schema from "@/lib/schema";
-import { DID } from "../atproto/did";
+import { type DID } from "../atproto/did";
 import { isAdmin } from "../user";
 
 export type ModerationEventDTO = {

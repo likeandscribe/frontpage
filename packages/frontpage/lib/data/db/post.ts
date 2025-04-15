@@ -9,12 +9,12 @@ import {
   and,
   isNull,
   or,
-  InferSelectModel,
+  type InferSelectModel,
   ne,
 } from "drizzle-orm";
 import * as schema from "@/lib/schema";
 import { getUser, isAdmin } from "../user";
-import { DID } from "../atproto/did";
+import { type DID } from "../atproto/did";
 import { newPostAggregateTrigger } from "./triggers";
 import { invariant } from "@/lib/utils";
 

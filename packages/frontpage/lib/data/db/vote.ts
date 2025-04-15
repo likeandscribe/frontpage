@@ -2,9 +2,9 @@ import "server-only";
 import { getUser } from "../user";
 import { db } from "@/lib/db";
 import * as schema from "@/lib/schema";
-import { and, eq, InferSelectModel } from "drizzle-orm";
+import { and, eq, type InferSelectModel } from "drizzle-orm";
 import { cache } from "react";
-import { DID } from "../atproto/did";
+import { type DID } from "../atproto/did";
 import {
   deleteCommentVoteAggregateTrigger,
   deletePostVoteAggregateTrigger,

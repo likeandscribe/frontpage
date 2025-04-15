@@ -4,7 +4,7 @@ import * as atproto from "../data/atproto/vote";
 import { DataLayerError } from "../data/error";
 import { ensureUser } from "../data/user";
 import { PostCollection } from "../data/atproto/post";
-import { DID } from "../data/atproto/did";
+import { type DID } from "../data/atproto/did";
 import { CommentCollection } from "../data/atproto/comment";
 import { invariant } from "../utils";
 import { TID } from "@atproto/common-web";

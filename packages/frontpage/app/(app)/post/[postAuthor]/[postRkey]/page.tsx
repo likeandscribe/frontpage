@@ -1,9 +1,9 @@
 import { NewComment } from "./_lib/comment-client";
 import { Comment } from "./_lib/comment";
 import { getCommentsForPost } from "@/lib/data/db/comment";
-import { Metadata } from "next";
+import { type Metadata } from "next";
 import { getVerifiedHandle } from "@/lib/data/atproto/identity";
-import { PostPageParams, getPostPageData } from "./_lib/page-data";
+import { type PostPageParams, getPostPageData } from "./_lib/page-data";
 import { LinkAlternateAtUri } from "@/lib/components/link-alternate-at";
 import { PostCollection } from "@/lib/data/atproto/post";
 

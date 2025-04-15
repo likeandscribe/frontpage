@@ -6,7 +6,7 @@ import * as schema from "@/lib/schema";
 import { and, eq, lt, desc, isNull, count } from "drizzle-orm";
 import { invariant } from "@/lib/utils";
 import { ensureUser } from "../user";
-import { DID } from "../atproto/did";
+import { type DID } from "../atproto/did";
 
 declare const tag: unique symbol;
 export type Cursor = { readonly [tag]: "Cursor" };

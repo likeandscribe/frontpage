@@ -6,7 +6,7 @@ import {
 } from "./record";
 import { z } from "zod";
 import { DataLayerError } from "../error";
-import { DID, getPdsUrl } from "./did";
+import { type DID, getPdsUrl } from "./did";
 import { MAX_POST_TITLE_LENGTH, MAX_POST_URL_LENGTH } from "../db/constants";
 
 export const PostCollection = "fyi.unravel.frontpage.post";

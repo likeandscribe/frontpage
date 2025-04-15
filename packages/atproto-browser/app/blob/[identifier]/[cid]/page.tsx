@@ -1,6 +1,6 @@
 import { resolveIdentity } from "@/lib/atproto-server";
 import { getPds } from "@atproto/identity";
-import { CSSProperties, ReactNode } from "react";
+import { type CSSProperties, type ReactNode } from "react";
 
 export default async function BlobPage(props: {
   params: Promise<{

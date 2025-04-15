@@ -8,7 +8,7 @@ import {
   OgWrapper,
   frontpageOgImageResponse,
 } from "@/lib/og";
-import { CommentPageParams, getCommentPageData } from "../_lib/page-data";
+import { type CommentPageParams, getCommentPageData } from "../_lib/page-data";
 import { getBlueskyProfile } from "@/lib/data/user";
 import { shouldHideComment } from "@/lib/data/db/comment";
 import { notFound } from "next/navigation";

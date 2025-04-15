@@ -8,7 +8,7 @@ import { createAtUriParser } from "./uri";
 import { DataLayerError } from "../error";
 import { z } from "zod";
 import { PostCollection } from "./post";
-import { DID, getPdsUrl } from "./did";
+import { type DID, getPdsUrl } from "./did";
 import { MAX_COMMENT_LENGTH } from "../db/constants";
 
 export const CommentCollection = "fyi.unravel.frontpage.comment";

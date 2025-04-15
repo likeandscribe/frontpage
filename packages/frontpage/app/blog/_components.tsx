@@ -1,6 +1,6 @@
 import { UserAvatar } from "@/lib/components/user-avatar";
 import { UserHoverCard } from "@/lib/components/user-hover-card";
-import { DID } from "@/lib/data/atproto/did";
+import { type DID } from "@/lib/data/atproto/did";
 import { ArrowLeftIcon } from "@radix-ui/react-icons";
 import Link from "next/link";
 

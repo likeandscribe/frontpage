@@ -1,4 +1,4 @@
-import { DID } from "@/lib/data/atproto/did";
+import { type DID } from "@/lib/data/atproto/did";
 import { getVerifiedHandle } from "@/lib/data/atproto/identity";
 import Link from "next/link";
 

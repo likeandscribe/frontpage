@@ -21,7 +21,7 @@ import {
   SelectValue,
 } from "@/lib/components/ui/select";
 import { ReportReasons } from "@/lib/data/db/report-shared";
-import { ReactNode, useState } from "react";
+import { type ReactNode, useState } from "react";
 import { ExclamationTriangleIcon } from "@radix-ui/react-icons";
 import { useEllipsisDropdownContext } from "./ellipsis-dropdown";
 import { DropdownMenuItem } from "@/lib/components/ui/dropdown-menu";

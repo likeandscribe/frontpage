@@ -1,14 +1,14 @@
 import * as schema from "@/lib/schema";
-import { ResultSet } from "@libsql/client";
+import { type ResultSet } from "@libsql/client";
 import {
-  ExtractTablesWithRelations,
+  type ExtractTablesWithRelations,
   and,
   eq,
   inArray,
   isNull,
   sql,
 } from "drizzle-orm";
-import { SQLiteTransaction } from "drizzle-orm/sqlite-core";
+import { type SQLiteTransaction } from "drizzle-orm/sqlite-core";
 
 type Transaction = SQLiteTransaction<
   "async",

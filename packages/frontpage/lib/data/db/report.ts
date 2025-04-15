@@ -3,11 +3,11 @@ import "server-only";
 import { db } from "@/lib/db";
 import * as schema from "@/lib/schema";
 import { cache } from "react";
-import { InferSelectModel, eq } from "drizzle-orm";
+import { type InferSelectModel, eq } from "drizzle-orm";
 import { sendDiscordMessage } from "@/lib/discord";
-import { DID } from "../atproto/did";
+import { type DID } from "../atproto/did";
 import { ensureUser, isAdmin } from "../user";
-import { ReportReasonType } from "./report-shared";
+import { type ReportReasonType } from "./report-shared";
 import { createFrontPageLink, getRootUrl } from "./shared";
 
 export type Report = InferSelectModel<typeof schema.Report>;

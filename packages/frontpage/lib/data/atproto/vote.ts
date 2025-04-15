@@ -7,7 +7,7 @@ import {
 import { z } from "zod";
 import { PostCollection } from "./post";
 import { CommentCollection } from "./comment";
-import { DID, getPdsUrl } from "./did";
+import { type DID, getPdsUrl } from "./did";
 import { createAtUriParser } from "./uri";
 import { DataLayerError } from "../error";
 

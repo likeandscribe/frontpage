@@ -4,7 +4,7 @@ import { ensureUser } from "../user";
 import { DataLayerError } from "../error";
 import { fetchAuthenticatedAtproto } from "@/lib/auth";
 import { AtUri } from "./uri";
-import { DID } from "./did";
+import { type DID } from "./did";
 
 const CreateRecordResponse = z.object({
   uri: AtUri,

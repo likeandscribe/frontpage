@@ -1,5 +1,5 @@
 import { cache } from "react";
-import { DID, getDidDoc, isDid, parseDid } from "./did";
+import { type DID, getDidDoc, isDid, parseDid } from "./did";
 import { unstable_cache } from "next/cache";
 import { z } from "zod";
 

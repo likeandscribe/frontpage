@@ -6,14 +6,14 @@ import {
   sql,
   desc,
   and,
-  InferSelectModel,
+  type InferSelectModel,
   isNotNull,
   ne,
 } from "drizzle-orm";
 import * as schema from "@/lib/schema";
 import { getUser, isAdmin } from "../user";
-import { DID } from "../atproto/did";
-import { invariant, Prettify } from "@/lib/utils";
+import { type DID } from "../atproto/did";
+import { invariant, type Prettify } from "@/lib/utils";
 import {
   deleteCommentAggregateTrigger,
   newCommentAggregateTrigger,

@@ -1,12 +1,12 @@
 "use client";
 
 import useSWR, { preload } from "swr";
-import { DID } from "../data/atproto/did";
+import { type DID } from "../data/atproto/did";
 import { HoverCardTrigger, HoverCardContent } from "./ui/hover-card";
-import { ReactNode, Suspense } from "react";
+import { type ReactNode, Suspense } from "react";
 import { Skeleton } from "./ui/skeleton";
 import { ChatBubbleIcon, Link1Icon } from "@radix-ui/react-icons";
-import { ApiRouteResponse } from "../api-route";
+import { type ApiRouteResponse } from "../api-route";
 import type { GET as GetHoverCardContent } from "@/app/api/hover-card-content/route";
 import Link from "next/link";
 import { ReportDialogIcon } from "@/app/(app)/_components/report-dialog";

@@ -14,7 +14,7 @@ import {
   updateReport,
 } from "@/lib/data/db/report";
 import {
-  ModerationEventDTO,
+  type ModerationEventDTO,
   createModerationEvent,
 } from "@/lib/data/db/moderation";
 import { PostCollection } from "@/lib/data/atproto/post";
@@ -23,7 +23,7 @@ import { revalidatePath } from "next/cache";
 import Link from "next/link";
 import { ReportCard } from "./_components/report-card";
 import { moderatePost } from "@/lib/data/db/post";
-import { DID } from "@/lib/data/atproto/did";
+import { type DID } from "@/lib/data/atproto/did";
 import { moderateComment } from "@/lib/data/db/comment";
 import { moderateUser } from "@/lib/data/db/user";
 

@@ -6,7 +6,7 @@ import { redirect } from "next/navigation";
 import { db } from "../db";
 import { and, count, eq } from "drizzle-orm";
 import * as schema from "../schema";
-import { DID, getPdsUrl } from "./atproto/did";
+import { type DID, getPdsUrl } from "./atproto/did";
 
 /**
  * Returns null when not logged in. If you want to ensure that the user is logged in, use `ensureUser` instead.

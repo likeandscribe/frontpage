@@ -5,8 +5,8 @@ import {
   CardTitle,
   CardContent,
 } from "@/lib/components/ui/card";
-import { DID } from "@/lib/data/atproto/did";
-import { Report } from "@/lib/data/db/report";
+import { type DID } from "@/lib/data/atproto/did";
+import { type Report } from "@/lib/data/db/report";
 import { performModerationAction } from "../page";
 import { UserHandle } from "./user-handle";
 import Link from "next/link";

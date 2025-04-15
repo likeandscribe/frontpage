@@ -3,7 +3,7 @@ import * as atproto from "../data/atproto/comment";
 import { DataLayerError } from "../data/error";
 import { ensureUser } from "../data/user";
 import * as db from "../data/db/comment";
-import { DID } from "../data/atproto/did";
+import { type DID } from "../data/atproto/did";
 import { createNotification } from "../data/db/notification";
 import { invariant } from "../utils";
 import { TID } from "@atproto/common-web";

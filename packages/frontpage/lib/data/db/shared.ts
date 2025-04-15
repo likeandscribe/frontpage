@@ -1,6 +1,6 @@
 import { headers } from "next/headers";
 import { CommentCollection } from "../atproto/comment";
-import { DID } from "../atproto/did";
+import { type DID } from "../atproto/did";
 import { PostCollection } from "../atproto/post";
 import { getPostFromComment } from "./post";
 

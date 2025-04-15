@@ -31,17 +31,17 @@ import {
 } from "react";
 import {
   VoteButton,
-  VoteButtonState,
+  type VoteButtonState,
 } from "../../../../_components/vote-button";
 import { Spinner } from "@/lib/components/ui/spinner";
-import { DID } from "@/lib/data/atproto/did";
+import { type DID } from "@/lib/data/atproto/did";
 import { InputLengthIndicator } from "@/lib/components/input-length-indicator";
 import { MAX_COMMENT_LENGTH } from "@/lib/data/db/constants";
 import type { CommentModel } from "@/lib/data/db/comment";
 import { EllipsisDropdown } from "@/app/(app)/_components/ellipsis-dropdown";
 import { ReportDialogDropdownButton } from "@/app/(app)/_components/report-dialog";
 import { DeleteButton } from "@/app/(app)/_components/delete-button";
-import { cva, VariantProps } from "class-variance-authority";
+import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 import { ShareDropdownButton } from "@/app/(app)/_components/share-button";
 

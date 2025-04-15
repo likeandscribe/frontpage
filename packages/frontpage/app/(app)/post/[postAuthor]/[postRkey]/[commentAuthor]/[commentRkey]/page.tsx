@@ -1,8 +1,8 @@
 import { Comment } from "../../_lib/comment";
 import Link from "next/link";
-import { Metadata } from "next";
+import { type Metadata } from "next";
 import { getVerifiedHandle } from "@/lib/data/atproto/identity";
-import { CommentPageParams, getCommentPageData } from "./_lib/page-data";
+import { type CommentPageParams, getCommentPageData } from "./_lib/page-data";
 import { LinkAlternateAtUri } from "@/lib/components/link-alternate-at";
 import { CommentCollection } from "@/lib/data/atproto/comment";
 

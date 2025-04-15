@@ -1,7 +1,7 @@
 "use server";
 
 import { CommentCollection } from "@/lib/data/atproto/comment";
-import { DID } from "@/lib/data/atproto/did";
+import { type DID } from "@/lib/data/atproto/did";
 import { getComment } from "@/lib/data/db/comment";
 import { getPost } from "@/lib/data/db/post";
 import { parseReportForm } from "@/lib/data/db/report-shared";

@@ -1,21 +1,21 @@
-import { JSONType, JSONValue } from "@/app/at/_lib/atproto-json";
+import { type JSONType, JSONValue } from "@/app/at/_lib/atproto-json";
 import { resolveNsidAuthority, resolveIdentity } from "@/lib/atproto-server";
 import Link from "@/lib/link";
 import { getHandle, getKey, getPds } from "@atproto/identity";
 import {
   InvalidLexiconError,
-  LexValue,
+  type LexValue,
   LexiconDefNotFoundError,
-  LexiconDoc,
+  type LexiconDoc,
   Lexicons,
   lexiconDoc,
 } from "@atproto/lexicon";
 import { AtpBaseClient, ComAtprotoRepoGetRecord } from "@atproto/api";
 import { verifyRecords } from "@atproto/repo";
-import React, { cache, Fragment, ReactNode, Suspense } from "react";
+import React, { cache, Fragment, type ReactNode, Suspense } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import { z } from "zod";
-import { AtUri, InvalidNsidError, NSID } from "@atproto/syntax";
+import { type AtUri, InvalidNsidError, NSID } from "@atproto/syntax";
 import { resolveNSIDs } from "@lpm/core";
 import { getAtUriPath } from "@/lib/util";
 

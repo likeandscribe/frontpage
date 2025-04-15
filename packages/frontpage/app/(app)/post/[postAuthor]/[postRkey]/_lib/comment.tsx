@@ -1,10 +1,10 @@
 import { getUser } from "@/lib/data/user";
 import {
   CommentClientWrapperWithToolbar,
-  CommentLevel,
+  type CommentLevel,
   NestComment,
 } from "./comment-client";
-import { CommentModel, shouldHideComment } from "@/lib/data/db/comment";
+import { type CommentModel, shouldHideComment } from "@/lib/data/db/comment";
 import { TimeAgo } from "@/lib/components/time-ago";
 import { AvatarFallback, UserAvatar } from "@/lib/components/user-avatar";
 import Link from "next/link";

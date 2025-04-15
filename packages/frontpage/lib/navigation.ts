@@ -1,4 +1,4 @@
-import { DID } from "./data/atproto/did";
+import { type DID } from "./data/atproto/did";
 
 type PostInput = {
   handleOrDid: string | DID;

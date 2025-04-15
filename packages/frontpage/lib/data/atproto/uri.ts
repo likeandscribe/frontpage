@@ -1,4 +1,4 @@
-import { Prettify } from "@/lib/utils";
+import { type Prettify } from "@/lib/utils";
 import { z } from "zod";
 
 export const AtUri = z.string().transform((value, ctx) => {

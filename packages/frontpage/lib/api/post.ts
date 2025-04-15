@@ -5,7 +5,7 @@ import { ensureUser } from "../data/user";
 import { DataLayerError } from "../data/error";
 import { invariant } from "../utils";
 import { TID } from "@atproto/common-web";
-import { DID } from "../data/atproto/did";
+import { type DID } from "../data/atproto/did";
 import { after } from "next/server";
 
 export type ApiCreatePostInput = {

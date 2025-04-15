@@ -1,6 +1,6 @@
 import * as atprotoComment from "@/lib/data/atproto/comment";
-import { DID } from "@/lib/data/atproto/did";
-import { Operation } from "@/lib/data/atproto/event";
+import { type DID } from "@/lib/data/atproto/did";
+import { type Operation } from "@/lib/data/atproto/event";
 import * as atprotoPost from "@/lib/data/atproto/post";
 import * as atprotoVote from "@/lib/data/atproto/vote";
 import * as dbComment from "@/lib/data/db/comment";

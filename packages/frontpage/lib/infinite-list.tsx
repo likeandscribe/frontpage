@@ -1,7 +1,7 @@
 "use client";
 
 import useSWRInfinite, { unstable_serialize } from "swr/infinite";
-import { createContext, Fragment, ReactNode, startTransition } from "react";
+import { createContext, Fragment, type ReactNode, startTransition } from "react";
 import { useInView } from "react-intersection-observer";
 import { mutate, SWRConfig } from "swr";
 

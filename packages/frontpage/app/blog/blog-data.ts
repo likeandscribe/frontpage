@@ -1,4 +1,4 @@
-import { DID, didSchema } from "@/lib/data/atproto/did";
+import { type DID, didSchema } from "@/lib/data/atproto/did";
 import { AtUri } from "@/lib/data/atproto/uri";
 import slugify from "slugify";
 import { z } from "zod";

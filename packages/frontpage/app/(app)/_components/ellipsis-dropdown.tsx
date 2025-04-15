@@ -8,7 +8,7 @@ import {
   DropdownMenuTrigger,
 } from "@/lib/components/ui/dropdown-menu";
 import { DotsHorizontalIcon } from "@radix-ui/react-icons";
-import React, { ReactNode } from "react";
+import React, { type ReactNode } from "react";
 
 interface EllipsisDropdownProps {
   children: ReactNode;

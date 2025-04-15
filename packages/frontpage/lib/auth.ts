@@ -7,7 +7,7 @@ import {
   calculateJwkThumbprint,
 } from "jose";
 import { cache } from "react";
-import { DID, getPdsUrl } from "./data/atproto/did";
+import { type DID, getPdsUrl } from "./data/atproto/did";
 import {
   discoveryRequest,
   processDiscoveryResponse,
@@ -16,13 +16,13 @@ import {
   protectedResourceRequest,
   revocationRequest,
   parseWwwAuthenticateChallenges,
-  Client as OauthClient,
+  type Client as OauthClient,
   isOAuth2Error,
   customFetch as oauth4webapiCustomFetchSymbol,
 } from "oauth4webapi";
 import { cookies, headers } from "next/headers";
 import {
-  OAuthClientMetadata,
+  type OAuthClientMetadata,
   oauthProtectedResourceMetadataSchema,
   oauthTokenResponseSchema,
 } from "@atproto/oauth-types";

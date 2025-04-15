@@ -2,7 +2,7 @@
 // eslint-disable-next-line no-restricted-imports
 import NextLink from "next/link";
 import { useRouter } from "next/navigation";
-import { ComponentProps } from "react";
+import { type ComponentProps } from "react";
 
 export default function Link(props: ComponentProps<typeof NextLink>) {
   const router = useRouter();

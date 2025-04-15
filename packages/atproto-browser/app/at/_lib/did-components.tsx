@@ -1,5 +1,5 @@
 import { ErrorBoundary } from "react-error-boundary";
-import { JSONType, JSONValue } from "./atproto-json";
+import { type JSONType, JSONValue } from "./atproto-json";
 import { resolveIdentity } from "@/lib/atproto-server";
 import { DidCollections } from "./collection-server";
 import { Suspense } from "react";

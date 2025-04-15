@@ -6,7 +6,7 @@ import {
   unique,
   foreignKey,
   index,
-  SQLiteColumn,
+  type SQLiteColumn,
 } from "drizzle-orm/sqlite-core";
 import type { DID } from "./data/atproto/did";
 import {
@@ -14,7 +14,7 @@ import {
   MAX_POST_TITLE_LENGTH,
   MAX_POST_URL_LENGTH,
 } from "./data/db/constants";
-import { ColumnBaseConfig, sql } from "drizzle-orm";
+import { type ColumnBaseConfig, sql } from "drizzle-orm";
 
 const did = customType<{ data: DID }>({
   dataType() {
