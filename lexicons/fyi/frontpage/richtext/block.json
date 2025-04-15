@@ -9,7 +9,11 @@
     "plaintextParagraph": {
       "type": "object",
       "properties": {
-        "text": { "type": "string" }
+        "text": {
+          "type": "string",
+          "maxLength": 100000,
+          "maxGraphemes": 10000
+        }
       }
     }
   }
