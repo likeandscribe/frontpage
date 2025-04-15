@@ -10,8 +10,9 @@ import { version as reactVersion } from "react";
 
 /**
  * @param {string} baseDirectory
+ * @param {import("typescript-eslint").InfiniteDepthConfigWithExtends[]} configs
  */
-export function defineConfig(baseDirectory) {
+export function defineConfig(baseDirectory, configs = []) {
   return tseslint.config(
     {
       ignores: ["**/.next/**", "**/.vercel/**"],
@@ -60,6 +61,7 @@ export function defineConfig(baseDirectory) {
         ],
       },
     },
+    ...configs,
   );
 }
 
