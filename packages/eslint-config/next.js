@@ -7,6 +7,7 @@ import jsxA11y from "eslint-plugin-jsx-a11y";
 import reactHooks from "eslint-plugin-react-hooks";
 import react from "eslint-plugin-react";
 import { version as reactVersion } from "react";
+import turboRepo from "eslint-config-turbo/flat";
 
 /**
  * @param {string} baseDirectory
@@ -19,6 +20,8 @@ export function defineConfig(baseDirectory, configs = []) {
     },
     next.flatConfig.recommended,
     next.flatConfig.coreWebVitals,
+
+    ...turboRepo,
 
     eslint.configs.recommended,
     tseslint.configs.recommendedTypeChecked,
