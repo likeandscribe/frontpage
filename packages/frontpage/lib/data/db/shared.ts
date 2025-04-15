@@ -24,12 +24,13 @@ export const createFrontPageLink = async (
     case PostCollection:
       return `/post/${author}/${rkey}/`;
 
-    case CommentCollection:
+    case CommentCollection: {
       const { postAuthor, postRkey } = (await getPostFromComment({
         rkey: rkey!,
         did: author!,
       }))!;
       return `/post/${postAuthor}/${postRkey}/${author}/${rkey}/`;
+    }
 
     default:
       return `/profile/${author}/`;

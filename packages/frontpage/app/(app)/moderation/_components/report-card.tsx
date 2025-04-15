@@ -25,7 +25,7 @@ const createLink = async (
     case PostCollection:
       return getPostLink({ handleOrDid: author!, rkey: rkey! });
 
-    case CommentCollection:
+    case CommentCollection: {
       const { postAuthor, postRkey } = (await getPostFromComment({
         rkey: rkey!,
         did: author!,
@@ -38,6 +38,7 @@ const createLink = async (
         handleOrDid: author!,
         rkey: rkey!,
       });
+    }
 
     default:
       return `/profile/${author}/`;
