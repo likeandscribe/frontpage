@@ -6,7 +6,7 @@
     "dev": "next dev --turbo",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
+    "lint": "eslint .",
     "type-check": "tsc --noEmit",
     "test": "vitest"
   },
@@ -38,8 +38,7 @@
     "@types/node": "^20",
     "@types/react": "^18.3.10",
     "@types/react-dom": "^18.3.0",
-    "eslint": "^8",
-    "eslint-config-next": "catalog:",
+    "eslint": "catalog:",
     "tsx": "^4.16.5",
     "typescript": "catalog:",
     "vite-tsconfig-paths": "^4.3.2",

@@ -155,7 +155,7 @@ export async function handleVote({ op, repo, rkey }: HandlerInput) {
     const { subject } = hydratedRecord.value;
 
     switch (subject.uri.collection) {
-      case atprotoPost.PostCollection:
+      case atprotoPost.PostCollection: {
         const postVote = await dbVote.uncached_doesPostVoteExist(repo, rkey);
         if (postVote) {
           await dbVote.updatePostVote({
@@ -184,7 +184,8 @@ export async function handleVote({ op, repo, rkey }: HandlerInput) {
           }
         }
         break;
-      case atprotoComment.CommentCollection:
+      }
+      case atprotoComment.CommentCollection: {
         const commentVote = await dbVote.uncached_doesCommentVoteExist(
           repo,
           rkey,
@@ -216,6 +217,7 @@ export async function handleVote({ op, repo, rkey }: HandlerInput) {
           }
         }
         break;
+      }
       default:
         throw new Error(`Unknown collection: ${subject.uri.collection}`);
     }

@@ -2,16 +2,31 @@
   "name": "@repo/eslint-config",
   "version": "0.0.0",
   "private": true,
+  "type": "module",
   "publishConfig": {
     "access": "public"
   },
   "devDependencies": {
-    "@typescript-eslint/eslint-plugin": "^7.14.1",
-    "@typescript-eslint/parser": "^7.14.1",
-    "@vercel/style-guide": "^6.0.0",
-    "eslint-config-turbo": "^2.0.5",
-    "eslint-plugin-react-compiler": "0.0.0-experimental-0998c1e-20240625",
+    "@eslint/eslintrc": "^3.3.1",
+    "@eslint/js": "^9.24.0",
+    "@next/eslint-plugin-next": "catalog:",
+    "@repo/typescript-config": "workspace:*",
+    "@types/eslint-plugin-jsx-a11y": "^6.10.0",
+    "@types/node": "catalog:",
+    "@types/react": "^18.3.10",
+    "@typescript-eslint/utils": "^8.30.1",
+    "eslint": "catalog:",
+    "eslint-config-next": "catalog:",
+    "eslint-config-turbo": "^2.5.0",
+    "eslint-plugin-jsx-a11y": "^6.10.2",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-compiler": "19.0.0-beta-ebf51a3-20250411",
+    "eslint-plugin-react-hooks": "^5.2.0",
+    "react": "catalog:",
     "typescript": "catalog:",
-    "typescript-eslint": "^7.14.1"
+    "typescript-eslint": "^8.30.1"
+  },
+  "peerDependencies": {
+    "eslint": "catalog:"
   }
 }

@@ -1,60 +1,71 @@
-const { resolve } = require("node:path");
+import eslint from "@eslint/js";
+import tseslint from "typescript-eslint";
+import reactCompiler from "eslint-plugin-react-compiler";
+// @ts-ignore no types
+import next from "@next/eslint-plugin-next";
+import jsxA11y from "eslint-plugin-jsx-a11y";
+import reactHooks from "eslint-plugin-react-hooks";
+import react from "eslint-plugin-react";
+import { version as reactVersion } from "react";
 
-const project = resolve(process.cwd(), "tsconfig.json");
-
-/*
- * This is a custom ESLint configuration for use with
- * Next.js apps.
- *
- * This config extends the Vercel Engineering Style Guide.
- * For more information, see https://github.com/vercel/style-guide
- *
+/**
+ * @param {string} baseDirectory
+ * @param {import("typescript-eslint").InfiniteDepthConfigWithExtends[]} configs
  */
+export function defineConfig(baseDirectory, configs = []) {
+  return tseslint.config(
+    {
+      ignores: ["**/.next/**", "**/.vercel/**"],
+    },
+    next.flatConfig.recommended,
+    next.flatConfig.coreWebVitals,
 
-module.exports = {
-  parser: "@typescript-eslint/parser",
-  parserOptions: {
-    project,
-  },
-  plugins: ["@typescript-eslint", "eslint-plugin-react-compiler"],
-  extends: ["plugin:@typescript-eslint/recommended"].concat(
-    [
-      "@vercel/style-guide/eslint/react",
-      "@vercel/style-guide/eslint/next",
-      // Turborepo custom eslint configuration configures the following rules:
-      //  - https://github.com/vercel/turbo/blob/main/packages/eslint-plugin-turbo/docs/rules/no-undeclared-env-vars.md
-      "eslint-config-turbo",
-    ].map(require.resolve),
-  ),
-  globals: {
-    React: true,
-    JSX: true,
-  },
-  settings: {
-    "import/resolver": {
-      typescript: {
-        project,
+    eslint.configs.recommended,
+    tseslint.configs.recommended,
+    reactCompiler.configs.recommended,
+    reactHooks.configs["recommended-latest"],
+    // @ts-expect-error
+    react.configs.flat.recommended,
+    jsxA11y.flatConfigs.recommended,
+    {
+      languageOptions: {
+        parserOptions: {
+          projectService: true,
+          tsconfigRootDir: baseDirectory,
+        },
+      },
+
+      settings: {
+        react: {
+          version: reactVersion,
+        },
+      },
+
+      rules: {
+        "react/react-in-jsx-scope": "off",
+        "react/prop-types": "off",
+        "react/no-array-index-key": "error",
+        "@typescript-eslint/no-floating-promises": "error",
+        "@typescript-eslint/no-misused-promises": "error",
+        "@typescript-eslint/no-unused-vars": [
+          "error",
+          {
+            args: "all",
+            argsIgnorePattern: "^_",
+            caughtErrors: "all",
+            caughtErrorsIgnorePattern: "^_",
+            destructuredArrayIgnorePattern: "^_",
+            varsIgnorePattern: "^_",
+            ignoreRestSiblings: true,
+          },
+        ],
       },
     },
-  },
-  ignorePatterns: ["node_modules/", "dist/"],
-  // add rules configurations here
-  rules: {
-    "jsx-a11y/no-noninteractive-element-interactions": "off",
-    "@typescript-eslint/no-unused-vars": [
-      "error",
-      {
-        args: "all",
-        argsIgnorePattern: "^_",
-        caughtErrors: "all",
-        caughtErrorsIgnorePattern: "^_",
-        destructuredArrayIgnorePattern: "^_",
-        varsIgnorePattern: "^_",
-        ignoreRestSiblings: true,
-      },
-    ],
-    "react-compiler/react-compiler": "error",
-    "@typescript-eslint/no-floating-promises": "error",
-    "@typescript-eslint/no-misused-promises": "error",
-  },
-};
+    ...configs,
+  );
+}
+
+// Bring @typescript-eslint/utils types into scope to solve a non-portable typescript issue caused by pnpm
+/**
+ * @type {import("@typescript-eslint/utils")}
+ */

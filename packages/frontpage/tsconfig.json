@@ -13,8 +13,7 @@
     "**/*.mjs",
     "**/*.mts",
     "next-env.d.ts",
-    ".next/types/**/*.ts",
-    ".eslintrc.js"
+    ".next/types/**/*.ts"
   ],
   "exclude": ["node_modules"]
 }

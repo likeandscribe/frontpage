@@ -534,6 +534,7 @@ function RecordValidationResult({
       </summary>
       <ul>
         {steps.map((step, i) => (
+          // eslint-disable-next-line react/no-array-index-key
           <Fragment key={i}>{step}</Fragment>
         ))}
         {error ? <li>{error}</li> : null}
