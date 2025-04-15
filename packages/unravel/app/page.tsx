@@ -3,7 +3,7 @@ import { useLayoutEffect } from "react";
 
 export default function Home() {
   useLayoutEffect(() => {
-    // @ts-expect-error
+    // @ts-expect-error UnicornStudio is on the window
     UnicornStudio.init();
   }, []);
 
