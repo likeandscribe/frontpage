@@ -1,6 +1,6 @@
 {
   "lexicon": 1,
-  "id": "fyi.unravel.frontpage.comment",
+  "id": "fyi.frontpage.feed.comment",
   "defs": {
     "main": {
       "type": "record",
