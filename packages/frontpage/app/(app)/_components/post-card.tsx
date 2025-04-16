@@ -3,7 +3,6 @@ import { getVoteForPost } from "@/lib/data/db/vote";
 import { ensureUser, getUser } from "@/lib/data/user";
 import { TimeAgo } from "@/lib/components/time-ago";
 import { VoteButton } from "./vote-button";
-import { PostCollection } from "@/lib/data/atproto/post";
 import { getVerifiedHandle } from "@/lib/data/atproto/identity";
 import { UserHoverCard } from "@/lib/components/user-hover-card";
 import type { DID } from "@/lib/data/atproto/did";
@@ -17,6 +16,7 @@ import { ShareDropdownButton } from "./share-button";
 import { createVote, deleteVote } from "@/lib/api/vote";
 import { deletePost } from "@/lib/api/post";
 import { invariant } from "@/lib/utils";
+import { nsids } from "@/lib/data/atproto/repo";
 
 type PostProps = {
   id: number;
@@ -65,7 +65,7 @@ export async function PostCard({
                 rkey,
                 cid,
                 authorDid: author,
-                collection: PostCollection,
+                collection: nsids.FyiUnravelFrontpagePost,
               },
             });
           }}
@@ -179,9 +179,9 @@ export async function reportPostAction(
 
   await createReport({
     ...formResult.data,
-    subjectUri: `at://${input.author}/${PostCollection}/${input.rkey}`,
+    subjectUri: `at://${input.author}/${nsids.FyiUnravelFrontpagePost}/${input.rkey}`,
     subjectDid: input.author,
-    subjectCollection: PostCollection,
+    subjectCollection: nsids.FyiUnravelFrontpagePost,
     subjectRkey: input.rkey,
     subjectCid: input.cid ?? undefined,
   });

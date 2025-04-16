@@ -1,12 +1,12 @@
 import "server-only";
 import * as db from "../data/db/post";
-import * as atproto from "../data/atproto/post";
 import { ensureUser } from "../data/user";
 import { DataLayerError } from "../data/error";
 import { invariant } from "../utils";
 import { TID } from "@atproto/common-web";
 import { type DID } from "../data/atproto/did";
 import { after } from "next/server";
+import { getAtprotoClient } from "../data/atproto/repo";
 
 export type ApiCreatePostInput = {
   authorDid: DID;
@@ -35,12 +35,19 @@ export async function createPost({
     });
     invariant(dbCreatedPost, "Failed to insert post in database");
 
+    const atproto = getAtprotoClient();
     after(() =>
-      atproto.createPost({
-        title: title,
-        url: url,
-        rkey,
-      }),
+      atproto.fyi.unravel.frontpage.post.create(
+        {
+          repo: user.did,
+        },
+        {
+          title: title,
+          url: url,
+          createdAt: new Date().toISOString(),
+          rkey,
+        },
+      ),
     );
 
     return { rkey };
@@ -59,7 +66,13 @@ export async function deletePost({ authorDid, rkey }: db.DeletePostInput) {
   }
 
   try {
-    after(() => atproto.deletePost(authorDid, rkey));
+    const atproto = getAtprotoClient();
+    after(() =>
+      atproto.fyi.unravel.frontpage.post.delete({
+        repo: authorDid,
+        rkey,
+      }),
+    );
     await db.deletePost({ authorDid: user.did, rkey });
   } catch (e) {
     // eslint-disable-next-line @typescript-eslint/restrict-template-expressions

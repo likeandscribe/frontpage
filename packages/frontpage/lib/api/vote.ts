@@ -3,12 +3,12 @@ import * as db from "../data/db/vote";
 import * as atproto from "../data/atproto/vote";
 import { DataLayerError } from "../data/error";
 import { ensureUser } from "../data/user";
-import { PostCollection } from "../data/atproto/post";
 import { type DID } from "../data/atproto/did";
 import { CommentCollection } from "../data/atproto/comment";
 import { invariant } from "../utils";
 import { TID } from "@atproto/common-web";
 import { after } from "next/server";
+import { nsids } from "../data/atproto/repo";
 
 export type ApiCreateVoteInput = {
   authorDid: DID;
@@ -16,7 +16,7 @@ export type ApiCreateVoteInput = {
     rkey: string;
     cid: string;
     authorDid: DID;
-    collection: typeof PostCollection | typeof CommentCollection;
+    collection: typeof nsids.FyiUnravelFrontpagePost | typeof CommentCollection;
   };
 };
 
@@ -29,7 +29,7 @@ export async function createVote({ authorDid, subject }: ApiCreateVoteInput) {
 
   const rkey = TID.next().toString();
   try {
-    if (subject.collection == PostCollection) {
+    if (subject.collection == nsids.FyiUnravelFrontpagePost) {
       const dbCreatedVote = await db.createPostVote({
         repo: authorDid,
         rkey,

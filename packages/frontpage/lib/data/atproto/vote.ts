@@ -5,16 +5,16 @@ import {
   atprotoGetRecord,
 } from "./record";
 import { z } from "zod";
-import { PostCollection } from "./post";
 import { CommentCollection } from "./comment";
 import { type DID, getPdsUrl } from "./did";
 import { createAtUriParser } from "./uri";
 import { DataLayerError } from "../error";
+import { nsids } from "./repo";
 
 export const VoteCollection = "fyi.unravel.frontpage.vote";
 
 const VoteSubjectCollection = z.union([
-  z.literal(PostCollection),
+  z.literal(nsids.FyiUnravelFrontpagePost),
   z.literal(CommentCollection),
 ]);
 
@@ -34,7 +34,7 @@ export type VoteInput = {
     rkey: string;
     cid: string;
     authorDid: DID;
-    collection: typeof PostCollection | typeof CommentCollection;
+    collection: typeof nsids.FyiUnravelFrontpagePost | typeof CommentCollection;
   };
 };
 

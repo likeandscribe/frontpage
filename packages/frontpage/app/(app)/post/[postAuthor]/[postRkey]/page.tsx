@@ -5,7 +5,7 @@ import { type Metadata } from "next";
 import { getVerifiedHandle } from "@/lib/data/atproto/identity";
 import { type PostPageParams, getPostPageData } from "./_lib/page-data";
 import { LinkAlternateAtUri } from "@/lib/components/link-alternate-at";
-import { PostCollection } from "@/lib/data/atproto/post";
+import { nsids } from "@/lib/data/atproto/repo";
 
 export async function generateMetadata(props: {
   params: Promise<PostPageParams>;
@@ -47,7 +47,7 @@ export default async function Post(props: { params: Promise<PostPageParams> }) {
     <>
       <LinkAlternateAtUri
         authority={authorDid}
-        collection={PostCollection}
+        collection={nsids.FyiUnravelFrontpagePost}
         rkey={post.rkey}
       />
       {post.status === "live" ? (

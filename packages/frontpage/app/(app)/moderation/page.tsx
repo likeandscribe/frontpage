@@ -17,7 +17,6 @@ import {
   type ModerationEventDTO,
   createModerationEvent,
 } from "@/lib/data/db/moderation";
-import { PostCollection } from "@/lib/data/atproto/post";
 import { CommentCollection } from "@/lib/data/atproto/comment";
 import { revalidatePath } from "next/cache";
 import Link from "next/link";
@@ -26,6 +25,7 @@ import { moderatePost } from "@/lib/data/db/post";
 import { type DID } from "@/lib/data/atproto/did";
 import { moderateComment } from "@/lib/data/db/comment";
 import { moderateUser } from "@/lib/data/db/user";
+import { nsids } from "@/lib/data/atproto/repo";
 
 export async function performModerationAction(
   input: { reportId: number; status: "accepted" | "rejected" },
@@ -49,8 +49,8 @@ export async function performModerationAction(
   };
 
   if (report.subjectCollection) {
-    if (report.subjectCollection === PostCollection) {
-      newModEvent.subjectCollection = PostCollection;
+    if (report.subjectCollection === nsids.FyiUnravelFrontpagePost) {
+      newModEvent.subjectCollection = nsids.FyiUnravelFrontpagePost;
     } else if (report.subjectCollection === CommentCollection) {
       newModEvent.subjectCollection = CommentCollection;
     }
@@ -61,7 +61,7 @@ export async function performModerationAction(
 
   const modAction = async () => {
     switch (report.subjectCollection) {
-      case PostCollection:
+      case nsids.FyiUnravelFrontpagePost:
         return await moderatePost({
           rkey: report.subjectRkey!,
           authorDid: report.subjectDid as DID,

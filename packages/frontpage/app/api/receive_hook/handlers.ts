@@ -1,7 +1,7 @@
 import * as atprotoComment from "@/lib/data/atproto/comment";
 import { type DID } from "@/lib/data/atproto/did";
 import { type Operation } from "@/lib/data/atproto/event";
-import * as atprotoPost from "@/lib/data/atproto/post";
+import { getAtprotoClient, nsids } from "@/lib/data/atproto/repo";
 import * as atprotoVote from "@/lib/data/atproto/vote";
 import * as dbComment from "@/lib/data/db/comment";
 import * as dbNotification from "@/lib/data/db/notification";
@@ -23,8 +23,9 @@ type HandlerInput = {
 // If it's a delete then setting the status to delete again doesn't matter
 
 export async function handlePost({ op, repo, rkey }: HandlerInput) {
+  const atproto = getAtprotoClient();
   if (op.action === "create") {
-    const postRecord = await atprotoPost.getPost({
+    const postRecord = await atproto.fyi.unravel.frontpage.post.get({
       repo,
       rkey,
     });
@@ -155,7 +156,7 @@ export async function handleVote({ op, repo, rkey }: HandlerInput) {
     const { subject } = hydratedRecord.value;
 
     switch (subject.uri.collection) {
-      case atprotoPost.PostCollection: {
+      case nsids.FyiUnravelFrontpagePost: {
         const postVote = await dbVote.uncached_doesPostVoteExist(repo, rkey);
         if (postVote) {
           await dbVote.updatePostVote({

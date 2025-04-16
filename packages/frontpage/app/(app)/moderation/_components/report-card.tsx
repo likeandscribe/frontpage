@@ -12,9 +12,9 @@ import { UserHandle } from "./user-handle";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { CommentCollection } from "@/lib/data/atproto/comment";
-import { PostCollection } from "@/lib/data/atproto/post";
 import { getPostFromComment } from "@/lib/data/db/post";
 import { getCommentLink, getPostLink } from "@/lib/navigation";
+import { nsids } from "@/lib/data/atproto/repo";
 
 const createLink = async (
   collection?: string | null,
@@ -22,7 +22,7 @@ const createLink = async (
   rkey?: string | null,
 ) => {
   switch (collection) {
-    case PostCollection:
+    case nsids.FyiUnravelFrontpagePost:
       return getPostLink({ handleOrDid: author!, rkey: rkey! });
 
     case CommentCollection: {
