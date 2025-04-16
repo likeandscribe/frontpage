@@ -9,5 +9,6 @@
       "path": "/api/cron/rank-posts",
       "schedule": "*/30 * * * *"
     }
-  ]
+  ],
+  "buildCommand": "pnpm exec turbo build --filter=frontpage..."
 }
