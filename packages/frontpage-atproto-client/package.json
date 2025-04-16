@@ -2,19 +2,21 @@
   "private": true,
   "name": "@repo/frontpage-atproto-client",
   "type": "module",
-  "main": "src/index.ts",
   "exports": {
     ".": {
-      "import": "./src/index.ts"
+      "import": "./dist/src/index.js",
+      "types": "./dist/src/index.d.ts"
     },
     "./lexicons": {
-      "import": "./src/lexicons.ts"
+      "import": "./dist/src/lexicons.js",
+      "types": "./dist/src/lexicons.d.ts"
     }
   },
   "scripts": {
     "format:write": "prettier --write src",
     "fetch-lexicons": "tsx ./fetch-lexicons.mts",
-    "type-check": "tsc --noEmit"
+    "type-check": "tsc --noEmit",
+    "build": "tsc"
   },
   "dependencies": {
     "@atproto/lexicon": "^0.4.2",
@@ -27,6 +29,7 @@
     "@types/adm-zip": "^0.5.5",
     "@types/node": "^20",
     "adm-zip": "^0.5.16",
-    "tsx": "^4.16.5"
+    "tsx": "^4.16.5",
+    "typescript": "catalog:"
   }
 }
