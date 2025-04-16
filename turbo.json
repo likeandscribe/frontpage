@@ -22,6 +22,10 @@
         "AUTH_SECRET"
       ]
     },
+    "dev": {
+      "persistent": true,
+      "dependsOn": ["^build"]
+    },
     "type-check": {},
     "lint": {},
     "test": {

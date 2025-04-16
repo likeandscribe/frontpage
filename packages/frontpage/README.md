@@ -7,10 +7,7 @@ Frontpage AppView and frontend client.
 If you just need to work on the app in a logged-out state, then you just need to run the following:
 
 ```bash
-# Build all local dependencies, only needs to be done once until you change the code in one of the packages
-pnpm exec turbo run build --filter=frontpage... --filter=!frontpage
-# Start the dev server
-pnpm run dev
+pnpm exec turbo dev
 ```
 
 If you need to login, you need to setup some additional env vars and serve your dev server over the public internet. You can do this with `cloudflared` although other options are available eg. `ngrok` or `tailscale`:
