@@ -1,13 +1,22 @@
 /**
  * GENERATED CODE - DO NOT MODIFY
  */
-import { ValidationResult, BlobRef } from "@atproto/lexicon";
-import { isObj, hasProp } from "../../../../util";
-import { lexicons } from "../../../../lexicons";
+import { type ValidationResult, BlobRef } from "@atproto/lexicon";
 import { CID } from "multiformats/cid";
-import * as ComAtprotoRepoStrongRef from "../../../com/atproto/repo/strongRef";
+import { validate as _validate } from "../../../../lexicons";
+import {
+  type $Typed,
+  is$typed as _is$typed,
+  type OmitKey,
+} from "../../../../util";
+import type * as ComAtprotoRepoStrongRef from "../../../com/atproto/repo/strongRef.js";
+
+const is$typed = _is$typed,
+  validate = _validate;
+const id = "fyi.unravel.frontpage.comment";
 
 export interface Record {
+  $type: "fyi.unravel.frontpage.comment";
   /** The content of the comment. */
   content: string;
   /** Client-declared timestamp when this comment was originally created. */
@@ -17,15 +26,12 @@ export interface Record {
   [k: string]: unknown;
 }
 
-export function isRecord(v: unknown): v is Record {
-  return (
-    isObj(v) &&
-    hasProp(v, "$type") &&
-    (v.$type === "fyi.unravel.frontpage.comment#main" ||
-      v.$type === "fyi.unravel.frontpage.comment")
-  );
+const hashRecord = "main";
+
+export function isRecord<V>(v: V) {
+  return is$typed(v, id, hashRecord);
 }
 
-export function validateRecord(v: unknown): ValidationResult {
-  return lexicons.validate("fyi.unravel.frontpage.comment#main", v);
+export function validateRecord<V>(v: V) {
+  return validate<Record & V>(v, id, hashRecord, true);
 }
