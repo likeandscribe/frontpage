@@ -37,6 +37,17 @@ Docker compose file that runs the required peices of infrastructure for frontpag
 >
 > Also, make sure you stop your docker container when you are done, as Cloudflare exposes port 3000 to the internet.
 
+### Using atproto-browser
+
+You can run a local instance of atproto-browser using this infrastructure. Create `packages/atproto-browser/local.env` and add the following:
+
+```env
+PLC_URL=http://localhost:4000
+NODE_OPTIONS=--use-openssl-ca
+```
+
+Then when you `pnpm turbo dev --filter=atproto-browser` it will use the local PLC and be able to connect to the local PDS instances.
+
 ## Troubleshooting
 
 ### `docker-compose up` fails with `failed to solve: error from sender: open ~/unravel/packages/frontpage/local-infra/plc/db: permission denied`
