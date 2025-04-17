@@ -13,6 +13,7 @@ export default tseslint.config(
         projectService: true,
       },
     },
+
     rules: {
       "@typescript-eslint/no-unsafe-assignment": "off",
       "@typescript-eslint/no-floating-promises": "error",
