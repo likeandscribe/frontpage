@@ -28,6 +28,7 @@ Docker compose file that runs the required peices of infrastructure for frontpag
   - `TURSO_CONNECTION_URL=libsql://turso.dev.unravel.fyi`
   - `PLC_DIRECTORY_URL=https://plc.dev.unravel.fyi`
 - Run `pnpm turbo dev` in the frontpage package folder
+- Run `pnpm run db:migrate` in the frontpage package folder
 - Grab the auto generated `cloudflared` tunnel URL from the logs of the `cloudflared` container, use this to access the Frontpage dev server
 - Go about your business
 
