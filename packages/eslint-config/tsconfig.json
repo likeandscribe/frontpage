@@ -1,6 +1,6 @@
 {
   "extends": "@repo/typescript-config/base.json",
-  "include": ["next.js"],
+  "include": ["next.js", "typescript.js", "react.js"],
   "compilerOptions": {
     "checkJs": true,
     "module": "NodeNext",

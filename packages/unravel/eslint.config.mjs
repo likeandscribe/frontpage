@@ -1,3 +1,3 @@
-import { defineConfig } from "@repo/eslint-config/next.js";
+import base from "@repo/eslint-config/next.js";
 
-export default defineConfig(import.meta.dirname);
+export default base;
