@@ -17,7 +17,6 @@ import {
   type ModerationEventDTO,
   createModerationEvent,
 } from "@/lib/data/db/moderation";
-import { CommentCollection } from "@/lib/data/atproto/comment";
 import { revalidatePath } from "next/cache";
 import Link from "next/link";
 import { ReportCard } from "./_components/report-card";
@@ -51,8 +50,8 @@ export async function performModerationAction(
   if (report.subjectCollection) {
     if (report.subjectCollection === nsids.FyiUnravelFrontpagePost) {
       newModEvent.subjectCollection = nsids.FyiUnravelFrontpagePost;
-    } else if (report.subjectCollection === CommentCollection) {
-      newModEvent.subjectCollection = CommentCollection;
+    } else if (report.subjectCollection === nsids.FyiUnravelFrontpageComment) {
+      newModEvent.subjectCollection = nsids.FyiUnravelFrontpageComment;
     }
 
     newModEvent.subjectRkey = report.subjectRkey;
@@ -69,7 +68,7 @@ export async function performModerationAction(
           hide: input.status === "accepted",
         });
 
-      case CommentCollection:
+      case nsids.FyiUnravelFrontpageComment:
         return await moderateComment({
           rkey: report.subjectRkey!,
           authorDid: report.subjectDid as DID,

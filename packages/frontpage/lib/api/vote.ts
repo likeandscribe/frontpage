@@ -4,7 +4,6 @@ import * as atproto from "../data/atproto/vote";
 import { DataLayerError } from "../data/error";
 import { ensureUser } from "../data/user";
 import { type DID } from "../data/atproto/did";
-import { CommentCollection } from "../data/atproto/comment";
 import { invariant } from "../utils";
 import { TID } from "@atproto/common-web";
 import { after } from "next/server";
@@ -16,7 +15,9 @@ export type ApiCreateVoteInput = {
     rkey: string;
     cid: string;
     authorDid: DID;
-    collection: typeof nsids.FyiUnravelFrontpagePost | typeof CommentCollection;
+    collection:
+      | typeof nsids.FyiUnravelFrontpagePost
+      | typeof nsids.FyiUnravelFrontpageComment;
   };
 };
 
@@ -42,7 +43,7 @@ export async function createVote({ authorDid, subject }: ApiCreateVoteInput) {
       });
 
       invariant(dbCreatedVote, "Failed to insert post vote in database");
-    } else if (subject.collection == CommentCollection) {
+    } else if (subject.collection == nsids.FyiUnravelFrontpageComment) {
       const dbCreatedVote = await db.createCommentVote({
         repo: authorDid,
         rkey,

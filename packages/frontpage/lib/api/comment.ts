@@ -1,5 +1,4 @@
 import "server-only";
-import * as atproto from "../data/atproto/comment";
 import { DataLayerError } from "../data/error";
 import { ensureUser } from "../data/user";
 import * as db from "../data/db/comment";
@@ -8,8 +7,13 @@ import { createNotification } from "../data/db/notification";
 import { invariant } from "../utils";
 import { TID } from "@atproto/common-web";
 import { after } from "next/server";
+import { getAtprotoClient, nsids } from "../data/atproto/repo";
 
-export type ApiCreateCommentInput = Omit<atproto.CommentInput, "rkey"> & {
+export type ApiCreateCommentInput = {
+  // TODO: Use strongRef type for parent and post
+  parent?: { cid: string; rkey: string; authorDid: DID };
+  post: { cid: string; rkey: string; authorDid: DID };
+  content: string;
   authorDid: DID;
 };
 
@@ -38,12 +42,26 @@ export async function createComment({
     invariant(dbCreatedComment, "Failed to insert comment in database");
 
     after(() =>
-      atproto.createComment({
-        parent,
-        post,
-        content: sanitizedContent,
-        rkey,
-      }),
+      getAtprotoClient().fyi.unravel.frontpage.comment.create(
+        {
+          repo: user.did,
+          rkey,
+        },
+        {
+          parent: parent
+            ? {
+                cid: parent.cid,
+                uri: `at://${parent.authorDid}/${nsids.FyiUnravelFrontpageComment}/${parent.rkey}`,
+              }
+            : undefined,
+          post: {
+            cid: post.cid,
+            uri: `at://${post.authorDid}/${nsids.FyiUnravelFrontpagePost}/${post.rkey}`,
+          },
+          content: sanitizedContent,
+          createdAt: new Date().toISOString(),
+        },
+      ),
     );
 
     const didToNotify = parent ? parent.authorDid : post.authorDid;
@@ -73,7 +91,12 @@ export async function deleteComment({
   }
 
   try {
-    after(() => atproto.deleteComment(authorDid, rkey));
+    after(() =>
+      getAtprotoClient().fyi.unravel.frontpage.comment.delete({
+        repo: authorDid,
+        rkey,
+      }),
+    );
     await db.deleteComment({ authorDid: user.did, rkey });
   } catch (e) {
     // eslint-disable-next-line @typescript-eslint/restrict-template-expressions

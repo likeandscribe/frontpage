@@ -1,7 +1,6 @@
 import { db } from "@/lib/db";
 import * as schema from "@/lib/schema";
 import { Commit } from "@/lib/data/atproto/event";
-import * as atprotoComment from "@/lib/data/atproto/comment";
 import * as atprotoVote from "@/lib/data/atproto/vote";
 import { getPdsUrl } from "@/lib/data/atproto/did";
 import { handleComment, handlePost, handleVote } from "./handlers";
@@ -46,7 +45,7 @@ export async function POST(request: Request) {
       case nsids.FyiUnravelFrontpagePost:
         await handlePost({ op, repo, rkey });
         break;
-      case atprotoComment.CommentCollection:
+      case nsids.FyiUnravelFrontpageComment:
         await handleComment({ op, repo, rkey });
         break;
       case atprotoVote.VoteCollection:

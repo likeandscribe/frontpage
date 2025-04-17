@@ -11,7 +11,6 @@ import { performModerationAction } from "../page";
 import { UserHandle } from "./user-handle";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
-import { CommentCollection } from "@/lib/data/atproto/comment";
 import { getPostFromComment } from "@/lib/data/db/post";
 import { getCommentLink, getPostLink } from "@/lib/navigation";
 import { nsids } from "@/lib/data/atproto/repo";
@@ -25,7 +24,7 @@ const createLink = async (
     case nsids.FyiUnravelFrontpagePost:
       return getPostLink({ handleOrDid: author!, rkey: rkey! });
 
-    case CommentCollection: {
+    case nsids.FyiUnravelFrontpageComment: {
       const { postAuthor, postRkey } = (await getPostFromComment({
         rkey: rkey!,
         did: author!,

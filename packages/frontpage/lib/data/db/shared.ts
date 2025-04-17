@@ -1,5 +1,4 @@
 import { headers } from "next/headers";
-import { CommentCollection } from "../atproto/comment";
 import { type DID } from "../atproto/did";
 import { getPostFromComment } from "./post";
 import { nsids } from "../atproto/repo";
@@ -24,7 +23,7 @@ export const createFrontPageLink = async (
     case nsids.FyiUnravelFrontpagePost:
       return `/post/${author}/${rkey}/`;
 
-    case CommentCollection: {
+    case nsids.FyiUnravelFrontpageComment: {
       const { postAuthor, postRkey } = (await getPostFromComment({
         rkey: rkey!,
         did: author,
