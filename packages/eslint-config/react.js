@@ -12,6 +12,7 @@ export default tseslint.config(
   react.configs.flat.recommended,
   jsxA11y.flatConfigs.recommended,
   {
+    name: "monorepo-react-config",
     settings: {
       react: {
         version: reactVersion,

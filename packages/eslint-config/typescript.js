@@ -1,10 +1,13 @@
 import eslint from "@eslint/js";
 import tseslint from "typescript-eslint";
+import turboRepo from "eslint-config-turbo/flat";
 
 export default tseslint.config(
   eslint.configs.recommended,
   tseslint.configs.recommendedTypeChecked,
+  turboRepo,
   {
+    name: "monorepo-typescript-config",
     languageOptions: {
       parserOptions: {
         projectService: true,
