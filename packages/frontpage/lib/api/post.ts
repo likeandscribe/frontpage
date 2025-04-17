@@ -40,12 +40,12 @@ export async function createPost({
       atproto.fyi.unravel.frontpage.post.create(
         {
           repo: user.did,
+          rkey,
         },
         {
           title: title,
           url: url,
           createdAt: new Date().toISOString(),
-          rkey,
         },
       ),
     );
