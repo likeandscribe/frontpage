@@ -1,5 +1,5 @@
 import * as atprotoComment from "@/lib/data/atproto/comment";
-import { type DID } from "@/lib/data/atproto/did";
+import { getPdsUrl, type DID } from "@/lib/data/atproto/did";
 import { type Operation } from "@/lib/data/atproto/event";
 import { getAtprotoClient, nsids } from "@/lib/data/atproto/repo";
 import * as atprotoVote from "@/lib/data/atproto/vote";
@@ -23,7 +23,11 @@ type HandlerInput = {
 // If it's a delete then setting the status to delete again doesn't matter
 
 export async function handlePost({ op, repo, rkey }: HandlerInput) {
-  const atproto = getAtprotoClient();
+  const pds = await getPdsUrl(repo);
+  if (!pds) {
+    throw new Error("Failed to get PDS");
+  }
+  const atproto = getAtprotoClient(pds);
   if (op.action === "create") {
     const postRecord = await atproto.fyi.unravel.frontpage.post.get({
       repo,
