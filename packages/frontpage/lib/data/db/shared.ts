@@ -1,8 +1,8 @@
 import { headers } from "next/headers";
 import { CommentCollection } from "../atproto/comment";
 import { type DID } from "../atproto/did";
-import { PostCollection } from "../atproto/post";
 import { getPostFromComment } from "./post";
+import { nsids } from "../atproto/repo";
 
 export const getRootUrl = async () => {
   const host =
@@ -21,7 +21,7 @@ export const createFrontPageLink = async (
   rkey?: string,
 ) => {
   switch (collection) {
-    case PostCollection:
+    case nsids.FyiUnravelFrontpagePost:
       return `/post/${author}/${rkey}/`;
 
     case CommentCollection: {

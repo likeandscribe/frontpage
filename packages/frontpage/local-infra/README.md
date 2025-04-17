@@ -3,7 +3,7 @@
 Docker compose file that runs the required peices of infrastructure for frontpage locally.
 
 > [!NOTE]
-> Does not include the frontpage service itself, you should run that with `pnpm run dev`
+> Does not include the frontpage service itself, you should run that with `pnpm turbo dev`
 
 ## What's inside
 
@@ -27,7 +27,8 @@ Docker compose file that runs the required peices of infrastructure for frontpag
   - `DRAINPIPE_CONSUMER_SECRET=secret`
   - `TURSO_CONNECTION_URL=libsql://turso.dev.unravel.fyi`
   - `PLC_DIRECTORY_URL=https://plc.dev.unravel.fyi`
-- Run `pnpm dev` in the frontpage package folder
+- Run `pnpm turbo dev` in the frontpage package folder
+- Run `pnpm run db:migrate` in the frontpage package folder
 - Grab the auto generated `cloudflared` tunnel URL from the logs of the `cloudflared` container, use this to access the Frontpage dev server
 - Go about your business
 
@@ -35,6 +36,17 @@ Docker compose file that runs the required peices of infrastructure for frontpag
 > When running Node.js based apps make sure you're setting the `NODE_OPTIONS` environment variable to `--use-openssl-ca` to tell Node.js to use the system's trust store. The scripts inside of Frontpage's `package.json` already do this for you.
 >
 > Also, make sure you stop your docker container when you are done, as Cloudflare exposes port 3000 to the internet.
+
+### Using atproto-browser
+
+You can run a local instance of atproto-browser using this infrastructure. Create `packages/atproto-browser/local.env` and add the following:
+
+```env
+PLC_URL=http://localhost:4000
+NODE_OPTIONS=--use-openssl-ca
+```
+
+Then when you `pnpm turbo dev --filter=atproto-browser` it will use the local PLC and be able to connect to the local PDS instances.
 
 ## Troubleshooting
 

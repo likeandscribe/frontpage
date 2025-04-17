@@ -7,9 +7,9 @@ import {
 import { createAtUriParser } from "./uri";
 import { DataLayerError } from "../error";
 import { z } from "zod";
-import { PostCollection } from "./post";
 import { type DID, getPdsUrl } from "./did";
 import { MAX_COMMENT_LENGTH } from "../db/constants";
+import { nsids } from "./repo";
 
 export const CommentCollection = "fyi.unravel.frontpage.comment";
 
@@ -23,7 +23,7 @@ export const CommentRecord = z.object({
     .optional(),
   post: z.object({
     cid: z.string(),
-    uri: createAtUriParser(z.literal(PostCollection)),
+    uri: createAtUriParser(z.literal(nsids.FyiUnravelFrontpagePost)),
   }),
   createdAt: z.string(),
 });
@@ -54,7 +54,7 @@ export async function createComment({
       : undefined,
     post: {
       cid: post.cid,
-      uri: `at://${post.authorDid}/${PostCollection}/${post.rkey}`,
+      uri: `at://${post.authorDid}/${nsids.FyiUnravelFrontpagePost}/${post.rkey}`,
     },
     createdAt: new Date().toISOString(),
   };

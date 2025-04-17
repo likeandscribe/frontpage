@@ -1,8 +1,9 @@
 {
   "$schema": "https://turbo.build/schema.json",
+  "ui": "tui",
   "tasks": {
     "build": {
-      "outputs": [".next/**", "!.next/cache/**"],
+      "outputs": [".next/**", "!.next/cache/**", "dist/**"],
       "env": [
         "DRAINPIPE_CONSUMER_SECRET",
         "DISCORD_WEBHOOK_URL",
@@ -22,8 +23,16 @@
         "AUTH_SECRET"
       ]
     },
-    "type-check": {},
-    "lint": {},
+    "dev": {
+      "persistent": true,
+      "dependsOn": ["^build"]
+    },
+    "type-check": {
+      "dependsOn": ["^build"]
+    },
+    "lint": {
+      "dependsOn": ["^build"]
+    },
     "test": {
       "dependsOn": ["^build"]
     }

@@ -1,13 +1,13 @@
 import { db } from "@/lib/db";
 import * as schema from "@/lib/schema";
 import { Commit } from "@/lib/data/atproto/event";
-import * as atprotoPost from "@/lib/data/atproto/post";
 import * as atprotoComment from "@/lib/data/atproto/comment";
 import * as atprotoVote from "@/lib/data/atproto/vote";
 import { getPdsUrl } from "@/lib/data/atproto/did";
 import { handleComment, handlePost, handleVote } from "./handlers";
 import { eq } from "drizzle-orm";
 import { exhaustiveCheck } from "@/lib/utils";
+import { nsids } from "@/lib/data/atproto/repo";
 
 export async function POST(request: Request) {
   const auth = request.headers.get("Authorization");
@@ -43,7 +43,7 @@ export async function POST(request: Request) {
     console.log("Processing", collection, rkey, op.action);
 
     switch (collection) {
-      case atprotoPost.PostCollection:
+      case nsids.FyiUnravelFrontpagePost:
         await handlePost({ op, repo, rkey });
         break;
       case atprotoComment.CommentCollection:
