@@ -89,15 +89,12 @@ export async function commentVoteAction(input: {
   rkey: string;
   authorDid: DID;
 }) {
-  const user = await ensureUser();
+  await ensureUser();
   await createVote({
-    authorDid: user.did,
-    subject: {
-      rkey: input.rkey,
-      cid: input.cid,
-      authorDid: input.authorDid,
-      collection: nsids.FyiUnravelFrontpageComment,
-    },
+    rkey: input.rkey,
+    cid: input.cid,
+    authorDid: input.authorDid,
+    collection: nsids.FyiUnravelFrontpageComment,
   });
 }
 
