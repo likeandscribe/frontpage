@@ -2,7 +2,6 @@ import { getPdsUrl, type DID } from "@/lib/data/atproto/did";
 import { type Operation } from "@/lib/data/atproto/event";
 import { getAtprotoClient, nsids } from "@/lib/data/atproto/repo";
 import { AtUri } from "@/lib/data/atproto/uri";
-import * as atprotoVote from "@/lib/data/atproto/vote";
 import * as dbComment from "@/lib/data/db/comment";
 import * as dbNotification from "@/lib/data/db/notification";
 import * as dbPost from "@/lib/data/db/post";
@@ -158,8 +157,9 @@ export async function handleComment({ op, repo, rkey }: HandlerInput) {
 }
 
 export async function handleVote({ op, repo, rkey }: HandlerInput) {
+  const atproto = await getAtprotoClientFromRepo(repo);
   if (op.action === "create") {
-    const hydratedRecord = await atprotoVote.getVote({
+    const hydratedRecord = await atproto.fyi.unravel.frontpage.vote.get({
       repo,
       rkey,
     });
@@ -167,8 +167,9 @@ export async function handleVote({ op, repo, rkey }: HandlerInput) {
     invariant(hydratedRecord, "atproto vote record not found");
 
     const { subject } = hydratedRecord.value;
+    const subjectUri = AtUri.parse(subject.uri);
 
-    switch (subject.uri.collection) {
+    switch (subjectUri.collection) {
       case nsids.FyiUnravelFrontpagePost: {
         const postVote = await dbVote.uncached_doesPostVoteExist(repo, rkey);
         if (postVote) {
@@ -184,8 +185,8 @@ export async function handleVote({ op, repo, rkey }: HandlerInput) {
             rkey,
             cid: hydratedRecord.cid,
             subject: {
-              rkey: subject.uri.rkey,
-              authorDid: subject.uri.authority as DID,
+              rkey: subjectUri.rkey,
+              authorDid: subjectUri.authority as DID,
               cid: subject.cid,
             },
             status: "live",
@@ -217,8 +218,8 @@ export async function handleVote({ op, repo, rkey }: HandlerInput) {
             rkey,
             cid: hydratedRecord.cid,
             subject: {
-              rkey: subject.uri.rkey,
-              authorDid: subject.uri.authority as DID,
+              rkey: subjectUri.rkey,
+              authorDid: subjectUri.authority as DID,
               cid: subject.cid,
             },
             status: "live",
@@ -233,7 +234,7 @@ export async function handleVote({ op, repo, rkey }: HandlerInput) {
         break;
       }
       default:
-        exhaustiveCheck(subject.uri.collection, "Unknown collection");
+        invariant(subjectUri.collection, "Unknown collection");
     }
   } else if (op.action === "delete") {
     console.log("deleting vote", rkey);
