@@ -1,7 +1,7 @@
-import * as atprotoComment from "@/lib/data/atproto/comment";
 import { getPdsUrl, type DID } from "@/lib/data/atproto/did";
 import { type Operation } from "@/lib/data/atproto/event";
 import { getAtprotoClient, nsids } from "@/lib/data/atproto/repo";
+import { AtUri } from "@/lib/data/atproto/uri";
 import * as atprotoVote from "@/lib/data/atproto/vote";
 import * as dbComment from "@/lib/data/db/comment";
 import * as dbNotification from "@/lib/data/db/notification";
@@ -22,12 +22,17 @@ type HandlerInput = {
 // Since we use read after write, we need to check if the record exists before creating it
 // If it's a delete then setting the status to delete again doesn't matter
 
-export async function handlePost({ op, repo, rkey }: HandlerInput) {
+async function getAtprotoClientFromRepo(repo: DID) {
   const pds = await getPdsUrl(repo);
   if (!pds) {
     throw new Error("Failed to get PDS");
   }
-  const atproto = getAtprotoClient(pds);
+  return getAtprotoClient(pds);
+}
+
+export async function handlePost({ op, repo, rkey }: HandlerInput) {
+  const atproto = await getAtprotoClientFromRepo(repo);
+
   if (op.action === "create") {
     const postRecord = await atproto.fyi.unravel.frontpage.post.get({
       repo,
@@ -91,8 +96,10 @@ export async function handlePost({ op, repo, rkey }: HandlerInput) {
 }
 
 export async function handleComment({ op, repo, rkey }: HandlerInput) {
+  const atproto = await getAtprotoClientFromRepo(repo);
+
   if (op.action === "create") {
-    const commentRecord = await atprotoComment.getComment({
+    const commentRecord = await atproto.fyi.unravel.frontpage.comment.get({
       rkey,
       repo,
     });
@@ -109,22 +116,24 @@ export async function handleComment({ op, repo, rkey }: HandlerInput) {
       });
     } else {
       const { content, createdAt, parent, post } = commentRecord.value;
+      const postUri = AtUri.parse(post.uri);
+      const parentUri = parent ? AtUri.parse(parent.uri) : null;
       const createdComment = await dbComment.createComment({
         cid: commentRecord.cid,
         authorDid: repo,
         rkey,
         content,
         createdAt: new Date(createdAt),
-        parent: parent
+        parent: parentUri
           ? {
               //TODO: is authority a DID?
-              authorDid: parent.uri.authority as DID,
-              rkey: parent.uri.rkey,
+              authorDid: parentUri.authority as DID,
+              rkey: parentUri.rkey,
             }
           : undefined,
         post: {
-          authorDid: post.uri.authority as DID,
-          rkey: post.uri.rkey,
+          authorDid: postUri.authority as DID,
+          rkey: postUri.rkey,
         },
         status: "live",
       });
@@ -133,7 +142,7 @@ export async function handleComment({ op, repo, rkey }: HandlerInput) {
         throw new Error("Failed to insert comment from relay in database");
       }
 
-      const didToNotify = parent ? parent.uri.authority : post.uri.authority;
+      const didToNotify = parentUri ? parentUri.authority : postUri.authority;
 
       if (didToNotify !== repo) {
         await dbNotification.createNotification({
@@ -190,7 +199,7 @@ export async function handleVote({ op, repo, rkey }: HandlerInput) {
         }
         break;
       }
-      case atprotoComment.CommentCollection: {
+      case nsids.FyiUnravelFrontpageComment: {
         const commentVote = await dbVote.uncached_doesCommentVoteExist(
           repo,
           rkey,

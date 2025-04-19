@@ -1,6 +1,5 @@
 "use server";
 
-import { CommentCollection } from "@/lib/data/atproto/comment";
 import { type DID } from "@/lib/data/atproto/did";
 import { getComment } from "@/lib/data/db/comment";
 import { getPost } from "@/lib/data/db/post";
@@ -12,6 +11,7 @@ import { revalidatePath } from "next/cache";
 import { createComment, deleteComment } from "@/lib/api/comment";
 import { createVote, deleteVote } from "@/lib/api/vote";
 import { invariant } from "@/lib/utils";
+import { nsids } from "@/lib/data/atproto/repo";
 
 export async function createCommentAction(
   input: { parentRkey?: string; postRkey: string; postAuthorDid: DID },
@@ -76,9 +76,9 @@ export async function reportCommentAction(
 
   await createReport({
     ...formResult.data,
-    subjectUri: `at://${input.authorDid}/${CommentCollection}/${input.rkey}`,
+    subjectUri: `at://${input.authorDid}/${nsids.FyiUnravelFrontpageComment}/${input.rkey}`,
     subjectDid: input.authorDid,
-    subjectCollection: CommentCollection,
+    subjectCollection: nsids.FyiUnravelFrontpageComment,
     subjectRkey: input.rkey,
     subjectCid: input.cid,
   });
@@ -96,7 +96,7 @@ export async function commentVoteAction(input: {
       rkey: input.rkey,
       cid: input.cid,
       authorDid: input.authorDid,
-      collection: CommentCollection,
+      collection: nsids.FyiUnravelFrontpageComment,
     },
   });
 }

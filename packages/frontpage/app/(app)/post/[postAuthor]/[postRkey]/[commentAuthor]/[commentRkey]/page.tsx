@@ -4,7 +4,7 @@ import { type Metadata } from "next";
 import { getVerifiedHandle } from "@/lib/data/atproto/identity";
 import { type CommentPageParams, getCommentPageData } from "./_lib/page-data";
 import { LinkAlternateAtUri } from "@/lib/components/link-alternate-at";
-import { CommentCollection } from "@/lib/data/atproto/comment";
+import { nsids } from "@/lib/data/atproto/repo";
 
 function truncateText(text: string, maxLength: number) {
   if (text.length > maxLength) {
@@ -61,7 +61,7 @@ export default async function CommentPage(props: {
     <>
       <LinkAlternateAtUri
         authority={comment.authorDid}
-        collection={CommentCollection}
+        collection={nsids.FyiUnravelFrontpageComment}
         rkey={comment.rkey}
       />
       <div className="flex justify-end">

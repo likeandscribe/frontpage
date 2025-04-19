@@ -1,6 +1,5 @@
 import "server-only";
 import { z } from "zod";
-import { CommentCollection } from "./comment";
 import { isDid } from "./did";
 import { nsids } from "./repo";
 
@@ -8,7 +7,7 @@ import { nsids } from "./repo";
 
 export const Collection = z.union([
   z.literal(nsids.FyiUnravelFrontpagePost),
-  z.literal(CommentCollection),
+  z.literal(nsids.FyiUnravelFrontpageComment),
   z.literal("fyi.unravel.frontpage.vote"),
 ]);
 
