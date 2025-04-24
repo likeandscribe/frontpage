@@ -3,10 +3,16 @@ import { sendDiscordMessage } from "@/lib/discord";
 import type { NextRequest } from "next/server";
 import * as schema from "@/lib/schema";
 import { lt, inArray } from "drizzle-orm";
+import { timingSafeEqual } from "node:crypto";
+
+const EXPECTED_AUTH_HEADER = Buffer.from(`Bearer ${process.env.CRON_SECRET}`);
 
 export async function GET(request: NextRequest) {
   const authHeader = request.headers.get("authorization");
-  if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+  if (
+    !authHeader ||
+    !timingSafeEqual(Buffer.from(authHeader), EXPECTED_AUTH_HEADER)
+  ) {
     await sendDiscordMessage({
       embeds: [
         {
