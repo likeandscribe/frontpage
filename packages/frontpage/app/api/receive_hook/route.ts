@@ -7,13 +7,19 @@ import { handleComment, handlePost, handleVote } from "./handlers";
 import { eq } from "drizzle-orm";
 import { exhaustiveCheck } from "@/lib/utils";
 import { nsids } from "@/lib/data/atproto/repo";
+import { timingSafeEqual } from "node:crypto";
+
+const EXPECTED_AUTH_HEADER = Buffer.from(
+  `Bearer ${process.env.DRAINPIPE_CONSUMER_SECRET}`,
+);
 
 export async function POST(request: Request) {
   const auth = request.headers.get("Authorization");
-  if (auth !== `Bearer ${process.env.DRAINPIPE_CONSUMER_SECRET}`) {
+  if (!auth || !timingSafeEqual(Buffer.from(auth), EXPECTED_AUTH_HEADER)) {
     console.error("Unauthorized request");
     return new Response("Unauthorized", { status: 401 });
   }
+
   const commit = Commit.safeParse(await request.json());
   if (!commit.success) {
     console.error("Could not parse commit from drainpipe", commit.error);
