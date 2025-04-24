@@ -2,27 +2,7 @@
   "$schema": "https://turbo.build/schema.json",
   "ui": "tui",
   "tasks": {
-    "build": {
-      "outputs": [".next/**", "!.next/cache/**", "dist/**"],
-      "env": [
-        "DRAINPIPE_CONSUMER_SECRET",
-        "DISCORD_WEBHOOK_URL",
-        "TURSO_CONNECTION_URL",
-        "TURSO_AUTH_TOKEN",
-        "VERCEL_PROJECT_PRODUCTION_URL",
-        "NODE_ENV",
-        "PRIVATE_JWK",
-        "PUBLIC_JWK",
-        "VERCEL_BRANCH_URL",
-        "VERCEL_ENV",
-        "CRON_SECRET",
-        "NEXT_RUNTIME",
-        "VERCEL_GIT_COMMIT_SHA",
-        "PLC_DIRECTORY_URL",
-        "PLC_URL",
-        "AUTH_SECRET"
-      ]
-    },
+    "build": {},
     "dev": {
       "persistent": true,
       "dependsOn": ["^build"]
@@ -37,5 +17,5 @@
       "dependsOn": ["^build"]
     }
   },
-  "globalEnv": ["CI"]
+  "globalEnv": ["CI", "NODE_ENV"]
 }
