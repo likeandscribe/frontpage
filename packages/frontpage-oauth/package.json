@@ -1,0 +1,13 @@
+{
+  "name": "@repo/frontpage-oauth",
+  "main": "./src/index.ts",
+  "dependencies": {
+    "@atproto/oauth-types": "^0.1.2"
+  },
+  "devDependencies": {
+    "@repo/eslint-config": "workspace:*",
+    "@repo/typescript-config": "workspace:*",
+    "eslint": "catalog:",
+    "typescript": "catalog:"
+  }
+}

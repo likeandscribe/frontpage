@@ -1,33 +1,27 @@
 {
-  "name": "unravel",
+  "name": "frontpage-oauth-preview-client",
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --turbo",
+    "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint .",
-    "type-check": "tsc --noEmit"
+    "lint": "next lint"
   },
   "dependencies": {
-    "clsx": "^2.1.1",
+    "@repo/frontpage-oauth": "workspace:*",
+    "@vercel/sdk": "^1.6.2",
     "next": "catalog:",
-    "next-themes": "^0.4.6",
     "react": "catalog:",
-    "react-dom": "catalog:",
-    "server-only": "^0.0.1",
-    "tailwind-merge": "^2.3.0",
-    "tailwindcss-animate": "^1.0.7"
+    "react-dom": "catalog:"
   },
   "devDependencies": {
     "@repo/eslint-config": "workspace:*",
     "@repo/typescript-config": "workspace:*",
-    "@types/node": "^20",
+    "@types/node": "catalog:",
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
     "eslint": "catalog:",
-    "postcss": "^8",
-    "tailwindcss": "^3.4.1",
     "typescript": "catalog:"
   }
 }
