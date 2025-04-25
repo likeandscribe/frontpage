@@ -49,15 +49,16 @@ export async function GET(
     return new Response("Not found", { status: 404 });
   }
 
-  const VERCEL_URL = process.env.VERCEL_URL;
-  if (!VERCEL_URL) {
-    throw new Error("VERCEL_URL is not set");
+  const VERCEL_PROJECT_PRODUCTION_URL =
+    process.env.VERCEL_PROJECT_PRODUCTION_URL;
+  if (!VERCEL_PROJECT_PRODUCTION_URL) {
+    throw new Error("VERCEL_PROJECT_PRODUCTION_URL is not set");
   }
 
   return Response.json(
     getClientMetadata({
       redirectUris: [`https://${host}/oauth/callback`],
-      baseUrl: `https://${VERCEL_URL}/${host}`,
+      baseUrl: `https://${VERCEL_PROJECT_PRODUCTION_URL}/${host}`,
     }),
   );
 }
