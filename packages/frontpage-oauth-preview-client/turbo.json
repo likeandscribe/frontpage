@@ -3,7 +3,7 @@
   "extends": ["//"],
   "tasks": {
     "build": {
-      "env": ["VERCEL_DEPLOYMENT_ID", "VERCEL_URL"]
+      "env": ["VERCEL_DEPLOYMENT_ID", "VERCEL_URL", "VERCEL_TOKEN"]
     }
   }
 }
