@@ -3,10 +3,10 @@ import { getClientMetadata } from "@repo/frontpage-oauth";
 
 export async function GET(
   _request: Request,
-  { params }: { params: Promise<{ host: string[] }> },
+  { params }: { params: Promise<{ host: string }> },
 ) {
   console.log(await params);
-  const host = (await params).host[0];
+  const host = (await params).host;
   if (!host) {
     return new Response("Not found", { status: 404 });
   }
