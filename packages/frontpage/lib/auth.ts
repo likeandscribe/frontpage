@@ -71,7 +71,7 @@ export const getClientMetadata = cache(async () => {
     process.env.VERCEL_ENV === "preview" ? previewOauthClientUrl : frontpageUrl;
 
   return createClientMetadata({
-    redirectUri: `${frontpageUrl}/oauth/callback`,
+    redirectUri: `${appUrl}/oauth/callback`,
     appUrl,
     jwksUri: `${frontpageUrl}/oauth/jwks.json`,
   });
