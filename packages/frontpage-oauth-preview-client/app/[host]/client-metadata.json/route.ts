@@ -11,9 +11,7 @@ export async function GET(
     return new Response("Not found", { status: 404 });
   }
 
-  const vercel = new Vercel({
-    bearerToken: process.env.VERCEL_TOKEN,
-  });
+  const vercel = new Vercel();
   const currentDeployment = await vercel.deployments
     .getDeployment({
       idOrUrl: process.env.VERCEL_DEPLOYMENT_ID!,
