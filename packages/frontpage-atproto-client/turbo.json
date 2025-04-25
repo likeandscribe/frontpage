@@ -3,8 +3,7 @@
   "extends": ["//"],
   "tasks": {
     "build": {
-      "outputs": [".next/**", "!.next/cache/**"],
-      "env": ["PLC_URL"]
+      "outputs": ["dist/**"]
     }
   }
 }
