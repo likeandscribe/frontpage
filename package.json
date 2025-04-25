@@ -1,7 +1,7 @@
 {
   "name": "monorepo",
   "private": true,
-  "packageManager": "pnpm@10.3.0",
+  "packageManager": "pnpm@10.9.0",
   "devDependencies": {
     "prettier": "^3.3.0",
     "turbo": "2.5.0",
