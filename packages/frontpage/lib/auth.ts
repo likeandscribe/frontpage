@@ -63,11 +63,17 @@ export const getClientMetadata = cache(async () => {
         ? process.env.VERCEL_PROJECT_PRODUCTION_URL!
         : process.env.VERCEL_BRANCH_URL!;
 
-  const appUrl = `https://${host}`;
+  const frontpageUrl = `https://${host}`;
+  const previewOauthClientUrl = `https://frontpage-oauth-preview-client.vercel.app/${host}/oauth/client-metadata.json`;
 
   return createClientMetadata({
-    redirectUris: [`${appUrl}/oauth/callback`],
-    baseUrl: appUrl,
+    redirectUris: [`${frontpageUrl}/oauth/callback`],
+
+    // In Vercel preview deployments we point to our preview oauth client so that we can bypass vercel auth for our login.
+    baseUrl:
+      process.env.VERCEL_ENV === "preview"
+        ? previewOauthClientUrl
+        : frontpageUrl,
   });
 });
 
