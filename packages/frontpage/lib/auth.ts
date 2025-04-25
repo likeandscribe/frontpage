@@ -22,7 +22,6 @@ import {
 } from "oauth4webapi";
 import { cookies, headers } from "next/headers";
 import {
-  type OAuthClientMetadata,
   oauthProtectedResourceMetadataSchema,
   oauthTokenResponseSchema,
 } from "@atproto/oauth-types";
@@ -31,6 +30,7 @@ import { db } from "./db";
 import * as schema from "./schema";
 import { eq } from "drizzle-orm";
 import { getDidFromHandleOrDid } from "./data/atproto/identity";
+import { getClientMetadata as createClientMetadata } from "@repo/frontpage-oauth";
 
 const USER_AGENT = "appview/@frontpage.fyi (@tom-sherman.com)";
 
@@ -65,24 +65,10 @@ export const getClientMetadata = cache(async () => {
 
   const appUrl = `https://${host}`;
 
-  return {
-    // Client ID is the URL of the client metadata
-    // This isn't immediately obvious and if you supply something else the PAR request will fail with a 400 "Invalid url" error. I had to traverse the atproto implementation to find out why!
-    client_id: `${appUrl}/oauth/client-metadata.json`,
-    dpop_bound_access_tokens: true,
-    application_type: "web",
-    subject_type: "public",
-    grant_types: ["authorization_code", "refresh_token"],
-    response_types: ["code"], // TODO: "code id_token"?
-    // TODO: Tweak these?
-    scope: "atproto transition:generic",
-    client_name: "Frontpage",
-    token_endpoint_auth_method: "private_key_jwt",
-    token_endpoint_auth_signing_alg: "ES256",
-    redirect_uris: [`${appUrl}/oauth/callback`] as const,
-    client_uri: appUrl,
-    jwks_uri: `${appUrl}/oauth/jwks.json`,
-  } satisfies OAuthClientMetadata;
+  return createClientMetadata({
+    redirectUris: [`${appUrl}/oauth/callback`],
+    baseUrl: appUrl,
+  });
 });
 
 export const getOauthClientOptions = async () =>
