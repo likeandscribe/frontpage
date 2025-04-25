@@ -20,6 +20,7 @@ export async function GET(
     url.port = "";
   }
 
+  // Redirecting on the client to avoid auth servers following the redirect and not allowing the callback because the target URL doesn't match the auth client URI
   return new Response(
     `<html>
       <head>
