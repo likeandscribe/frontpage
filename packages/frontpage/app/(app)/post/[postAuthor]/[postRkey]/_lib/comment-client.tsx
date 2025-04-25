@@ -238,7 +238,7 @@ export function NewComment({
   autoFocus?: boolean;
   onActionDone?: () => void;
   extraButton?: React.ReactNode;
-  textAreaRef?: React.RefObject<HTMLTextAreaElement>;
+  textAreaRef?: React.RefObject<HTMLTextAreaElement | null>;
 }) {
   const [input, setInput] = useState("");
   const [_, action, isPending] = useActionState(

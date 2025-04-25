@@ -53,7 +53,7 @@ export function VideoEmbedClient({
 export function VideoEmbedWrapper({
   videoRef,
 }: {
-  videoRef: RefObject<HTMLVideoElement | null>;
+  videoRef?: RefObject<HTMLVideoElement | null>;
 }) {
   return (
     <div
