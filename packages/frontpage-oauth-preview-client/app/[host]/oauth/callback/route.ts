@@ -15,6 +15,25 @@ export async function GET(
 
   const url = new URL(request.url);
   url.host = host;
+  url.pathname = "/oauth/callback";
+  if (process.env.NODE_ENV === "development") {
+    url.port = "";
+  }
 
-  return Response.redirect(url, 307);
+  return new Response(
+    `<html>
+      <head>
+        <meta http-equiv="refresh" content="0; url=${url.toString()}" />
+      </head>
+    </html>`,
+    {
+      headers: {
+        "Content-Type": "text/html",
+        "Cache-Control":
+          "no-store, no-cache, must-revalidate, proxy-revalidate",
+        Pragma: "no-cache",
+        Expires: "0",
+      },
+    },
+  );
 }
