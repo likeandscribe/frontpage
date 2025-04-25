@@ -64,7 +64,7 @@ export const getClientMetadata = cache(async () => {
         : process.env.VERCEL_BRANCH_URL!;
 
   const frontpageUrl = `https://${host}`;
-  const previewOauthClientUrl = `https://frontpage-oauth-preview-client.vercel.app/${host}/oauth/client-metadata.json`;
+  const previewOauthClientUrl = `https://frontpage-oauth-preview-client.vercel.app/${host}`;
 
   return createClientMetadata({
     redirectUris: [`${frontpageUrl}/oauth/callback`],
