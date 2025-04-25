@@ -58,7 +58,7 @@ export async function GET(
   return Response.json(
     getClientMetadata({
       redirectUri: `https://${host}/oauth/callback`,
-      appUrl: `https://${VERCEL_PROJECT_PRODUCTION_URL}`,
+      appUrl: `https://${VERCEL_PROJECT_PRODUCTION_URL}/${host}`,
       jwksUri: "https://frontpage.fyi/oauth/jwks.json",
     }),
   );
