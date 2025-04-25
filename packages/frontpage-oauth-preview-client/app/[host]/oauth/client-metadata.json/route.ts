@@ -2,7 +2,7 @@ import { Vercel } from "@vercel/sdk";
 import { getClientMetadata } from "@repo/frontpage-oauth";
 
 export async function GET(
-  _request: Request,
+  request: Request,
   { params }: { params: Promise<{ host: string }> },
 ) {
   console.log(await params);
@@ -57,8 +57,10 @@ export async function GET(
 
   return Response.json(
     getClientMetadata({
-      redirectUris: [`https://${host}/oauth/callback`],
-      baseUrl: `https://${VERCEL_PROJECT_PRODUCTION_URL}/${host}`,
+      redirectUri: `https://${host}/oauth/callback`,
+      clientMetadataUrl: request.url,
+      appUrl: `https://${host}`,
+      jwksUri: "https://frontpage.fyi/oauth/jwks.json",
     }),
   );
 }

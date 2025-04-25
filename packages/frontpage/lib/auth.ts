@@ -66,8 +66,10 @@ export const getClientMetadata = cache(async () => {
   const appUrl = `https://${host}`;
 
   return createClientMetadata({
-    redirectUris: [`${appUrl}/oauth/callback`],
-    baseUrl: appUrl,
+    redirectUri: `${appUrl}/oauth/callback`,
+    appUrl,
+    clientMetadataUrl: `${appUrl}/oauth/client-metadata.json`,
+    jwksUri: `${appUrl}/oauth/jwks.json`,
   });
 });
 
