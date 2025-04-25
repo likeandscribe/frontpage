@@ -66,20 +66,14 @@ export const getClientMetadata = cache(async () => {
   const frontpageUrl = `https://${host}`;
   const previewOauthClientUrl = `https://frontpage-oauth-preview-client.vercel.app/${host}`;
 
-  return createClientMetadata({
-    // appUrl,
-    // clientMetadataUrl: `${appUrl}/oauth/client-metadata.json`,
-    // jwksUri: `${appUrl}/oauth/jwks.json`,
-    redirectUri: `${frontpageUrl}/oauth/callback`,
-    jwksUri: `${frontpageUrl}/oauth/jwks.json`,
-    appUrl: frontpageUrl,
+  // In Vercel preview deployments we point to our preview oauth client so that we can bypass vercel auth for our login.
+  const appUrl =
+    process.env.VERCEL_ENV === "preview" ? previewOauthClientUrl : frontpageUrl;
 
-    // In Vercel preview deployments we point to our preview oauth client so that we can bypass vercel auth for our login.
-    clientMetadataUrl: `${
-      process.env.VERCEL_ENV === "preview"
-        ? previewOauthClientUrl
-        : frontpageUrl
-    }/oauth/client-metadata.json`,
+  return createClientMetadata({
+    redirectUri: `${appUrl}/oauth/callback`,
+    appUrl,
+    jwksUri: `${appUrl}/oauth/jwks.json`,
   });
 });
 
