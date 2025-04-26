@@ -20,6 +20,10 @@ export const getRootHost = async () => {
     }
   }
 
+  if (!host) {
+    throw new Error("Host is not defined");
+  }
+
   return host;
 };
 
