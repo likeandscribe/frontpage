@@ -23,6 +23,14 @@ import { FRONTPAGE_ATPROTO_HANDLE } from "@/lib/constants";
 import { cookies } from "next/headers";
 import { revalidatePath } from "next/cache";
 import { NotificationIndicator } from "./_components/notification-indicator";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/lib/components/ui/dialog";
+import { NewPostForm } from "./post/new/_client";
 
 export default async function Layout({
   children,
@@ -40,9 +48,17 @@ export default async function Layout({
 
         <div className="flex items-center gap-4">
           {session ? (
-            <Button asChild>
-              <Link href="/post/new">New</Link>
-            </Button>
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button>New</Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>New post</DialogTitle>
+                </DialogHeader>
+                <NewPostForm />
+              </DialogContent>
+            </Dialog>
           ) : null}
           <Suspense>
             <LoginOrLogout />
