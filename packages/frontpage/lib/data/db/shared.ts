@@ -3,7 +3,7 @@ import { type DID } from "../atproto/did";
 import { getPostFromComment } from "./post";
 import { nsids } from "../atproto/repo";
 
-export const getRootUrl = async () => {
+export const getRootHost = async () => {
   const host =
     process.env.NODE_ENV === "development"
       ? (await headers()).get("host")

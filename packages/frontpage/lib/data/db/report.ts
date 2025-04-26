@@ -8,7 +8,7 @@ import { sendDiscordMessage } from "@/lib/discord";
 import { type DID } from "../atproto/did";
 import { ensureUser, isAdmin } from "../user";
 import { type ReportReasonType } from "./report-shared";
-import { createFrontPageLink, getRootUrl } from "./shared";
+import { createFrontPageLink, getRootHost } from "./shared";
 
 export type Report = InferSelectModel<typeof schema.Report>;
 
@@ -126,7 +126,7 @@ export const createReport = async ({
     status: "pending",
   });
 
-  const rootUrl = await getRootUrl();
+  const rootUrl = `https://${await getRootHost()}`;
 
   await sendDiscordMessage({
     embeds: [
