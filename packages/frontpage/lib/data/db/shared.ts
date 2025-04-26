@@ -9,7 +9,7 @@ export const getRootUrl = async () => {
       ? (await headers()).get("host")
       : process.env.VERCEL_ENV === "production"
         ? process.env.VERCEL_PROJECT_PRODUCTION_URL!
-        : process.env.VERCEL_BRANCH_URL!;
+        : process.env.VERCEL_URL!;
 
   return `https://${host}`;
 };

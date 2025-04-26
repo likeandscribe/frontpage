@@ -20,7 +20,7 @@ import {
   isOAuth2Error,
   customFetch as oauth4webapiCustomFetchSymbol,
 } from "oauth4webapi";
-import { cookies, headers } from "next/headers";
+import { cookies } from "next/headers";
 import {
   oauthProtectedResourceMetadataSchema,
   oauthTokenResponseSchema,
@@ -31,6 +31,7 @@ import * as schema from "./schema";
 import { eq } from "drizzle-orm";
 import { getDidFromHandleOrDid } from "./data/atproto/identity";
 import { getClientMetadata as createClientMetadata } from "@repo/frontpage-oauth";
+import { getRootUrl } from "./data/db/shared";
 
 const USER_AGENT = "appview/@frontpage.fyi (@tom-sherman.com)";
 
@@ -56,13 +57,7 @@ export const getPublicJwk = cache(async () => {
 });
 
 export const getClientMetadata = cache(async () => {
-  const host =
-    process.env.NODE_ENV === "development"
-      ? (await headers()).get("host")
-      : process.env.VERCEL_ENV === "production"
-        ? process.env.VERCEL_PROJECT_PRODUCTION_URL!
-        : process.env.VERCEL_URL!;
-
+  const host = await getRootUrl();
   const frontpageUrl = `https://${host}`;
   const previewOauthClientUrl = `https://frontpage-oauth-preview-client.vercel.app/${host}`;
 
