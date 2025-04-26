@@ -8,7 +8,7 @@ import * as dbPost from "@/lib/data/db/post";
 import * as dbVote from "@/lib/data/db/vote";
 import { getBlueskyProfile } from "@/lib/data/user";
 import { sendDiscordMessage } from "@/lib/discord";
-import { exhaustiveCheck, invariant } from "@/lib/utils";
+import { invariant } from "@/lib/utils";
 
 type HandlerInput = {
   op: Zod.infer<typeof Operation>;
