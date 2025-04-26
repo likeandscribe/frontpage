@@ -19,7 +19,7 @@
           "subject": {
             "type": "union",
             "description": "The piece of content that this Frontpage post is about.",
-            "refs": ["fyi.frontpage.subject.url"]
+            "refs": ["fyi.frontpage.feed.subject.url"]
           },
           "createdAt": {
             "type": "string",
