@@ -61,7 +61,7 @@ export const getClientMetadata = cache(async () => {
       ? (await headers()).get("host")
       : process.env.VERCEL_ENV === "production"
         ? process.env.VERCEL_PROJECT_PRODUCTION_URL!
-        : process.env.VERCEL_BRANCH_URL!;
+        : process.env.VERCEL_URL!;
 
   const frontpageUrl = `https://${host}`;
   const previewOauthClientUrl = `https://frontpage-oauth-preview-client.vercel.app/${host}`;

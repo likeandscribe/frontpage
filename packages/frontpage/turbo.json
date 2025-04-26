@@ -13,7 +13,7 @@
         "VERCEL_PROJECT_PRODUCTION_URL",
         "PRIVATE_JWK",
         "PUBLIC_JWK",
-        "VERCEL_BRANCH_URL",
+        "VERCEL_URL",
         "VERCEL_ENV",
         "CRON_SECRET",
         "PLC_DIRECTORY_URL"
