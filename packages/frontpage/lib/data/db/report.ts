@@ -8,7 +8,7 @@ import { sendDiscordMessage } from "@/lib/discord";
 import { type DID } from "../atproto/did";
 import { ensureUser, isAdmin } from "../user";
 import { type ReportReasonType } from "./report-shared";
-import { createFrontPageLink, getRootHost } from "./shared";
+import { getFrontPageLink, getRootHost } from "@/lib/navigation";
 
 export type Report = InferSelectModel<typeof schema.Report>;
 
@@ -143,7 +143,11 @@ export const createReport = async ({
         fields: [
           {
             name: "Link to post/comment/user",
-            value: `${rootUrl}${await createFrontPageLink(subjectDid, subjectCollection, subjectRkey)}`,
+            value: `${rootUrl}${await getFrontPageLink({
+              identity: subjectDid,
+              collection: subjectCollection,
+              rkey: subjectRkey,
+            })}`,
           },
         ],
       },

@@ -31,7 +31,7 @@ import * as schema from "./schema";
 import { eq } from "drizzle-orm";
 import { getDidFromHandleOrDid } from "./data/atproto/identity";
 import { getClientMetadata as createClientMetadata } from "@repo/frontpage-oauth";
-import { getRootHost } from "./data/db/shared";
+import { getRootHost } from "./navigation";
 
 const USER_AGENT = "appview/@frontpage.fyi (@tom-sherman.com)";
 
