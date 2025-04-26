@@ -3,15 +3,29 @@ import { type DID } from "../atproto/did";
 import { getPostFromComment } from "./post";
 import { nsids } from "../atproto/repo";
 
-export const getRootUrl = async () => {
-  const host =
-    process.env.NODE_ENV === "development"
-      ? (await headers()).get("host")
-      : process.env.VERCEL_ENV === "production"
-        ? process.env.VERCEL_PROJECT_PRODUCTION_URL!
-        : process.env.VERCEL_BRANCH_URL!;
+export const getRootHost = async () => {
+  let host: string | null | undefined =
+    process.env.VERCEL_PROJECT_PRODUCTION_URL;
 
-  return `https://${host}`;
+  if (process.env.NODE_ENV === "development") {
+    host = (await headers()).get("host");
+  } else if (process.env.VERCEL_ENV === "preview") {
+    const hostHeader = (await headers()).get("host");
+
+    if (hostHeader === process.env.VERCEL_URL) {
+      host = process.env.VERCEL_URL;
+    } else if (hostHeader === process.env.VERCEL_BRANCH_URL) {
+      host = process.env.VERCEL_BRANCH_URL;
+    } else {
+      throw new Error("Invalid host header");
+    }
+  }
+
+  if (!host) {
+    throw new Error("Host is not defined");
+  }
+
+  return host;
 };
 
 export const createFrontPageLink = async (
