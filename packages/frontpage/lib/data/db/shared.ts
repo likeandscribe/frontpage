@@ -4,7 +4,8 @@ import { getPostFromComment } from "./post";
 import { nsids } from "../atproto/repo";
 
 export const getRootHost = async () => {
-  let host = process.env.VERCEL_PROJECT_PRODUCTION_URL;
+  let host: string | null | undefined =
+    process.env.VERCEL_PROJECT_PRODUCTION_URL;
 
   if (process.env.NODE_ENV === "development") {
     host = (await headers()).get("host");
