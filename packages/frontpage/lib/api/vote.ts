@@ -48,7 +48,7 @@ export async function createVote(subject: ApiCreateVoteInput) {
         status: "pending",
       });
 
-      invariant(dbCreatedVote, "Failed to insert post vote in database");
+      invariant(dbCreatedVote, "Failed to insert comment vote in database");
     }
 
     const atproto = getAtprotoClient();
