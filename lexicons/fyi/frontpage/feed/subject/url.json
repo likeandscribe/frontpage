@@ -1,6 +1,6 @@
 {
   "lexicon": 1,
-  "id": "fyi.frontpage.subject.url",
+  "id": "fyi.frontpage.feed.subject.url",
   "description": "A link to a webpage URL.",
   "defs": {
     "main": {
