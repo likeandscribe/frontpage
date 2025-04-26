@@ -4,11 +4,7 @@
   "tasks": {
     "build": {
       "outputs": [".next/**", "!.next/cache/**"],
-      "env": [
-        "VERCEL_DEPLOYMENT_ID",
-        "VERCEL_PROJECT_PRODUCTION_URL",
-        "VERCEL_TOKEN"
-      ]
+      "env": ["VERCEL_PROJECT_PRODUCTION_URL", "VERCEL_TOKEN"]
     }
   }
 }
