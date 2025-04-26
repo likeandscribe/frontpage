@@ -2,10 +2,6 @@
   "lexicon": 1,
   "id": "fyi.frontpage.richtext.block",
   "defs": {
-    "main": {
-      "type": "union",
-      "refs": ["#plaintextParagraph"]
-    },
     "plaintextParagraph": {
       "type": "object",
       "properties": {
