@@ -16,8 +16,8 @@ import {
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
+  DropdownMenuTrigger,
 } from "@/lib/components/ui/dropdown-menu";
-import { DropdownMenuTrigger } from "@radix-ui/react-dropdown-menu";
 import { UserAvatar } from "@/lib/components/user-avatar";
 import { FRONTPAGE_ATPROTO_HANDLE } from "@/lib/constants";
 import { cookies } from "next/headers";
@@ -98,12 +98,12 @@ async function LoginOrLogout() {
               <Link href={`/profile/${handle}`} className="cursor-pointer">
                 Profile
               </Link>
-            </DropdownMenuItem> 
-          <DropdownMenuItem asChild>
-            <Link href="/about" className="cursor-pointer">
-              About
-            </Link>
-          </DropdownMenuItem>
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <Link href="/about" className="cursor-pointer">
+                About
+              </Link>
+            </DropdownMenuItem>
             <Suspense fallback={null}>
               {isAdmin().then((isAdmin) =>
                 isAdmin ? (
