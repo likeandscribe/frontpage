@@ -22,6 +22,12 @@ const did = customType<{ data: DID }>({
   },
 });
 
+const didOrEmptyString = customType<{ data: DID | "" }>({
+  dataType() {
+    return "text";
+  },
+});
+
 const nowAsIsoString = sql`(strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))`;
 
 const dateIsoText = customType<{ data: Date; driverData: string }>({
@@ -197,7 +203,7 @@ export const ConsumedOffset = sqliteTable("consumed_offsets", {
 export const OauthAuthRequest = sqliteTable("oauth_auth_requests", {
   state: text("state").notNull().unique(),
   iss: text("iss").notNull(),
-  did: did("did").notNull(),
+  did: didOrEmptyString("did").notNull(),
   username: text("username").notNull(),
   nonce: text("nonce").notNull(),
   pkceVerifier: text("pkce_verifier").notNull(),
