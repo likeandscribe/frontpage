@@ -10,6 +10,7 @@ import { CrossCircledIcon } from "@radix-ui/react-icons";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -47,6 +48,9 @@ export function LoginForm() {
             <DialogContent>
               <DialogHeader>
                 <DialogTitle>Login with another PDS</DialogTitle>
+                <DialogDescription>
+                  Enter the URL of your PDS to login.
+                </DialogDescription>
               </DialogHeader>
 
               <PdsForm />
@@ -63,6 +67,9 @@ export function LoginForm() {
             <DialogContent>
               <DialogHeader>
                 <DialogTitle>Login with handle</DialogTitle>
+                <DialogDescription>
+                  Enter your Bluesky/AT Protocol handle to login.
+                </DialogDescription>
               </DialogHeader>
 
               <IdentifierForm />
@@ -102,20 +109,16 @@ function IdentifierForm() {
         });
       }}
     >
-      <div>
-        <Label htmlFor="handle">Handle</Label>
-        <Input
-          id="identifier"
-          name="identifier"
-          required
-          placeholder="example.com"
-        />
-      </div>
-      <div>
-        <Button type="submit" className="w-full" disabled={isIdentiferPending}>
-          Sign in
-        </Button>
-      </div>
+      <Input
+        id="identifier"
+        name="identifier"
+        required
+        placeholder="eg. dril.bsky.social"
+      />
+
+      <Button type="submit" className="w-full" disabled={isIdentiferPending}>
+        Login
+      </Button>
 
       <LoginError errorState={identifierState?.error} />
     </form>
@@ -129,7 +132,7 @@ function PdsForm() {
   );
   return (
     <form className="space-y-6" action={pdsAction}>
-      <Input name="pdsUrl" />
+      <Input name="pdsUrl" placeholder="eg. bsky.social" />
       <Button type="submit" className="w-full" disabled={isPdsPending}>
         Login
       </Button>
