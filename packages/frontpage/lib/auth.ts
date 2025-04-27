@@ -376,7 +376,7 @@ export async function signOut() {
 
 export const getSession = cache(async () => {
   const tokenCookie = (await cookies()).get(AUTH_COOKIE_NAME);
-  if (!tokenCookie) {
+  if (!tokenCookie || !tokenCookie.value) {
     return null;
   }
 
