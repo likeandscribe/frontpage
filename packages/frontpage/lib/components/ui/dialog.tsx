@@ -4,7 +4,7 @@ import { Dialog as DialogPrimitive } from "radix-ui";
 import { Cross2Icon } from "@radix-ui/react-icons";
 
 import { cn } from "@/lib/utils";
-import { type ComponentProps } from "react";
+import { useRef, type ComponentProps } from "react";
 
 const Dialog = DialogPrimitive.Root;
 
@@ -35,14 +35,38 @@ function DialogContent({
   children,
   ...props
 }: ComponentProps<typeof DialogPrimitive.Content>) {
+  const contentRef = useRef<HTMLDivElement>(null);
   return (
     <DialogPortal>
       <DialogOverlay />
       <DialogPrimitive.Content
+        ref={contentRef}
         className={cn(
           "fixed left-[50%] top-[50%] z-50 grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 border bg-background p-6 shadow-lg duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%] sm:rounded-lg",
           className,
         )}
+        onPointerDownOutside={(e) => {
+          // Fix to improve usability when using extensions like 1password that inject
+          // elements into the page. This is a workaround for a bug in radix-ui.
+          // See https://github.com/radix-ui/primitives/issues/1280#issuecomment-1319109163
+          if (!contentRef.current) return;
+          const contentRect = contentRef.current.getBoundingClientRect();
+          // Detect if click actually happened within the bounds of content.
+          // This can happen if click was on an absolutely positioned element overlapping content,
+          // such as the 1password extension icon in the text input.
+          const actuallyClickedInside =
+            e.detail.originalEvent.clientX > contentRect.left &&
+            e.detail.originalEvent.clientX <
+              contentRect.left + contentRect.width &&
+            e.detail.originalEvent.clientY > contentRect.top &&
+            e.detail.originalEvent.clientY <
+              contentRect.top + contentRect.height;
+          if (actuallyClickedInside) {
+            e.preventDefault();
+          } else {
+            props.onPointerDownOutside?.(e);
+          }
+        }}
         {...props}
       >
         {children}
