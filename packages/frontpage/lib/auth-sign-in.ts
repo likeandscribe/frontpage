@@ -60,7 +60,7 @@ export async function signIn(input: SignInInput) {
     // TODO: Cache this
     authServer = await processDiscoveryResponse(
       authServerUrl,
-      await discoveryRequest(new URL(authServerUrl), {
+      await discoveryRequest(authServerUrl, {
         algorithm: "oauth2",
       }),
     );
