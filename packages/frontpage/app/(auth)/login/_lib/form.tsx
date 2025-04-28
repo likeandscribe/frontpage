@@ -130,7 +130,16 @@ function PdsForm() {
     null,
   );
   return (
-    <form className="space-y-6" action={pdsAction}>
+    <form
+      className="space-y-6"
+      action={pdsAction}
+      onSubmit={(event) => {
+        event.preventDefault();
+        startTransition(() => {
+          pdsAction(new FormData(event.currentTarget));
+        });
+      }}
+    >
       <Input name="pdsUrl" placeholder="eg. bsky.social" />
       <Button type="submit" className="w-full" disabled={isPdsPending}>
         Login
