@@ -24,7 +24,7 @@ export function LoginForm() {
 
   return (
     <>
-      <div className="space-y-6">
+      <div className="space-y-3">
         <form className="contents" action={pdsAction}>
           <Button
             className="w-full"
@@ -32,49 +32,48 @@ export function LoginForm() {
             name="pdsUrl"
             value="bsky.social"
             disabled={isPdsPending}
+            size="lg"
           >
-            Login with bsky.social
+            Login or signup with bsky.social
           </Button>
         </form>
 
-        <div className="flex gap-2">
-          <Dialog open={pdsDialogOpen} onOpenChange={setPdsDialogOpen}>
-            <DialogTrigger asChild>
-              <Button className="w-full" variant="outline">
-                Login with another PDS
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Login with another PDS</DialogTitle>
-                <DialogDescription>
-                  Enter the URL of your PDS to login.
-                </DialogDescription>
-              </DialogHeader>
+        <Dialog open={pdsDialogOpen} onOpenChange={setPdsDialogOpen}>
+          <DialogTrigger asChild>
+            <Button className="w-full" variant="outline">
+              Continue with another PDS
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="top-1/3">
+            <DialogHeader>
+              <DialogTitle>Login with another PDS</DialogTitle>
+              <DialogDescription>
+                Enter the URL of your PDS to login.
+              </DialogDescription>
+            </DialogHeader>
 
-              <PdsForm />
-            </DialogContent>
-          </Dialog>
+            <PdsForm />
+          </DialogContent>
+        </Dialog>
 
-          <Dialog>
-            <DialogTrigger asChild>
-              <Button className="w-full" variant="outline">
-                Login with @handle
-              </Button>
-            </DialogTrigger>
+        <Dialog>
+          <DialogTrigger asChild>
+            <Button className="w-full" variant="outline">
+              Continue with @handle
+            </Button>
+          </DialogTrigger>
 
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Login with handle</DialogTitle>
-                <DialogDescription>
-                  Enter your Bluesky/AT Protocol handle to login.
-                </DialogDescription>
-              </DialogHeader>
+          <DialogContent className="top-1/3">
+            <DialogHeader>
+              <DialogTitle>Login with handle</DialogTitle>
+              <DialogDescription>
+                Enter your Bluesky/AT Protocol handle to login.
+              </DialogDescription>
+            </DialogHeader>
 
-              <IdentifierForm />
-            </DialogContent>
-          </Dialog>
-        </div>
+            <IdentifierForm />
+          </DialogContent>
+        </Dialog>
 
         <LoginError errorState={pdsState?.error} />
       </div>
