@@ -7,7 +7,7 @@ import {
   calculateJwkThumbprint,
 } from "jose";
 import { cache } from "react";
-import { type DID, getPdsUrl } from "./data/atproto/did";
+import { type DID, getPdsUrl, parseDid } from "./data/atproto/did";
 import {
   discoveryRequest,
   processDiscoveryResponse,
@@ -29,9 +29,13 @@ import { redirect, RedirectType } from "next/navigation";
 import { db } from "./db";
 import * as schema from "./schema";
 import { eq } from "drizzle-orm";
-import { getDidFromHandleOrDid } from "./data/atproto/identity";
+import {
+  getDidFromHandleOrDid,
+  getVerifiedHandle,
+} from "./data/atproto/identity";
 import { getClientMetadata as createClientMetadata } from "@repo/frontpage-oauth";
 import { getRootHost } from "./navigation";
+import { invariant } from "./utils";
 
 const USER_AGENT = "appview/@frontpage.fyi (@tom-sherman.com)";
 
@@ -278,9 +282,11 @@ export const handlers = {
       }
 
       if (
-        tokensResult.data.sub !== row.did ||
-        tokensResult.data.sub !== (await getDidFromHandleOrDid(row.username)) ||
-        row.did !== (await getDidFromHandleOrDid(row.username))
+        row.did !== "" &&
+        (tokensResult.data.sub !== row.did ||
+          tokensResult.data.sub !==
+            (await getDidFromHandleOrDid(row.username)) ||
+          row.did !== (await getDidFromHandleOrDid(row.username)))
       ) {
         // Delete row to prevent replay attacks
         await deleteOauthRequest(state);
@@ -290,22 +296,27 @@ export const handlers = {
         );
       }
 
+      // At this point tokenResult.data.sub should be the same as row.did or undefined
+      // Note it's also possible for it to be empty string, but that would cause parseDid to return null
+      const subjectDid = tokensResult.data.sub
+        ? parseDid(tokensResult.data.sub)
+        : null;
+
+      invariant(subjectDid, "Failed to parse subject DID");
+
       const dpopNonce = authCodeResponse.headers.get("DPoP-Nonce");
-      if (!dpopNonce) {
-        throw new Error("Missing DPoP nonce");
-      }
 
-      if (!tokensResult.data.refresh_token) {
-        throw new Error("Missing refresh");
-      }
+      invariant(dpopNonce, "Missing DPoP nonce");
+      invariant(tokensResult.data.refresh_token, "Missing refresh token");
+      invariant(tokensResult.data.expires_in, "Missing expires_in");
 
-      if (!tokensResult.data.expires_in) {
-        throw new Error("Missing expires");
-      }
+      const handle = row.username || (await getVerifiedHandle(subjectDid));
+
+      invariant(handle, "Failed to get handle");
 
       const { lastInsertRowid } = await db.insert(schema.OauthSession).values({
-        did: row.did,
-        username: row.username,
+        did: subjectDid,
+        username: handle,
         iss: row.iss,
         accessToken: tokensResult.data.access_token,
         refreshToken: tokensResult.data.refresh_token,

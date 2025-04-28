@@ -19,33 +19,56 @@ import { db } from "./db";
 import * as schema from "./schema";
 import { redirect } from "next/navigation";
 
-export async function signIn(identifier: string) {
-  const did = await getDidFromHandleOrDid(identifier);
-  if (!did) {
+type SignInInput =
+  | {
+      identifier: string;
+    }
+  | {
+      pdsUrl: URL;
+    };
+
+export async function signIn(input: SignInInput) {
+  let authServerUrl: URL;
+  if ("identifier" in input) {
+    const did = await getDidFromHandleOrDid(input.identifier);
+    if (!did) {
+      return {
+        error: "DID_NOT_FOUND" as const,
+      };
+    }
+    const meta = await oauthProtectedMetadataRequest(did);
+    if ("error" in meta) {
+      return meta;
+    }
+    const server = meta.data.authorization_servers?.[0];
+    if (!server) {
+      return {
+        error: "NO_AUTH_SERVER" as const,
+      };
+    }
+
+    authServerUrl = new URL(server);
+  } else if ("pdsUrl" in input) {
+    authServerUrl = input.pdsUrl;
+  } else {
+    throw new Error("Invalid input");
+  }
+
+  let authServer;
+
+  try {
+    // TODO: Cache this
+    authServer = await processDiscoveryResponse(
+      authServerUrl,
+      await discoveryRequest(authServerUrl, {
+        algorithm: "oauth2",
+      }),
+    );
+  } catch (_) {
     return {
-      error: "DID_NOT_FOUND" as const,
+      error: "INVALID_AUTH_SERVER" as const,
     };
   }
-
-  const meta = await oauthProtectedMetadataRequest(did);
-  if ("error" in meta) {
-    return meta;
-  }
-
-  const authServerUrl = meta.data.authorization_servers?.[0];
-  if (!authServerUrl) {
-    return {
-      error: "NO_AUTH_SERVER" as const,
-    };
-  }
-
-  // TODO: Cache this
-  const authServer = await processDiscoveryResponse(
-    new URL(authServerUrl),
-    await discoveryRequest(new URL(authServerUrl), {
-      algorithm: "oauth2",
-    }),
-  );
 
   // Check this early, we'll need it later
   const authorizationEndpiont = authServer.authorization_endpoint;
@@ -77,7 +100,11 @@ export async function signIn(identifier: string) {
         state,
         redirect_uri: client.redirect_uris[0],
         scope: client.scope,
-        login_hint: identifier,
+        ...("identifier" in input
+          ? {
+              login_hint: input.identifier,
+            }
+          : {}),
       },
       {
         DPoP: {
@@ -141,9 +168,12 @@ export async function signIn(identifier: string) {
   }
 
   await db.insert(schema.OauthAuthRequest).values({
-    did: did,
+    did:
+      "identifier" in input
+        ? (await getDidFromHandleOrDid(input.identifier)) ?? ""
+        : "",
     iss: authServer.issuer,
-    username: identifier,
+    username: "identifier" in input ? input.identifier : "",
     nonce: dpopNonce,
     state,
     pkceVerifier,
@@ -157,7 +187,7 @@ export async function signIn(identifier: string) {
     ),
   });
 
-  const redirectUrl = new URL(authServer.authorization_endpoint);
+  const redirectUrl = new URL(authorizationEndpiont);
   redirectUrl.searchParams.set("request_uri", parResult.data.request_uri);
   redirectUrl.searchParams.set("client_id", client.client_id);
   redirect(redirectUrl.toString());
