@@ -187,7 +187,7 @@ export async function signIn(input: SignInInput) {
     ),
   });
 
-  const redirectUrl = new URL(authServer.authorization_endpoint);
+  const redirectUrl = new URL(authorizationEndpiont);
   redirectUrl.searchParams.set("request_uri", parResult.data.request_uri);
   redirectUrl.searchParams.set("client_id", client.client_id);
   redirect(redirectUrl.toString());
