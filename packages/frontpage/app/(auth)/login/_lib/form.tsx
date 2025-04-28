@@ -94,7 +94,7 @@ function LoginError({ errorState }: { errorState?: string }) {
 }
 
 function IdentifierForm() {
-  const [identifierState, identifierAction, isIdentiferPending] =
+  const [identifierState, identifierAction, isIdentifierPending] =
     useActionState(loginWithIdentifierAction, null);
 
   return (
@@ -115,7 +115,7 @@ function IdentifierForm() {
         placeholder="eg. dril.bsky.social"
       />
 
-      <Button type="submit" className="w-full" disabled={isIdentiferPending}>
+      <Button type="submit" className="w-full" disabled={isIdentifierPending}>
         Login
       </Button>
 
