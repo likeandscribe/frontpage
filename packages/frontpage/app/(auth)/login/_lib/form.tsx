@@ -2,7 +2,6 @@
 
 import { startTransition, useActionState, useState } from "react";
 import { loginWithIdentifierAction, loginWithPdsAction } from "./action";
-import { Label } from "@/lib/components/ui/label";
 import { Input } from "@/lib/components/ui/input";
 import { Button } from "@/lib/components/ui/button";
 import { Alert, AlertDescription, AlertTitle } from "@/lib/components/ui/alert";
