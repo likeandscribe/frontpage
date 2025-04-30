@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "@repo/frontpage-oauth": "workspace:*",
-    "@vercel/sdk": "^1.6.2",
+    "@vercel/sdk": "^1.6.6",
     "next": "catalog:",
     "react": "catalog:",
     "react-dom": "catalog:"
