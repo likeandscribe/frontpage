@@ -15,6 +15,9 @@ import {
   DialogTrigger,
 } from "@/lib/components/ui/dialog";
 
+const DEFAULT_PDS_URL =
+  process.env.NEXT_PUBLIC_DEFAULT_PDS_HOST || "bsky.social";
+
 export function LoginForm() {
   const [pdsDialogOpen, setPdsDialogOpen] = useState(false);
   const [pdsState, pdsAction, isPdsPending] = useActionState(
@@ -30,11 +33,11 @@ export function LoginForm() {
             className="w-full"
             type="submit"
             name="pdsUrl"
-            value="bsky.social"
+            value={DEFAULT_PDS_URL}
             disabled={isPdsPending}
             size="lg"
           >
-            Login or signup with bsky.social
+            Login or signup with {DEFAULT_PDS_URL}
           </Button>
         </form>
 
