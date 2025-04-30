@@ -9,6 +9,13 @@ const nextConfig = {
   experimental: {
     reactCompiler: true,
   },
+
+  rewrites: () => [
+    {
+      source: "/.well-known/security.txt",
+      destination: "/security.txt",
+    },
+  ],
 };
 
 export default nextConfig;
