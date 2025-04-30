@@ -2,7 +2,7 @@
   "name": "@repo/frontpage-oauth",
   "main": "./src/index.ts",
   "dependencies": {
-    "@atproto/oauth-types": "^0.1.2"
+    "@atproto/oauth-types": "^0.1.5"
   },
   "devDependencies": {
     "@repo/eslint-config": "workspace:*",
