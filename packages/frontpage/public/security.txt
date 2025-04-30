@@ -1,5 +1,25 @@
+-----BEGIN PGP SIGNED MESSAGE-----
+Hash: SHA256
+
 Contact: mailto:team@frontpage.fyi
 Expires: 2026-04-30T10:01:00.000Z
 Encryption: https://frontpage.fyi/pgp
 Preferred-Languages: en
 Policy: https://github.com/likeandscribe/frontpage/security
+Canonical: https://frontpage.fyi/.well-known/security.txt
+-----BEGIN PGP SIGNATURE-----
+
+iQIzBAEBCAAdFiEEyY/Ik0huN1mmBUY+hgQkap51llIFAmgR+ToACgkQhgQkap51
+llKnZg/+K9iRjXZ/SspBOJeJ87GM3jRhujt+BEeEzK4cwXdfvAMDAxN5FSeqzrPe
+UnjFAdteGpZK9TCdJN7DO/gGBeW/h1dppNQVBHM+exTeZEQdGbKGlmIiLRyugMTF
+amBENwHR3sghcw9rJtpxChsCWYHZDnTHUdbrn3Ygl8BOYgmeTXNT5pPKAVXZa204
+SlurzwK02bBLgC+VJ1+DYBuFTDCpYFlpqYcyF2TgRLu+Xo8hFoCnQCbgznXZmrlh
+cCiCw8bE+j419bjEYGZUMA2nqP0RxnjQwM1F+ARU7ukwgNKGD65mFy9ksS2miWJw
+dD14cOQPrXPchoRiFi8iBAjkmK4cKyOuR+l0LUvrvdsLd2a05fgB5QcYyLImODpW
+wafeXCtJ2Dp5X4kZ63OtEwnkygq8OZSThxOgSWWac2L4a1LPmLa2yZSAxAPT/7N7
+1Gw8plgR9wleG+Gqw7lUZUr/U2BAthCJcaxyJkbIQJoW53/o+9ZkV3H2H8FkGUzJ
+1YJYDGGwgt63zRICEmpp4/N0xYSmLk/M6czNoojOiNb71ARQO8SJGuiKHEmsfjhG
+4LaT+EAw6WiUyj/rz6D8kKv2TTzMjVniD5DDn/ccq5vmnvh9DGFFXYJawPEi4l6Y
+mtdhoe2fWRy8IQrdU41LNKpESbGVWWV1jhKQD+gx20l5LNZKRxw=
+=KnyF
+-----END PGP SIGNATURE-----
