@@ -296,11 +296,14 @@ export const handlers = {
         );
       }
 
+      const tokenSub = tokensResult.data.sub;
+      if (typeof tokenSub !== "string") {
+        throw new Error("Invalid token sub");
+      }
+
       // At this point tokenResult.data.sub should be the same as row.did or undefined
       // Note it's also possible for it to be empty string, but that would cause parseDid to return null
-      const subjectDid = tokensResult.data.sub
-        ? parseDid(tokensResult.data.sub)
-        : null;
+      const subjectDid = tokensResult.data.sub ? parseDid(tokenSub) : null;
 
       invariant(subjectDid, "Failed to parse subject DID");
 
