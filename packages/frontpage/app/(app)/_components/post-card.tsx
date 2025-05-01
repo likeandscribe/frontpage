@@ -58,15 +58,12 @@ export async function PostCard({
           voteAction={async () => {
             "use server";
             invariant(cid, "Vote action requires cid");
-            const user = await ensureUser();
+            await ensureUser();
             await createVote({
-              authorDid: user.did,
-              subject: {
-                rkey,
-                cid,
-                authorDid: author,
-                collection: nsids.FyiUnravelFrontpagePost,
-              },
+              rkey,
+              cid,
+              authorDid: author,
+              collection: nsids.FyiUnravelFrontpagePost,
             });
           }}
           unvoteAction={async () => {

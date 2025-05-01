@@ -1,7 +1,6 @@
 import { db } from "@/lib/db";
 import * as schema from "@/lib/schema";
 import { Commit } from "@/lib/data/atproto/event";
-import * as atprotoVote from "@/lib/data/atproto/vote";
 import { getPdsUrl } from "@/lib/data/atproto/did";
 import { handleComment, handlePost, handleVote } from "./handlers";
 import { eq } from "drizzle-orm";
@@ -54,7 +53,7 @@ export async function POST(request: Request) {
       case nsids.FyiUnravelFrontpageComment:
         await handleComment({ op, repo, rkey });
         break;
-      case atprotoVote.VoteCollection:
+      case nsids.FyiUnravelFrontpageVote:
         await handleVote({ op, repo, rkey });
         break;
       default:
