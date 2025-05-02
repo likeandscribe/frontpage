@@ -10,28 +10,23 @@ import {
   is$typed as _is$typed,
   type OmitKey,
 } from "../../../../util";
+import type * as ComAtprotoSyncDefs from "./defs.js";
 
 const is$typed = _is$typed,
   validate = _validate;
-const id = "com.atproto.repo.listRecords";
+const id = "com.atproto.sync.listHosts";
 
 export interface QueryParams {
-  /** The handle or DID of the repo. */
-  repo: string;
-  /** The NSID of the record type. */
-  collection: string;
-  /** The number of records to return. */
   limit?: number;
   cursor?: string;
-  /** Flag to reverse the order of the returned records. */
-  reverse?: boolean;
 }
 
 export type InputSchema = undefined;
 
 export interface OutputSchema {
   cursor?: string;
-  records: Record[];
+  /** Sort order is not formally specified. Recommended order is by time host was first seen by the server, with oldest first. */
+  hosts: Host[];
 }
 
 export interface CallOptions {
@@ -49,19 +44,22 @@ export function toKnownErr(e: any) {
   return e;
 }
 
-export interface Record {
-  $type?: "com.atproto.repo.listRecords#record";
-  uri: string;
-  cid: string;
-  value: { [_ in string]: unknown };
+export interface Host {
+  $type?: "com.atproto.sync.listHosts#host";
+  /** hostname of server; not a URL (no scheme) */
+  hostname: string;
+  /** Recent repo stream event sequence number. May be delayed from actual stream processing (eg, persisted cursor not in-memory cursor). */
+  seq?: number;
+  accountCount?: number;
+  status?: ComAtprotoSyncDefs.HostStatus;
 }
 
-const hashRecord = "record";
+const hashHost = "host";
 
-export function isRecord<V>(v: V) {
-  return is$typed(v, id, hashRecord);
+export function isHost<V>(v: V) {
+  return is$typed(v, id, hashHost);
 }
 
-export function validateRecord<V>(v: V) {
-  return validate<Record & V>(v, id, hashRecord);
+export function validateHost<V>(v: V) {
+  return validate<Host & V>(v, id, hashHost);
 }

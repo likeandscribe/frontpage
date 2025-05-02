@@ -13,25 +13,20 @@ import {
 
 const is$typed = _is$typed,
   validate = _validate;
-const id = "com.atproto.repo.listRecords";
+const id = "com.atproto.sync.listReposByCollection";
 
 export interface QueryParams {
-  /** The handle or DID of the repo. */
-  repo: string;
-  /** The NSID of the record type. */
   collection: string;
-  /** The number of records to return. */
+  /** Maximum size of response set. Recommend setting a large maximum (1000+) when enumerating large DID lists. */
   limit?: number;
   cursor?: string;
-  /** Flag to reverse the order of the returned records. */
-  reverse?: boolean;
 }
 
 export type InputSchema = undefined;
 
 export interface OutputSchema {
   cursor?: string;
-  records: Record[];
+  repos: Repo[];
 }
 
 export interface CallOptions {
@@ -49,19 +44,17 @@ export function toKnownErr(e: any) {
   return e;
 }
 
-export interface Record {
-  $type?: "com.atproto.repo.listRecords#record";
-  uri: string;
-  cid: string;
-  value: { [_ in string]: unknown };
+export interface Repo {
+  $type?: "com.atproto.sync.listReposByCollection#repo";
+  did: string;
 }
 
-const hashRecord = "record";
+const hashRepo = "repo";
 
-export function isRecord<V>(v: V) {
-  return is$typed(v, id, hashRecord);
+export function isRepo<V>(v: V) {
+  return is$typed(v, id, hashRepo);
 }
 
-export function validateRecord<V>(v: V) {
-  return validate<Record & V>(v, id, hashRecord);
+export function validateRepo<V>(v: V) {
+  return validate<Repo & V>(v, id, hashRepo);
 }

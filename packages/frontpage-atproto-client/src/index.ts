@@ -21,6 +21,23 @@ import * as ComAtprotoRepoListRecords from "./types/com/atproto/repo/listRecords
 import * as ComAtprotoRepoPutRecord from "./types/com/atproto/repo/putRecord.js";
 import * as ComAtprotoRepoStrongRef from "./types/com/atproto/repo/strongRef.js";
 import * as ComAtprotoRepoUploadBlob from "./types/com/atproto/repo/uploadBlob.js";
+import * as ComAtprotoSyncDefs from "./types/com/atproto/sync/defs.js";
+import * as ComAtprotoSyncGetBlob from "./types/com/atproto/sync/getBlob.js";
+import * as ComAtprotoSyncGetBlocks from "./types/com/atproto/sync/getBlocks.js";
+import * as ComAtprotoSyncGetCheckout from "./types/com/atproto/sync/getCheckout.js";
+import * as ComAtprotoSyncGetHead from "./types/com/atproto/sync/getHead.js";
+import * as ComAtprotoSyncGetHostStatus from "./types/com/atproto/sync/getHostStatus.js";
+import * as ComAtprotoSyncGetLatestCommit from "./types/com/atproto/sync/getLatestCommit.js";
+import * as ComAtprotoSyncGetRecord from "./types/com/atproto/sync/getRecord.js";
+import * as ComAtprotoSyncGetRepo from "./types/com/atproto/sync/getRepo.js";
+import * as ComAtprotoSyncGetRepoStatus from "./types/com/atproto/sync/getRepoStatus.js";
+import * as ComAtprotoSyncListBlobs from "./types/com/atproto/sync/listBlobs.js";
+import * as ComAtprotoSyncListHosts from "./types/com/atproto/sync/listHosts.js";
+import * as ComAtprotoSyncListRepos from "./types/com/atproto/sync/listRepos.js";
+import * as ComAtprotoSyncListReposByCollection from "./types/com/atproto/sync/listReposByCollection.js";
+import * as ComAtprotoSyncNotifyOfUpdate from "./types/com/atproto/sync/notifyOfUpdate.js";
+import * as ComAtprotoSyncRequestCrawl from "./types/com/atproto/sync/requestCrawl.js";
+import * as ComAtprotoSyncSubscribeRepos from "./types/com/atproto/sync/subscribeRepos.js";
 import * as FyiUnravelFrontpageComment from "./types/fyi/unravel/frontpage/comment.js";
 import * as FyiUnravelFrontpagePost from "./types/fyi/unravel/frontpage/post.js";
 import * as FyiUnravelFrontpageVote from "./types/fyi/unravel/frontpage/vote.js";
@@ -37,6 +54,23 @@ export * as ComAtprotoRepoListRecords from "./types/com/atproto/repo/listRecords
 export * as ComAtprotoRepoPutRecord from "./types/com/atproto/repo/putRecord.js";
 export * as ComAtprotoRepoStrongRef from "./types/com/atproto/repo/strongRef.js";
 export * as ComAtprotoRepoUploadBlob from "./types/com/atproto/repo/uploadBlob.js";
+export * as ComAtprotoSyncDefs from "./types/com/atproto/sync/defs.js";
+export * as ComAtprotoSyncGetBlob from "./types/com/atproto/sync/getBlob.js";
+export * as ComAtprotoSyncGetBlocks from "./types/com/atproto/sync/getBlocks.js";
+export * as ComAtprotoSyncGetCheckout from "./types/com/atproto/sync/getCheckout.js";
+export * as ComAtprotoSyncGetHead from "./types/com/atproto/sync/getHead.js";
+export * as ComAtprotoSyncGetHostStatus from "./types/com/atproto/sync/getHostStatus.js";
+export * as ComAtprotoSyncGetLatestCommit from "./types/com/atproto/sync/getLatestCommit.js";
+export * as ComAtprotoSyncGetRecord from "./types/com/atproto/sync/getRecord.js";
+export * as ComAtprotoSyncGetRepo from "./types/com/atproto/sync/getRepo.js";
+export * as ComAtprotoSyncGetRepoStatus from "./types/com/atproto/sync/getRepoStatus.js";
+export * as ComAtprotoSyncListBlobs from "./types/com/atproto/sync/listBlobs.js";
+export * as ComAtprotoSyncListHosts from "./types/com/atproto/sync/listHosts.js";
+export * as ComAtprotoSyncListRepos from "./types/com/atproto/sync/listRepos.js";
+export * as ComAtprotoSyncListReposByCollection from "./types/com/atproto/sync/listReposByCollection.js";
+export * as ComAtprotoSyncNotifyOfUpdate from "./types/com/atproto/sync/notifyOfUpdate.js";
+export * as ComAtprotoSyncRequestCrawl from "./types/com/atproto/sync/requestCrawl.js";
+export * as ComAtprotoSyncSubscribeRepos from "./types/com/atproto/sync/subscribeRepos.js";
 export * as FyiUnravelFrontpageComment from "./types/fyi/unravel/frontpage/comment.js";
 export * as FyiUnravelFrontpagePost from "./types/fyi/unravel/frontpage/post.js";
 export * as FyiUnravelFrontpageVote from "./types/fyi/unravel/frontpage/vote.js";
@@ -70,10 +104,12 @@ export class ComNS {
 export class ComAtprotoNS {
   _client: XrpcClient;
   repo: ComAtprotoRepoNS;
+  sync: ComAtprotoSyncNS;
 
   constructor(client: XrpcClient) {
     this._client = client;
     this.repo = new ComAtprotoRepoNS(client);
+    this.sync = new ComAtprotoSyncNS(client);
   }
 }
 
@@ -197,6 +233,184 @@ export class ComAtprotoRepoNS {
       data,
       opts,
     );
+  }
+}
+
+export class ComAtprotoSyncNS {
+  _client: XrpcClient;
+
+  constructor(client: XrpcClient) {
+    this._client = client;
+  }
+
+  getBlob(
+    params?: ComAtprotoSyncGetBlob.QueryParams,
+    opts?: ComAtprotoSyncGetBlob.CallOptions,
+  ): Promise<ComAtprotoSyncGetBlob.Response> {
+    return this._client
+      .call("com.atproto.sync.getBlob", params, undefined, opts)
+      .catch((e) => {
+        throw ComAtprotoSyncGetBlob.toKnownErr(e);
+      });
+  }
+
+  getBlocks(
+    params?: ComAtprotoSyncGetBlocks.QueryParams,
+    opts?: ComAtprotoSyncGetBlocks.CallOptions,
+  ): Promise<ComAtprotoSyncGetBlocks.Response> {
+    return this._client
+      .call("com.atproto.sync.getBlocks", params, undefined, opts)
+      .catch((e) => {
+        throw ComAtprotoSyncGetBlocks.toKnownErr(e);
+      });
+  }
+
+  getCheckout(
+    params?: ComAtprotoSyncGetCheckout.QueryParams,
+    opts?: ComAtprotoSyncGetCheckout.CallOptions,
+  ): Promise<ComAtprotoSyncGetCheckout.Response> {
+    return this._client.call(
+      "com.atproto.sync.getCheckout",
+      params,
+      undefined,
+      opts,
+    );
+  }
+
+  getHead(
+    params?: ComAtprotoSyncGetHead.QueryParams,
+    opts?: ComAtprotoSyncGetHead.CallOptions,
+  ): Promise<ComAtprotoSyncGetHead.Response> {
+    return this._client
+      .call("com.atproto.sync.getHead", params, undefined, opts)
+      .catch((e) => {
+        throw ComAtprotoSyncGetHead.toKnownErr(e);
+      });
+  }
+
+  getHostStatus(
+    params?: ComAtprotoSyncGetHostStatus.QueryParams,
+    opts?: ComAtprotoSyncGetHostStatus.CallOptions,
+  ): Promise<ComAtprotoSyncGetHostStatus.Response> {
+    return this._client
+      .call("com.atproto.sync.getHostStatus", params, undefined, opts)
+      .catch((e) => {
+        throw ComAtprotoSyncGetHostStatus.toKnownErr(e);
+      });
+  }
+
+  getLatestCommit(
+    params?: ComAtprotoSyncGetLatestCommit.QueryParams,
+    opts?: ComAtprotoSyncGetLatestCommit.CallOptions,
+  ): Promise<ComAtprotoSyncGetLatestCommit.Response> {
+    return this._client
+      .call("com.atproto.sync.getLatestCommit", params, undefined, opts)
+      .catch((e) => {
+        throw ComAtprotoSyncGetLatestCommit.toKnownErr(e);
+      });
+  }
+
+  getRecord(
+    params?: ComAtprotoSyncGetRecord.QueryParams,
+    opts?: ComAtprotoSyncGetRecord.CallOptions,
+  ): Promise<ComAtprotoSyncGetRecord.Response> {
+    return this._client
+      .call("com.atproto.sync.getRecord", params, undefined, opts)
+      .catch((e) => {
+        throw ComAtprotoSyncGetRecord.toKnownErr(e);
+      });
+  }
+
+  getRepo(
+    params?: ComAtprotoSyncGetRepo.QueryParams,
+    opts?: ComAtprotoSyncGetRepo.CallOptions,
+  ): Promise<ComAtprotoSyncGetRepo.Response> {
+    return this._client
+      .call("com.atproto.sync.getRepo", params, undefined, opts)
+      .catch((e) => {
+        throw ComAtprotoSyncGetRepo.toKnownErr(e);
+      });
+  }
+
+  getRepoStatus(
+    params?: ComAtprotoSyncGetRepoStatus.QueryParams,
+    opts?: ComAtprotoSyncGetRepoStatus.CallOptions,
+  ): Promise<ComAtprotoSyncGetRepoStatus.Response> {
+    return this._client
+      .call("com.atproto.sync.getRepoStatus", params, undefined, opts)
+      .catch((e) => {
+        throw ComAtprotoSyncGetRepoStatus.toKnownErr(e);
+      });
+  }
+
+  listBlobs(
+    params?: ComAtprotoSyncListBlobs.QueryParams,
+    opts?: ComAtprotoSyncListBlobs.CallOptions,
+  ): Promise<ComAtprotoSyncListBlobs.Response> {
+    return this._client
+      .call("com.atproto.sync.listBlobs", params, undefined, opts)
+      .catch((e) => {
+        throw ComAtprotoSyncListBlobs.toKnownErr(e);
+      });
+  }
+
+  listHosts(
+    params?: ComAtprotoSyncListHosts.QueryParams,
+    opts?: ComAtprotoSyncListHosts.CallOptions,
+  ): Promise<ComAtprotoSyncListHosts.Response> {
+    return this._client.call(
+      "com.atproto.sync.listHosts",
+      params,
+      undefined,
+      opts,
+    );
+  }
+
+  listRepos(
+    params?: ComAtprotoSyncListRepos.QueryParams,
+    opts?: ComAtprotoSyncListRepos.CallOptions,
+  ): Promise<ComAtprotoSyncListRepos.Response> {
+    return this._client.call(
+      "com.atproto.sync.listRepos",
+      params,
+      undefined,
+      opts,
+    );
+  }
+
+  listReposByCollection(
+    params?: ComAtprotoSyncListReposByCollection.QueryParams,
+    opts?: ComAtprotoSyncListReposByCollection.CallOptions,
+  ): Promise<ComAtprotoSyncListReposByCollection.Response> {
+    return this._client.call(
+      "com.atproto.sync.listReposByCollection",
+      params,
+      undefined,
+      opts,
+    );
+  }
+
+  notifyOfUpdate(
+    data?: ComAtprotoSyncNotifyOfUpdate.InputSchema,
+    opts?: ComAtprotoSyncNotifyOfUpdate.CallOptions,
+  ): Promise<ComAtprotoSyncNotifyOfUpdate.Response> {
+    return this._client.call(
+      "com.atproto.sync.notifyOfUpdate",
+      opts?.qp,
+      data,
+      opts,
+    );
+  }
+
+  requestCrawl(
+    data?: ComAtprotoSyncRequestCrawl.InputSchema,
+    opts?: ComAtprotoSyncRequestCrawl.CallOptions,
+  ): Promise<ComAtprotoSyncRequestCrawl.Response> {
+    return this._client
+      .call("com.atproto.sync.requestCrawl", opts?.qp, data, opts)
+      .catch((e) => {
+        throw ComAtprotoSyncRequestCrawl.toKnownErr(e);
+      });
   }
 }
 
