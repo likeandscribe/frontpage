@@ -15,7 +15,8 @@
     "db:push": "NODE_OPTIONS=--use-openssl-ca drizzle-kit push",
     "db:pull": "NODE_OPTIONS=--use-openssl-ca drizzle-kit pull",
     "test": "vitest",
-    "type-check": "tsc --noEmit"
+    "type-check": "tsc --noEmit",
+    "generate-local-env": "tsx scripts/generate-local-env.mts"
   },
   "dependencies": {
     "@atproto/common-web": "^0.3.2",

@@ -14,5 +14,9 @@ const [privateKey, publicKey] = await Promise.all(
 );
 
 console.log(
-  `PRIVATE_JWK='${JSON.stringify(privateKey)}'\nPUBLIC_JWK='${JSON.stringify(publicKey)}'`,
+  `PRIVATE_JWK='${JSON.stringify(privateKey)}'
+PUBLIC_JWK='${JSON.stringify(publicKey)}'
+DRAINPIPE_CONSUMER_SECRET=secret
+TURSO_CONNECTION_URL=libsql://turso.dev.unravel.fyi
+PLC_DIRECTORY_URL=https://plc.dev.unravel.fyi`,
 );
