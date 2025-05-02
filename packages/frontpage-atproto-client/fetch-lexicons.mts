@@ -3,7 +3,7 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import AdmZip from "adm-zip";
 
-const LEXICON_PREFIXES_TO_FETCH = ["com/atproto/repo"];
+const LEXICON_PREFIXES_TO_FETCH = ["com/atproto/repo", "com/atproto/sync"];
 const LEXICON_OUTPUT_PATH = path.resolve(import.meta.dirname, "../../lexicons");
 
 const isWorkingDirectoryClean = await new Promise<boolean>((resolve, reject) =>
