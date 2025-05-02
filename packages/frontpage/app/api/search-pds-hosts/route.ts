@@ -1,5 +1,9 @@
 import { unstable_cache } from "next/cache";
-import { AtpBaseClient } from "@repo/frontpage-atproto-client";
+import {
+  AtpBaseClient,
+  ComAtprotoSyncListHosts,
+} from "@repo/frontpage-atproto-client";
+import { createApiRoute } from "@/lib/api-route";
 
 const getAllPdsHosts = unstable_cache(
   async () => {
@@ -30,7 +34,10 @@ const getAllPdsHosts = unstable_cache(
       }
     }
 
-    return results;
+    // Deduplicate the results by .hostname
+    const uniqueResults = new Map(results.map((host) => [host.hostname, host]));
+
+    return Array.from(uniqueResults.values());
   },
   ["getAllPdsHosts"],
   {
@@ -38,14 +45,18 @@ const getAllPdsHosts = unstable_cache(
   },
 );
 
-export async function GET(request: Request) {
-  const search = new URL(request.url).searchParams.get("search");
-  const hosts = await getAllPdsHosts();
-  const filteredHosts = hosts
-    .filter((host) =>
-      host.hostname.toLowerCase().includes(search?.toLowerCase() || ""),
-    )
-    .sort((a, b) => a.hostname.localeCompare(b.hostname));
+export const GET = createApiRoute(
+  async (
+    request: Request,
+  ): Promise<ComAtprotoSyncListHosts.OutputSchema["hosts"]> => {
+    const search = new URL(request.url).searchParams.get("search");
+    const hosts = await getAllPdsHosts();
+    const filteredHosts = hosts
+      .filter((host) =>
+        host.hostname.toLowerCase().includes(search?.toLowerCase() || ""),
+      )
+      .sort((a, b) => a.hostname.localeCompare(b.hostname));
 
-  return Response.json(filteredHosts.slice(0, 20));
-}
+    return filteredHosts.slice(0, 20);
+  },
+);

@@ -1,6 +1,13 @@
 "use client";
 
-import { startTransition, useActionState, useState } from "react";
+import {
+  startTransition,
+  Suspense,
+  useActionState,
+  useDeferredValue,
+  useId,
+  useState,
+} from "react";
 import { loginWithIdentifierAction, loginWithPdsAction } from "./action";
 import { Input } from "@/lib/components/ui/input";
 import { Button } from "@/lib/components/ui/button";
@@ -14,6 +21,9 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/lib/components/ui/dialog";
+import useSWR from "swr";
+import type { GET as GetPdsHosts } from "@/app/api/search-pds-hosts/route";
+import { ApiRouteResponse } from "@/lib/api-route";
 
 const DEFAULT_PDS_URL =
   process.env.NEXT_PUBLIC_DEFAULT_PDS_HOST || "bsky.social";
@@ -142,7 +152,7 @@ function PdsForm() {
         });
       }}
     >
-      <Input name="pdsUrl" placeholder="eg. bsky.social" />
+      <PdsUrlInput />
       <Button type="submit" className="w-full" disabled={isPdsPending}>
         Login
       </Button>
@@ -150,4 +160,43 @@ function PdsForm() {
       <LoginError errorState={pdsState?.error} />
     </form>
   );
+}
+
+function PdsUrlInput() {
+  const [input, setInput] = useState("");
+  const listId = `pds-url-${useId()}`;
+
+  return (
+    <>
+      <Input
+        name="pdsUrl"
+        placeholder="eg. bsky.social"
+        list={listId}
+        onChange={(e) => setInput(e.target.value)}
+        value={input}
+      />
+      <Suspense>
+        <PdsUrlResults input={input} id={listId} />
+      </Suspense>
+    </>
+  );
+}
+
+function PdsUrlResults({ input, id }: { input: string; id: string }) {
+  const { data } = useSWR([input], ([i]) => searchPdsHosts(i), {
+    suspense: true,
+  });
+
+  return (
+    <datalist id={id}>
+      {data.map((host) => (
+        <option key={host.hostname} value={host.hostname} />
+      ))}
+    </datalist>
+  );
+}
+
+async function searchPdsHosts(search: string) {
+  const res = await fetch(`/api/search-pds-hosts?search=${search}`);
+  return (await res.json()) as ApiRouteResponse<typeof GetPdsHosts>;
 }
