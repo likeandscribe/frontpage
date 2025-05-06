@@ -1,9 +1,9 @@
-import { Source_Sans_3, Source_Serif_4 } from "next/font/google";
 import "./globals.css";
+import { VercelToolbar } from "@vercel/toolbar/next";
+import { Source_Sans_3, Source_Serif_4 } from "next/font/google";
 import { cn } from "@/lib/utils";
 import { Toaster } from "@/lib/components/ui/toaster";
-import { SpeedInsights } from "@vercel/speed-insights/next";
-import { Analytics } from "@vercel/analytics/react";
+import { Analytics } from "@vercel/analytics/next";
 import { type Metadata } from "next";
 import { ThemeProvider } from "@/lib/components/theme-provider";
 
@@ -50,7 +50,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         >
           {children}
           <Toaster />
-          <SpeedInsights />
           <Analytics />
         </ThemeProvider>
         <script
@@ -58,6 +57,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           src="https://static.cloudflareinsights.com/beacon.min.js"
           data-cf-beacon='{"token": "5e64b32c70b34b1583d863032b03d9ad"}'
         />
+        {process.env.NODE_ENV === "development" && <VercelToolbar />}
       </body>
     </html>
   );
