@@ -366,7 +366,8 @@ export const handlers = {
 export async function signOut() {
   const session = await getSession();
   if (!session) {
-    throw new Error("Not authenticated");
+    console.warn("No session to sign out of");
+    return;
   }
   const authServer = await processDiscoveryResponse(
     new URL(session.user.iss),
