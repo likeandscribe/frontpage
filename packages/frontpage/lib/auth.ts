@@ -317,13 +317,17 @@ export const handlers = {
 
       invariant(handle, "Failed to get handle");
 
+      const expiresAt = new Date(
+        Date.now() + tokensResult.data.expires_in * 1000,
+      );
+
       const { lastInsertRowid } = await db.insert(schema.OauthSession).values({
         did: subjectDid,
         username: handle,
         iss: row.iss,
         accessToken: tokensResult.data.access_token,
         refreshToken: tokensResult.data.refresh_token,
-        expiresAt: new Date(Date.now() + tokensResult.data.expires_in * 1000),
+        expiresAt,
         createdAt: new Date(),
         dpopNonce,
         dpopPrivateJwk: row.dpopPrivateJwk,
@@ -339,6 +343,7 @@ export const handlers = {
         .setProtectedHeader({ alg: USER_SESSION_JWT_ALG })
         .setIssuedAt()
         .setJti(lastInsertRowid.toString())
+        .setExpirationTime(expiresAt)
         .sign(
           // TODO: This probably ought to be a different key
           await getPrivateJwk(),
@@ -358,16 +363,11 @@ export const handlers = {
   },
 };
 
-export function deleteAuthCookie(cookieStub: {
-  delete: (name: string) => void;
-}) {
-  cookieStub.delete(AUTH_COOKIE_NAME);
-}
-
 export async function signOut() {
   const session = await getSession();
   if (!session) {
-    throw new Error("Not authenticated");
+    console.warn("No session to sign out of");
+    return;
   }
   const authServer = await processDiscoveryResponse(
     new URL(session.user.iss),
@@ -386,9 +386,11 @@ export async function signOut() {
   await db
     .delete(schema.OauthSession)
     .where(eq(schema.OauthSession.sessionId, session.user.sessionId));
+
+  (await cookies()).delete(AUTH_COOKIE_NAME);
 }
 
-export const getSession = cache(async () => {
+export const getCookieJwt = cache(async () => {
   const tokenCookie = (await cookies()).get(AUTH_COOKIE_NAME);
   if (!tokenCookie || !tokenCookie.value) {
     return null;
@@ -399,6 +401,15 @@ export const getSession = cache(async () => {
     token = await jwtVerify(tokenCookie.value, await getPublicJwk());
   } catch (e) {
     console.error("Failed to verify token", e);
+    return null;
+  }
+
+  return token;
+});
+
+export const getSession = cache(async () => {
+  const token = await getCookieJwt();
+  if (!token) {
     return null;
   }
 
