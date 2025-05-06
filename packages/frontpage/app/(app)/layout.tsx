@@ -1,4 +1,4 @@
-import { getSession, signOut } from "@/lib/auth";
+import { deleteAuthCookie, getSession, signOut } from "@/lib/auth";
 import Link from "next/link";
 import { Suspense } from "react";
 import { Button } from "@/lib/components/ui/button";
@@ -20,6 +20,7 @@ import {
 } from "@/lib/components/ui/dropdown-menu";
 import { UserAvatar } from "@/lib/components/user-avatar";
 import { FRONTPAGE_ATPROTO_HANDLE } from "@/lib/constants";
+import { cookies } from "next/headers";
 import { revalidatePath } from "next/cache";
 import { NotificationIndicator } from "./_components/notification-indicator";
 import {
@@ -136,6 +137,7 @@ async function LoginOrLogout() {
               action={async () => {
                 "use server";
                 await signOut();
+                deleteAuthCookie(await cookies());
                 revalidatePath("/", "layout");
               }}
             >
