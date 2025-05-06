@@ -8,22 +8,33 @@ import {
 import { db } from "./lib/db";
 import * as schema from "./lib/schema";
 import {
-  deleteAuthCookie,
   getClientPrivateKey,
   getOauthClientOptions,
   getSession,
   importDpopJwks,
   signOut,
   oauthDiscoveryRequest,
+  getCookieJwt,
 } from "./lib/auth";
 
 export async function middleware(request: NextRequest) {
-  const session = await getSession();
-  if (!session) {
+  const cookieJwt = await getCookieJwt();
+  if (!cookieJwt) {
     return NextResponse.next();
   }
 
-  if (session.user.expiresAt.getTime() < new Date().getTime() - 500) {
+  // This check is for old cookies that don't have the exp field set
+  // Can be removed after a while (when all old cookies are expired)
+  if (!cookieJwt.payload.exp) {
+    await signOut();
+    return NextResponse.next();
+  }
+
+  if (cookieJwt.payload.exp * 1000 < new Date().getTime() - 500) {
+    const session = await getSession();
+    if (!session) {
+      return NextResponse.next();
+    }
     const authServer = await processDiscoveryResponse(
       new URL(session.user.iss),
       await oauthDiscoveryRequest(new URL(session.user.iss)),
@@ -92,8 +103,10 @@ export async function middleware(request: NextRequest) {
       // Logout and show error
       console.log("session corrupt, logging out", result);
       await signOut();
-      const response = NextResponse.redirect(new URL("/login", request.url));
-      deleteAuthCookie(response.cookies);
+      const response = NextResponse.redirect(
+        new URL("/login", request.url),
+        NextResponse.next(),
+      );
       return response;
     }
 
