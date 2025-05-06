@@ -101,7 +101,7 @@ export async function middleware(request: NextRequest) {
 
     if ("error" in result) {
       // Logout and show error
-      console.log("session corrupt, logging out", result);
+      console.error("session corrupt, logging out", result);
       await signOut();
       const response = NextResponse.redirect(
         new URL("/login", request.url),
