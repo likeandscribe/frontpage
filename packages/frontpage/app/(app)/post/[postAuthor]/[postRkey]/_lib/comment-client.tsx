@@ -120,7 +120,7 @@ export function CommentClientWrapperWithToolbar({
             </Button>
           </SimpleTooltip>
           <SimpleTooltip content="action-menu" side="bottom">
-            <EllipsisDropdown>
+            <EllipsisDropdown aria-label="Comment actions">
               <ShareDropdownButton path={commentHref} />
               {cid && !hasAuthored ? (
                 <ReportDialogDropdownButton

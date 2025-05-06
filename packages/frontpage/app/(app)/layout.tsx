@@ -93,13 +93,13 @@ async function LoginOrLogout() {
       <>
         <NotificationIndicator>
           <Button asChild variant="outline" size="icon">
-            <Link href="/notifications">
+            <Link href="/notifications" aria-label="Notifications">
               <BellIcon />
             </Link>
           </Button>
         </NotificationIndicator>
         <DropdownMenu>
-          <DropdownMenuTrigger>
+          <DropdownMenuTrigger aria-label="User menu">
             {did ? (
               <UserAvatar did={did} size="smedium" />
             ) : (

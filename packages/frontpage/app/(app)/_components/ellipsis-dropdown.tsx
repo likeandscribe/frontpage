@@ -12,19 +12,23 @@ import React, { type ReactNode } from "react";
 
 interface EllipsisDropdownProps {
   children: ReactNode;
+  "aria-label": string;
 }
 
 const EllipsisDropdownContext = React.createContext<null | {
   close: () => void;
 }>(null);
 
-export function EllipsisDropdown({ children }: EllipsisDropdownProps) {
+export function EllipsisDropdown({
+  children,
+  "aria-label": ariaLabel,
+}: EllipsisDropdownProps) {
   const [open, setOpen] = React.useState(false);
 
   return (
     <EllipsisDropdownContext.Provider value={{ close: () => setOpen(false) }}>
       <DropdownMenu open={open} onOpenChange={setOpen} modal={false}>
-        <DropdownMenuTrigger asChild>
+        <DropdownMenuTrigger asChild aria-label={ariaLabel}>
           <Button variant="ghost" size="sm">
             <DotsHorizontalIcon className="scale-125" />
           </Button>

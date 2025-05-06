@@ -126,7 +126,7 @@ export async function PostCard({
 
           {user ? (
             <div className="ml-auto">
-              <EllipsisDropdown>
+              <EllipsisDropdown aria-label="Post actions">
                 <ShareDropdownButton path={postHref} />
                 <ReportDialogDropdownButton
                   reportAction={reportPostAction.bind(null, {

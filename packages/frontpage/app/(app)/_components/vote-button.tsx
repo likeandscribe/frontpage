@@ -74,6 +74,7 @@ export function VoteButton({
         size="icon"
         disabled={disabled || initialState === "authored"}
         name={hasVoted ? "unvote" : "vote"}
+        aria-label={hasVoted ? "Unvote" : "Vote"}
       >
         <ChevronUpIcon
           className={cn(

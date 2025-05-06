@@ -86,7 +86,7 @@ export default async function Profile(props: { params: Promise<Params> }) {
           <h1 className="md:text-2xl font-bold">
             {userHandle ?? "Invalid handle"}
           </h1>
-          <EllipsisDropdown>
+          <EllipsisDropdown aria-label="User actions">
             <ReportDialogDropdownButton
               reportAction={reportUserAction.bind(null, { did })}
             />
