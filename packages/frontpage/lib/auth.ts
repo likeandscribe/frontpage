@@ -332,6 +332,7 @@ export const handlers = {
         dpopNonce,
         dpopPrivateJwk: row.dpopPrivateJwk,
         dpopPublicJwk: row.dpopPublicJwk,
+        userAgent: request.headers.get("user-agent"),
       });
 
       if (!lastInsertRowid) {
