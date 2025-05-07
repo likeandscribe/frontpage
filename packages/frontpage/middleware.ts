@@ -26,6 +26,7 @@ export async function middleware(request: NextRequest) {
   // This check is for old cookies that don't have the exp field set
   // Can be removed after a while (when all old cookies are expired)
   if (!cookieJwt.payload.exp) {
+    console.warn("No exp in cookie jwt, signing out");
     await signOut();
     return NextResponse.next();
   }
