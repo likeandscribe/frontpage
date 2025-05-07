@@ -339,7 +339,7 @@ export const handlers = {
       }
 
       const userToken = await new SignJWT()
-        .setSubject(row.did)
+        .setSubject(subjectDid)
         .setProtectedHeader({ alg: USER_SESSION_JWT_ALG })
         .setIssuedAt()
         .setJti(lastInsertRowid.toString())
