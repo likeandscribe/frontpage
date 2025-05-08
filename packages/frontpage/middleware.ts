@@ -105,10 +105,10 @@ export async function middleware(request: NextRequest) {
       // Logout and show error
       console.error("session corrupt, logging out", result);
       await signOut();
-      const response = NextResponse.redirect(
-        new URL("/login", request.url),
-        NextResponse.next(),
-      );
+      const response = NextResponse.redirect(new URL("/login", request.url), {
+        status: 307,
+        headers: NextResponse.next().headers,
+      });
       return response;
     }
 
