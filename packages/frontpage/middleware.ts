@@ -14,24 +14,25 @@ import {
   importDpopJwks,
   signOut,
   oauthDiscoveryRequest,
-  getCookieJwt,
+  getAuthCookie,
+  setAuthCookie,
 } from "./lib/auth";
 
 export async function middleware(request: NextRequest) {
-  const cookieJwt = await getCookieJwt();
+  const cookieJwt = await getAuthCookie();
   if (!cookieJwt) {
     return NextResponse.next();
   }
 
   // This check is for old cookies that don't have the exp field set
   // Can be removed after a while (when all old cookies are expired)
-  if (!cookieJwt.payload.exp) {
-    console.warn("No exp in cookie jwt, signing out");
+  if (!cookieJwt.payload.token_exp) {
+    console.warn("No token_exp in cookie jwt, signing out");
     await signOut();
     return NextResponse.next();
   }
 
-  if (cookieJwt.payload.exp * 1000 < new Date().getTime() - 500) {
+  if (cookieJwt.payload.token_exp < new Date().getTime() - 500) {
     const session = await getSession();
     if (!session) {
       return NextResponse.next();
@@ -120,15 +121,23 @@ export async function middleware(request: NextRequest) {
       throw new Error("Missing expires_in");
     }
 
+    const expiresAt = new Date(Date.now() + result.expires_in * 1000);
+
     await db
       .update(schema.OauthSession)
       .set({
         accessToken: result.access_token,
         refreshToken: result.refresh_token,
-        expiresAt: new Date(Date.now() + result.expires_in * 1000),
+        expiresAt,
         dpopNonce,
       })
       .where(eq(schema.OauthSession.sessionId, session.user.sessionId));
+
+    await setAuthCookie({
+      jti: String(session.user.sessionId),
+      sub: session.user.did,
+      token_exp: expiresAt.getTime(),
+    });
   }
 
   return NextResponse.next();
