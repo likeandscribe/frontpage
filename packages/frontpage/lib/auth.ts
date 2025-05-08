@@ -338,22 +338,10 @@ export const handlers = {
         throw new Error("Failed to insert session");
       }
 
-      const userToken = await new SignJWT()
-        .setSubject(subjectDid)
-        .setProtectedHeader({ alg: USER_SESSION_JWT_ALG })
-        .setIssuedAt()
-        .setJti(lastInsertRowid.toString())
-        .setExpirationTime(expiresAt)
-        .sign(
-          // TODO: This probably ought to be a different key
-          await getPrivateJwk(),
-        );
-
-      (await cookies()).set(AUTH_COOKIE_NAME, userToken, {
-        httpOnly: true,
-        secure: true,
-        sameSite: "lax",
-        expires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 365),
+      await setAuthCookie({
+        sub: subjectDid,
+        jti: lastInsertRowid.toString(),
+        token_exp: expiresAt.getTime(),
       });
 
       return redirect("/", RedirectType.replace);
@@ -362,6 +350,54 @@ export const handlers = {
     return new Response("Not found", { status: 404 });
   },
 };
+
+type AuthCookiePayload = {
+  sub: DID;
+  jti: string;
+  /**
+   * NB: This is in milliseconds
+   * This is the time the access token in the database expires, not the JWT.
+   * Auth cookie lives longer than the token, this allows us to refresh the token without checking the database
+   */
+  token_exp: number;
+};
+
+export async function setAuthCookie(payload: AuthCookiePayload) {
+  const userToken = await new SignJWT(payload)
+    .setProtectedHeader({ alg: USER_SESSION_JWT_ALG })
+    .setIssuedAt()
+    .sign(
+      // TODO: This probably ought to be a different key
+      await getPrivateJwk(),
+    );
+
+  (await cookies()).set(AUTH_COOKIE_NAME, userToken, {
+    httpOnly: true,
+    secure: true,
+    sameSite: "lax",
+    expires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 365),
+  });
+}
+
+export const getAuthCookie = cache(async () => {
+  const tokenCookie = (await cookies()).get(AUTH_COOKIE_NAME);
+  if (!tokenCookie || !tokenCookie.value) {
+    return null;
+  }
+
+  let token;
+  try {
+    token = await jwtVerify<AuthCookiePayload>(
+      tokenCookie.value,
+      await getPublicJwk(),
+    );
+  } catch (e) {
+    console.error("Failed to verify token", e);
+    return null;
+  }
+
+  return token;
+});
 
 export async function signOut() {
   const session = await getSession();
@@ -390,31 +426,14 @@ export async function signOut() {
   (await cookies()).delete(AUTH_COOKIE_NAME);
 }
 
-export const getCookieJwt = cache(async () => {
-  const tokenCookie = (await cookies()).get(AUTH_COOKIE_NAME);
-  if (!tokenCookie || !tokenCookie.value) {
-    return null;
-  }
-
-  let token;
-  try {
-    token = await jwtVerify(tokenCookie.value, await getPublicJwk());
-  } catch (e) {
-    console.error("Failed to verify token", e);
-    return null;
-  }
-
-  return token;
-});
-
 export const getSession = cache(async () => {
-  const token = await getCookieJwt();
+  const token = await getAuthCookie();
   if (!token) {
     return null;
   }
 
   if (!token.payload.jti) {
-    return null;
+    throw new Error("Missing jti");
   }
 
   const [session] = await db
