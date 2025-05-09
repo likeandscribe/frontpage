@@ -64,3 +64,16 @@ This can happen when the cert expires and Caddy needs to regenerate a new one. C
 ```
 docker-compose restart caddy
 ```
+
+### 502 Bad Gateway error on the Cloudflare tunnel
+
+Check your next.js dev server is running on port 3000.
+
+On windows this can happen after an update. Try running the following in an admin powershell after quitting docker and anything using WSL:
+
+```powershell
+wsl --shutdown
+netsh int ip reset all
+```
+
+Then restart your machine and try again.
