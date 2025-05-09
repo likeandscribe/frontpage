@@ -1,4 +1,3 @@
-import { NewComment } from "./_lib/comment-client";
 import { Comment } from "./_lib/comment";
 import { getCommentsForPost } from "@/lib/data/db/comment";
 import { type Metadata } from "next";
@@ -49,9 +48,7 @@ export default async function Post(props: { params: Promise<PostPageParams> }) {
         collection={nsids.FyiUnravelFrontpagePost}
         rkey={post.rkey}
       />
-      {post.status === "live" ? (
-        <NewComment postRkey={post.rkey} postAuthorDid={authorDid} />
-      ) : null}
+
       <div className="flex flex-col gap-6">
         {getCommentsForPost(post.id).then((comments) =>
           comments.map((comment) => (
