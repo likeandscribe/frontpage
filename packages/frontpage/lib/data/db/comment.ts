@@ -181,11 +181,16 @@ const findCommentSubtree = (
   return null;
 };
 
-export const getComment = cache(async (rkey: string) => {
+export const getComment = cache(async (authorDid: DID, rkey: string) => {
   const rows = await db
     .select()
     .from(schema.Comment)
-    .where(eq(schema.Comment.rkey, rkey))
+    .where(
+      and(
+        eq(schema.Comment.authorDid, authorDid),
+        eq(schema.Comment.rkey, rkey),
+      ),
+    )
     .limit(1);
 
   return rows[0] ?? null;
