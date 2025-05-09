@@ -14,17 +14,24 @@ import { invariant } from "@/lib/utils";
 import { nsids } from "@/lib/data/atproto/repo";
 
 export async function createCommentAction(
-  input: { parentRkey?: string; postRkey: string; postAuthorDid: DID },
+  input: {
+    parent?: {
+      rkey: string;
+      did: DID;
+    };
+    postRkey: string;
+    postAuthorDid: DID;
+  },
   _prevState: unknown,
   formData: FormData,
 ) {
   const content = formData.get("comment") as string;
   const user = await ensureUser();
 
-  const [post, comment] = await Promise.all([
+  const [post, parent] = await Promise.all([
     getPost(input.postAuthorDid, input.postRkey),
-    input.parentRkey
-      ? getComment(input.parentRkey).then((c) => {
+    input.parent
+      ? getComment(input.parent.did, input.parent.rkey).then((c) => {
           if (!c) throw new Error("Comment not found");
           return c;
         })
@@ -41,7 +48,7 @@ export async function createCommentAction(
   invariant(post.cid, "Post cid is missing");
 
   await createComment({
-    parent: comment,
+    parent,
     post: {
       authorDid: post.authorDid,
       rkey: post.rkey,

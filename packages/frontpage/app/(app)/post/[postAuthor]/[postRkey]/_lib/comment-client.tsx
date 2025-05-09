@@ -144,7 +144,7 @@ export function CommentClientWrapperWithToolbar({
       {showNewComment ? (
         <NewComment
           textAreaRef={newCommentTextAreaRef}
-          parentRkey={rkey}
+          parent={{ rkey, did: authorDid }}
           postRkey={postRkey}
           postAuthorDid={postAuthorDid}
           // eslint-disable-next-line jsx-a11y/no-autofocus
@@ -225,14 +225,14 @@ export function NestComment({
 
 export function NewComment({
   autoFocus = false,
-  parentRkey,
+  parent,
   postRkey,
   postAuthorDid,
   extraButton,
   textAreaRef,
   onActionDone,
 }: {
-  parentRkey?: string;
+  parent?: { did: DID; rkey: string };
   postRkey: string;
   postAuthorDid: DID;
   autoFocus?: boolean;
@@ -242,7 +242,7 @@ export function NewComment({
 }) {
   const [input, setInput] = useState("");
   const [_, action, isPending] = useActionState(
-    createCommentAction.bind(null, { parentRkey, postRkey, postAuthorDid }),
+    createCommentAction.bind(null, { parent, postRkey, postAuthorDid }),
     undefined,
   );
   const id = useId();
