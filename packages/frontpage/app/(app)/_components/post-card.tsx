@@ -102,14 +102,11 @@ export async function PostCard({
         </h2>
         <div className="flex flex-wrap text-gray-500 dark:text-gray-400 sm:gap-4">
           <div className="flex gap-2 flex-wrap md:flex-nowrap">
-            <div className="flex gap-2 items-center">
-              <span aria-hidden>•</span>
-              <UserHoverCard did={author} asChild>
-                <Link href={`/profile/${handle}`} className="hover:underline">
-                  by {handle}
-                </Link>
-              </UserHoverCard>
-            </div>
+            <UserHoverCard did={author} asChild>
+              <Link href={`/profile/${handle}`} className="hover:underline">
+                @{handle}
+              </Link>
+            </UserHoverCard>
           </div>
           <div className="w-full flex items-center justify-between gap-2 md:gap-4 sm:w-auto">
             <div className="flex gap-2">
