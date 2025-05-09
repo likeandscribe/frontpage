@@ -37,7 +37,9 @@ export async function generateMetadata(props: {
   };
 }
 
-export default async function Post(props: { params: Promise<PostPageParams> }) {
+export default async function PostPage(props: {
+  params: Promise<PostPageParams>;
+}) {
   const params = await props.params;
   const { post, authorDid } = await getPostPageData(params);
   const comments = await getCommentsForPost(post.id);

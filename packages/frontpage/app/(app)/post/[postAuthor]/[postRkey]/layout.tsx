@@ -12,7 +12,7 @@ type Params = {
   postAuthor: string;
 };
 
-export default async function Post(props: {
+export default async function PostLayout(props: {
   children: React.ReactNode;
   params: Promise<Params>;
 }) {
