@@ -40,6 +40,7 @@ export async function generateMetadata(props: {
 export default async function Post(props: { params: Promise<PostPageParams> }) {
   const params = await props.params;
   const { post, authorDid } = await getPostPageData(params);
+  const comments = await getCommentsForPost(post.id);
 
   return (
     <>
@@ -50,18 +51,16 @@ export default async function Post(props: { params: Promise<PostPageParams> }) {
       />
 
       <div className="flex flex-col gap-6">
-        {getCommentsForPost(post.id).then((comments) =>
-          comments.map((comment) => (
-            <Comment
-              key={comment.id}
-              comment={comment}
-              level={0}
-              postAuthorParam={params.postAuthor}
-              postRkey={post.rkey}
-              allowReply={post.status === "live"}
-            />
-          )),
-        )}
+        {comments.map((comment) => (
+          <Comment
+            key={comment.id}
+            comment={comment}
+            level={0}
+            postAuthorParam={params.postAuthor}
+            postRkey={post.rkey}
+            allowReply={post.status === "live"}
+          />
+        ))}
       </div>
     </>
   );
