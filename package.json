@@ -6,10 +6,5 @@
     "prettier": "^3.5.3",
     "turbo": "2.5.0",
     "typescript": "catalog:"
-  },
-  "pnpm": {
-    "onlyBuiltDependencies": [
-      "@vercel/speed-insights"
-    ]
   }
 }
