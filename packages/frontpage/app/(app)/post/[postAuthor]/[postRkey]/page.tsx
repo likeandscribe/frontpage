@@ -6,6 +6,8 @@ import { getVerifiedHandle } from "@/lib/data/atproto/identity";
 import { type PostPageParams, getPostPageData } from "./_lib/page-data";
 import { LinkAlternateAtUri } from "@/lib/components/link-alternate-at";
 import { nsids } from "@/lib/data/atproto/repo";
+import { Suspense } from "react";
+import { Skeleton } from "@/lib/components/ui/skeleton";
 
 export async function generateMetadata(props: {
   params: Promise<PostPageParams>;
@@ -41,7 +43,6 @@ export async function generateMetadata(props: {
 export default async function Post(props: { params: Promise<PostPageParams> }) {
   const params = await props.params;
   const { post, authorDid } = await getPostPageData(params);
-  const comments = await getCommentsForPost(post.id);
 
   return (
     <>
@@ -53,18 +54,33 @@ export default async function Post(props: { params: Promise<PostPageParams> }) {
       {post.status === "live" ? (
         <NewComment postRkey={post.rkey} postAuthorDid={authorDid} />
       ) : null}
-      <div className="flex flex-col gap-6">
-        {comments.map((comment) => (
-          <Comment
-            key={comment.id}
-            comment={comment}
-            level={0}
-            postAuthorParam={params.postAuthor}
-            postRkey={post.rkey}
-            allowReply={post.status === "live"}
-          />
-        ))}
-      </div>
+      <Suspense fallback={<CommentTreeFallback />}>
+        <div className="flex flex-col gap-6">
+          {getCommentsForPost(post.id).then((comments) =>
+            comments.map((comment) => (
+              <Comment
+                key={comment.id}
+                comment={comment}
+                level={0}
+                postAuthorParam={params.postAuthor}
+                postRkey={post.rkey}
+                allowReply={post.status === "live"}
+              />
+            )),
+          )}
+        </div>
+      </Suspense>
     </>
+  );
+}
+
+function CommentTreeFallback() {
+  return (
+    <div className="flex flex-col gap-6">
+      {Array.from({ length: 3 }).map((_, i) => (
+        // eslint-disable-next-line react/no-array-index-key
+        <Skeleton key={i} className="h-12 w-full" />
+      ))}
+    </div>
   );
 }
