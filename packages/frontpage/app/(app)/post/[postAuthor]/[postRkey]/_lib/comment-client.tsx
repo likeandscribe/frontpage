@@ -21,13 +21,19 @@ import {
   deleteCommentAction,
   reportCommentAction,
 } from "./actions";
-import { ChatBubbleIcon, TrashIcon } from "@radix-ui/react-icons";
+import {
+  ChatBubbleIcon,
+  TrashIcon,
+  ExclamationTriangleIcon,
+} from "@radix-ui/react-icons";
 import {
   useActionState,
   useRef,
   useState,
   useId,
   startTransition,
+  type ReactNode,
+  Suspense,
 } from "react";
 import {
   VoteButton,
@@ -44,6 +50,9 @@ import { DeleteButton } from "@/app/(app)/_components/delete-button";
 import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 import { ShareDropdownButton } from "@/app/(app)/_components/share-button";
+import { useRecordStatus } from "@/lib/components/record-status";
+import { ids as nsids } from "@repo/frontpage-atproto-client/lexicons";
+import { ErrorBoundary } from "react-error-boundary";
 
 const commentVariants = cva(undefined, {
   variants: {
@@ -302,5 +311,73 @@ export function NewComment({
         </div>
       </div>
     </form>
+  );
+}
+
+export function CommentStatus({
+  did,
+  rkey,
+  whenLive,
+}: {
+  did: DID;
+  rkey: string;
+  whenLive: ReactNode;
+}) {
+  return (
+    <ErrorBoundary
+      fallback={
+        <CommentStatusError
+          message={
+            "An error occurred while loading the comment status, try refreshing the page."
+          }
+        />
+      }
+    >
+      <Suspense fallback={<CommentStatusPending />}>
+        <CommentStatusInner did={did} rkey={rkey} whenLive={whenLive} />
+      </Suspense>
+    </ErrorBoundary>
+  );
+}
+
+function CommentStatusInner({
+  did,
+  rkey,
+  whenLive,
+}: {
+  did: DID;
+  rkey: string;
+  whenLive: ReactNode;
+}) {
+  const status = useRecordStatus(
+    `at://${did}/${nsids.FyiUnravelFrontpageComment}/${rkey}`,
+  );
+
+  if (status === "pending") {
+    return <CommentStatusPending />;
+  }
+
+  if (status !== "live") {
+    return <CommentStatusError message={`Comment status is ${status}`} />;
+  }
+
+  return whenLive;
+}
+
+function CommentStatusError({ message }: { message: string }) {
+  return (
+    <SimpleTooltip content={message}>
+      <ExclamationTriangleIcon className="w-4 h-4" aria-label={message} />
+    </SimpleTooltip>
+  );
+}
+
+function CommentStatusPending() {
+  const pendingCommentMsg =
+    "Travelling through the atmosphere. Will appear for others soon.";
+  return (
+    <SimpleTooltip content={pendingCommentMsg}>
+      <Spinner aria-label={pendingCommentMsg} />
+    </SimpleTooltip>
   );
 }

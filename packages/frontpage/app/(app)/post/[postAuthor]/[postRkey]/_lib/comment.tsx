@@ -2,6 +2,7 @@ import { getUser } from "@/lib/data/user";
 import {
   CommentClientWrapperWithToolbar,
   type CommentLevel,
+  CommentStatus,
   NestComment,
 } from "./comment-client";
 import { type CommentModel, shouldHideComment } from "@/lib/data/db/comment";
@@ -14,8 +15,6 @@ import {
 } from "@/lib/data/atproto/identity";
 import { UserHoverCard } from "@/lib/components/user-hover-card";
 import { cn } from "@/lib/utils";
-import { Spinner } from "@/lib/components/ui/spinner";
-import { SimpleTooltip } from "@/lib/components/ui/tooltip";
 
 type CommentProps = {
   comment: CommentModel;
@@ -43,9 +42,6 @@ export async function Comment({ comment, level, ...props }: CommentProps) {
 
   return <DeletedComment {...props} level={level} comment={comment} />;
 }
-
-const PENDING_COMMENT_COPY =
-  "Travelling through the atmosphere. Will appear for others soon.";
 
 async function LiveComment({
   comment,
@@ -97,18 +93,18 @@ async function LiveComment({
               <div className="font-medium">@{handle}</div>
             </Link>
           </UserHoverCard>
-          {comment.status === "pending" ? (
-            <SimpleTooltip content={PENDING_COMMENT_COPY}>
-              <Spinner aria-label={PENDING_COMMENT_COPY} />
-            </SimpleTooltip>
-          ) : (
-            <Link
-              href={commentHref}
-              className="text-gray-500 text-xs dark:text-gray-400 hover:underline"
-            >
-              <TimeAgo createdAt={comment.createdAt} side="bottom" />
-            </Link>
-          )}
+          <CommentStatus
+            whenLive={
+              <Link
+                href={commentHref}
+                className="text-gray-500 text-xs dark:text-gray-400 hover:underline"
+              >
+                <TimeAgo createdAt={comment.createdAt} side="bottom" />
+              </Link>
+            }
+            did={comment.authorDid}
+            rkey={comment.rkey}
+          />
         </div>
         {comment.body ? <CommentBody body={comment.body} /> : null}
       </CommentClientWrapperWithToolbar>

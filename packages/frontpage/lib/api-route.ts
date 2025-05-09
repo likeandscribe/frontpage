@@ -27,6 +27,11 @@ export function badRequest(message: string, init?: RequestInit): never {
   throw new ResponseError(new Response(message, { ...init, status: 400 }));
 }
 
+export function unauthorized(message: string, init?: RequestInit): never {
+  // eslint-disable-next-line @typescript-eslint/only-throw-error
+  throw new ResponseError(new Response(message, { ...init, status: 401 }));
+}
+
 export function createApiRoute<JsonBody>(
   handler: (request: Request, ctx: Context) => JsonBody | Promise<JsonBody>,
 ) {
