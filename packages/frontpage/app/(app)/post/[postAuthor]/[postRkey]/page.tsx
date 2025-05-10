@@ -1,4 +1,3 @@
-import { NewComment } from "./_lib/comment-client";
 import { Comment } from "./_lib/comment";
 import { getCommentsForPost } from "@/lib/data/db/comment";
 import { type Metadata } from "next";
@@ -38,23 +37,19 @@ export async function generateMetadata(props: {
   };
 }
 
-export default async function Post(props: { params: Promise<PostPageParams> }) {
+export default async function PostPage(props: {
+  params: Promise<PostPageParams>;
+}) {
   const params = await props.params;
   const { post, authorDid } = await getPostPageData(params);
   const comments = await getCommentsForPost(post.id);
 
   return (
-    <>
-      <LinkAlternateAtUri
-        authority={authorDid}
-        collection={nsids.FyiUnravelFrontpagePost}
-        rkey={post.rkey}
-      />
-      {post.status === "live" ? (
-        <NewComment postRkey={post.rkey} postAuthorDid={authorDid} />
-      ) : null}
-      <div className="flex flex-col gap-6">
-        {comments.map((comment) => (
+    <div className="flex flex-col gap-6">
+      {comments.length === 0 ? (
+        <p className="text-center text-gray-400 my-8">No comments yet!</p>
+      ) : (
+        comments.map((comment) => (
           <Comment
             key={comment.id}
             comment={comment}
@@ -63,8 +58,8 @@ export default async function Post(props: { params: Promise<PostPageParams> }) {
             postRkey={post.rkey}
             allowReply={post.status === "live"}
           />
-        ))}
-      </div>
-    </>
+        ))
+      )}
+    </div>
   );
 }
