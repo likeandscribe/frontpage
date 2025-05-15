@@ -45,21 +45,29 @@ export default async function PostPage(props: {
   const comments = await getCommentsForPost(post.id);
 
   return (
-    <div className="flex flex-col gap-6">
-      {comments.length === 0 ? (
-        <p className="text-center text-gray-400 my-8">No comments yet!</p>
-      ) : (
-        comments.map((comment) => (
-          <Comment
-            key={comment.id}
-            comment={comment}
-            level={0}
-            postAuthorParam={params.postAuthor}
-            postRkey={post.rkey}
-            allowReply={post.status === "live"}
-          />
-        ))
-      )}
-    </div>
+    <>
+      <LinkAlternateAtUri
+        authority={authorDid}
+        collection={nsids.FyiUnravelFrontpagePost}
+        rkey={post.rkey}
+      />
+
+      <div className="flex flex-col gap-6">
+        {comments.length === 0 ? (
+          <p className="text-center text-gray-400 my-8">No comments yet!</p>
+        ) : (
+          comments.map((comment) => (
+            <Comment
+              key={comment.id}
+              comment={comment}
+              level={0}
+              postAuthorParam={params.postAuthor}
+              postRkey={post.rkey}
+              allowReply={post.status === "live"}
+            />
+          ))
+        )}
+      </div>
+    </>
   );
 }
