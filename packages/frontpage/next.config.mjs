@@ -12,8 +12,6 @@ const nextConfig = {
     reactCompiler: true,
   },
 
-  productionBrowserSourceMaps: true,
-
   rewrites: () => [
     {
       source: "/.well-known/security.txt",
