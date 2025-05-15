@@ -5,13 +5,14 @@ import { getPost } from "@/lib/data/db/post";
 import { getDidFromHandleOrDid } from "@/lib/data/atproto/identity";
 import { Alert, AlertTitle, AlertDescription } from "@/lib/components/ui/alert";
 import { Spinner } from "@/lib/components/ui/spinner";
+import { NewComment } from "./_lib/comment-client";
 
 type Params = {
   postRkey: string;
   postAuthor: string;
 };
 
-export default async function Post(props: {
+export default async function PostLayout(props: {
   children: React.ReactNode;
   params: Promise<Params>;
 }) {
@@ -61,6 +62,9 @@ export default async function Post(props: {
             Deleted posts cannot receive new comments.
           </AlertDescription>
         </Alert>
+      ) : null}
+      {post.status === "live" ? (
+        <NewComment postRkey={post.rkey} postAuthorDid={post.authorDid} />
       ) : null}
       {children}
     </main>
