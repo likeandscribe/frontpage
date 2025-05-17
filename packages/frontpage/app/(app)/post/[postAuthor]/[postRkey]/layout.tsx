@@ -6,6 +6,7 @@ import { getDidFromHandleOrDid } from "@/lib/data/atproto/identity";
 import { Alert, AlertTitle, AlertDescription } from "@/lib/components/ui/alert";
 import { Spinner } from "@/lib/components/ui/spinner";
 import { NewComment } from "./_lib/comment-client";
+import { SuperHackyScrollToTop } from "./scroller";
 
 type Params = {
   postRkey: string;
@@ -32,6 +33,8 @@ export default async function PostLayout(props: {
 
   return (
     <main className="mx-auto max-w-4xl space-y-6">
+      {/* This is needed to work around some next.js weirdness where sometimes you're not scrolled to the top of the page when navigating to the comments page. */}
+      <SuperHackyScrollToTop />
       <PostCard
         author={post.authorDid}
         createdAt={post.createdAt}

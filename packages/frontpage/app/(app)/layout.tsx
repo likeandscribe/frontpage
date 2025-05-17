@@ -65,7 +65,7 @@ export default async function Layout({
         </div>
       </div>
 
-      <main className="mb-6">{children}</main>
+      <div className="mb-6">{children}</div>
 
       <footer className="flex justify-between items-center text-gray-500 dark:text-gray-400">
         <p>
