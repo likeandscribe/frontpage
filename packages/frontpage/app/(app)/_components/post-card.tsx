@@ -100,46 +100,38 @@ export async function PostCard({
             </span>
           </a>
         </h2>
-        <div className="flex flex-wrap text-gray-500 dark:text-gray-400 sm:gap-4">
-          <div className="flex gap-2 flex-wrap md:flex-nowrap">
+        <div className="flex flex-nowrap text-gray-500 dark:text-gray-400 sm:gap-4 justify-between">
+          <div className="flex flex-wrap items-center gap-x-4">
             <UserHoverCard did={author} asChild>
               <Link href={`/profile/${handle}`} className="hover:underline">
                 @{handle}
               </Link>
             </UserHoverCard>
-          </div>
-          <div className="w-full flex items-center justify-between gap-2 md:gap-4 sm:w-auto">
-            <div className="flex gap-2">
-              <span aria-hidden>•</span>
-              <TimeAgo createdAt={createdAt} side="bottom" />
-            </div>
-            <div className="flex gap-2">
-              <span aria-hidden>•</span>
-              <Link href={postHref} className="hover:underline">
-                {commentCount} comments
-              </Link>
-            </div>
+            {/* <span aria-hidden>•</span> */}
+            <TimeAgo createdAt={createdAt} side="bottom" />
+            {/* <span aria-hidden>•</span> */}
+            <Link href={postHref} className="hover:underline">
+              {commentCount} comments
+            </Link>
           </div>
 
           {user ? (
-            <div className="ml-auto">
-              <EllipsisDropdown aria-label="Post actions">
-                <ShareDropdownButton path={postHref} />
-                <ReportDialogDropdownButton
-                  reportAction={reportPostAction.bind(null, {
-                    rkey,
-                    cid,
-                    author,
-                  })}
+            <EllipsisDropdown aria-label="Post actions">
+              <ShareDropdownButton path={postHref} />
+              <ReportDialogDropdownButton
+                reportAction={reportPostAction.bind(null, {
+                  rkey,
+                  cid,
+                  author,
+                })}
+              />
+              {/* TODO: there's a bug here where delete shows on deleted posts */}
+              {user?.did === author ? (
+                <DeleteButton
+                  deleteAction={deletePostAction.bind(null, rkey)}
                 />
-                {/* TODO: there's a bug here where delete shows on deleted posts */}
-                {user?.did === author ? (
-                  <DeleteButton
-                    deleteAction={deletePostAction.bind(null, rkey)}
-                  />
-                ) : null}
-              </EllipsisDropdown>
-            </div>
+              ) : null}
+            </EllipsisDropdown>
           ) : null}
         </div>
       </div>
