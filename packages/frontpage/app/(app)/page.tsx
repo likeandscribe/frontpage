@@ -1,10 +1,10 @@
-import { unstable_noStore } from "next/cache";
+import { connection } from "next/server";
 import { InfiniteList } from "@/lib/infinite-list";
 import { getFrontpagePosts } from "@/lib/data/db/post";
 import { PostCard } from "./_components/post-card";
 
 export default async function Home() {
-  unstable_noStore();
+  await connection();
 
   // Calling an action directly is not recommended in the doc but here we do it as a DRY shortcut.
   const initialData = await getMorePostsAction(0);

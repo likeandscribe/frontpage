@@ -1,6 +1,6 @@
 import type { DID } from "@/lib/data/atproto/did";
 import { getUserPosts } from "@/lib/data/db/post";
-import { unstable_noStore } from "next/cache";
+import { connection } from "next/server";
 import { notFound } from "next/navigation";
 import { PostCard } from "../../_components/post-card";
 import { UserAvatar } from "@/lib/components/user-avatar";
@@ -57,8 +57,8 @@ export async function generateMetadata(props: {
 }
 
 export default async function Profile(props: { params: Promise<Params> }) {
+  await connection();
   const params = await props.params;
-  unstable_noStore();
   const did = await getDidFromHandleOrDid(params.user);
   if (!did) {
     notFound();
