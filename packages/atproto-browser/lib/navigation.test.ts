@@ -26,9 +26,9 @@ const PATH_SUFFIXES = [
   "/collection/rkey",
 ];
 
-const makeValidCases = (authority: string) =>
+const makeValidCases = (authority: string, expectedAuthority?: string) =>
   PATH_SUFFIXES.flatMap((suffix) => {
-    const result = `/at/${authority}${suffix}`;
+    const result = `/at/${expectedAuthority ?? authority}${suffix}`;
     return [
       [`${authority}${suffix}`, result],
       [`at://${authority}${suffix}`, result],
@@ -39,11 +39,12 @@ const VALID_CASES = [
   ...makeValidCases("example.com"),
   ...makeValidCases("did:plc:hello"),
   ...makeValidCases("did:web:hello"),
-  // Unicode should be preserved, we handle punycode transformation within the fetch of the page not on navigation
-  ...makeValidCases("mañana.com"),
+  // Unicode should be uri encode but preserved, we handle punycode transformation within the fetch of the page not on navigation
+  ...makeValidCases("mañana.com", "ma%C3%B1ana.com"),
+  ...makeValidCases("ma%C3%B1ana.com"),
 
   ["@example.com", "/at/example.com"],
-  ["@mañana.com", "/at/mañana.com"],
+  ["@mañana.com", "/at/ma%C3%B1ana.com"],
 
   // Not sure about this case. Are bare hosts supported in the spec? For now we allow it to error out at a later stage
   ["host", "/at/host"],
