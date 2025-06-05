@@ -19,9 +19,11 @@ export async function navigateAtUri(input: string) {
 
   if (handle) {
     redirect(
-      getAtUriPath({
-        host: handle,
-      }),
+      encodeURI(
+        getAtUriPath({
+          host: handle,
+        }),
+      ),
     );
   } else if (sanitizedInput.startsWith("@")) {
     return {
@@ -41,7 +43,7 @@ export async function navigateAtUri(input: string) {
     return result;
   }
 
-  redirect(getAtUriPath(result.uri));
+  redirect(encodeURI(getAtUriPath(result.uri)));
 }
 
 /**
