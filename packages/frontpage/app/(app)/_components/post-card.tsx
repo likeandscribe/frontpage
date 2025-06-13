@@ -91,7 +91,7 @@ export async function PostCard({
         <h2 className="mb-1 text-xl">
           <a
             href={url}
-            rel="ugc"
+            rel="ugc noopener"
             className="hover:underline flex flex-wrap items-center gap-x-2"
           >
             {title}{" "}
