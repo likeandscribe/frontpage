@@ -8,23 +8,23 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.3.1",
-    "@eslint/js": "^9.25.1",
+    "@eslint/js": "^9.31.0",
     "@next/eslint-plugin-next": "catalog:",
     "@repo/typescript-config": "workspace:*",
     "@types/eslint-plugin-jsx-a11y": "^6.10.0",
     "@types/node": "catalog:",
     "@types/react": "catalog:",
-    "@typescript-eslint/utils": "^8.31.1",
+    "@typescript-eslint/utils": "^8.37.0",
     "eslint": "catalog:",
     "eslint-config-next": "catalog:",
-    "eslint-config-turbo": "^2.5.2",
+    "eslint-config-turbo": "^2.5.4",
     "eslint-plugin-jsx-a11y": "^6.10.2",
     "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-react-compiler": "19.0.0-beta-ebf51a3-20250411",
     "eslint-plugin-react-hooks": "^5.2.0",
     "react": "catalog:",
     "typescript": "catalog:",
-    "typescript-eslint": "^8.31.1"
+    "typescript-eslint": "^8.37.0"
   },
   "peerDependencies": {
     "eslint": "catalog:"

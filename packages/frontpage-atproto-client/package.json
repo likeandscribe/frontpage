@@ -19,17 +19,17 @@
     "build": "tsc"
   },
   "dependencies": {
-    "@atproto/lexicon": "^0.4.10",
+    "@atproto/lexicon": "^0.4.12",
     "@atproto/xrpc": "^0.6.12",
-    "multiformats": "^13.3.2"
+    "multiformats": "^13.3.7"
   },
   "devDependencies": {
-    "@atproto/lex-cli": "^0.8.0",
+    "@atproto/lex-cli": "^0.8.3",
     "@repo/typescript-config": "workspace:*",
     "@types/adm-zip": "^0.5.7",
     "@types/node": "catalog:",
     "adm-zip": "^0.5.16",
-    "tsx": "^4.19.4",
+    "tsx": "^4.20.3",
     "typescript": "catalog:"
   }
 }
