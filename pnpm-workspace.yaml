@@ -2,13 +2,13 @@ packages:
   - "packages/*"
 
 catalog:
-  next: ^15.3.1
-  eslint-config-next: ^15.3.1
-  '@next/eslint-plugin-next': ^15.3.1
+  next: ^15.4.0
+  eslint-config-next: ^15.4.0
+  "@next/eslint-plugin-next": ^15.4.0
   react: ^19.0.0
   react-dom: ^19.0.0
-  '@types/react': ^19
-  '@types/react-dom': ^19
+  "@types/react": ^19
+  "@types/react-dom": ^19
   typescript: ^5.8.3
   eslint: ^9
-  '@types/node': ^22
+  "@types/node": ^22
