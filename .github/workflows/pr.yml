@@ -6,6 +6,18 @@ env:
   TURBO_SCM_BASE: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.event.before }}
 
 jobs:
+  formatting:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+
+      - run: pnpm i
+
+      - run: pnpm exec prettier --check .
+
   test:
     runs-on: ubuntu-latest
     steps:
