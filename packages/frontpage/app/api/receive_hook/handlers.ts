@@ -9,9 +9,10 @@ import * as dbVote from "@/lib/data/db/vote";
 import { getBlueskyProfile } from "@/lib/data/user";
 import { sendDiscordMessage } from "@/lib/discord";
 import { invariant } from "@/lib/utils";
+import type z from "zod";
 
 type HandlerInput = {
-  op: Zod.infer<typeof Operation>;
+  op: z.infer<typeof Operation>;
   repo: DID;
   rkey: string;
 };
