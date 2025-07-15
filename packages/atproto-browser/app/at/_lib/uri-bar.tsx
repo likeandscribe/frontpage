@@ -15,7 +15,7 @@ export function UriBar() {
 
   const uri =
     pathname === "/at"
-      ? searchParams.get("u") ?? undefined
+      ? (searchParams.get("u") ?? undefined)
       : `at://${[params.identifier, params.collection, params.rkey]
           .map((c) => c && decodeURIComponent(c))
           .filter(Boolean)

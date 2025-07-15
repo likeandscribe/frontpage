@@ -1,24 +1,22 @@
 atproto-browser:
   - changed-files:
-    - any-glob-to-any-file: packages/atproto-browser/**
+      - any-glob-to-any-file: packages/atproto-browser/**
 
 frontpage:
   - changed-files:
-    - any-glob-to-any-file: packages/frontpage/**
+      - any-glob-to-any-file: packages/frontpage/**
 
 drainpipe:
   - changed-files:
-    - any-glob-to-any-file: packages-rs/**
+      - any-glob-to-any-file: packages-rs/**
 
-# Add 'documentation' label to any change to .md files within the entire repository 
+# Add 'documentation' label to any change to .md files within the entire repository
 documentation:
   - changed-files:
-    - any-glob-to-any-file: '**/*.md'
+      - any-glob-to-any-file: "**/*.md"
 
 enhancement:
-  - head-branch: ['^feature', 'feature', '^feat', 'feat']
+  - head-branch: ["^feature", "feature", "^feat", "feat"]
 
 fix:
-  - head-branch: ['^fix', 'fix'] 
-
-
+  - head-branch: ["^fix", "fix"]

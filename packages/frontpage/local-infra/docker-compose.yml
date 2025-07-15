@@ -22,7 +22,7 @@ services:
     image: ghcr.io/bluesky-social/pds:0.4
     restart: unless-stopped
     ports:
-      - '4001:3000'
+      - "4001:3000"
     volumes:
       - pds:/pds
     env_file:
@@ -33,7 +33,7 @@ services:
     container_name: plc
     restart: unless-stopped
     ports:
-      - '4000:8080'
+      - "4000:8080"
     depends_on:
       - plc_db
     environment:
@@ -53,7 +53,7 @@ services:
       - POSTGRES_USER=pg
       - POSTGRES_PASSWORD=password
     ports:
-      - '5433:5432'
+      - "5433:5432"
     volumes:
       - plc:/var/lib/postgresql/data
 
@@ -77,7 +77,7 @@ services:
     container_name: turso_dev
     build: ./turso
     ports:
-      - '4002:8080'
+      - "4002:8080"
     volumes:
       - turso:/var/lib/sqld
 

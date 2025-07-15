@@ -170,7 +170,7 @@ export async function signIn(input: SignInInput) {
   await db.insert(schema.OauthAuthRequest).values({
     did:
       "identifier" in input
-        ? (await getDidFromHandleOrDid(input.identifier)) ?? ""
+        ? ((await getDidFromHandleOrDid(input.identifier)) ?? "")
         : "",
     iss: authServer.issuer,
     username: "identifier" in input ? input.identifier : "",

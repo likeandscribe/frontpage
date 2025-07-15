@@ -1,0 +1,3 @@
+pnpm-lock.yaml
+packages/frontpage/drizzle/meta
+**/dist/**
