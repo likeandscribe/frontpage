@@ -3,7 +3,7 @@
   "private": true,
   "packageManager": "pnpm@10.9.0",
   "devDependencies": {
-    "prettier": "^3.5.3",
+    "prettier": "^3.6.2",
     "turbo": "2.5.0",
     "typescript": "catalog:"
   }
