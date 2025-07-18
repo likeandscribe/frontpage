@@ -10,6 +10,7 @@ const nextConfig = {
   },
   experimental: {
     reactCompiler: true,
+    devtoolSegmentExplorer: true
   },
 
   rewrites: () => [
