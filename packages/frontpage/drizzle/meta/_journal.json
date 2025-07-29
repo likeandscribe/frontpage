@@ -50,6 +50,13 @@
       "when": 1744475828986,
       "tag": "0006_thankful_namorita",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "6",
+      "when": 1753794880462,
+      "tag": "0007_slimy_mephistopheles",
+      "breakpoints": true
     }
   ]
 }
