@@ -15,6 +15,7 @@ import {
   MAX_POST_URL_LENGTH,
 } from "./data/db/constants";
 import { type ColumnBaseConfig, sql } from "drizzle-orm";
+import { AUTH_SCOPES } from "@repo/frontpage-oauth";
 
 const did = customType<{ data: DID }>({
   dataType() {
@@ -225,6 +226,7 @@ export const OauthSession = sqliteTable("oauth_sessions", {
   dpopPublicJwk: text("dpop_public_jwk").notNull(),
   expiresAt: dateIsoText("expires_at").notNull(),
   createdAt: dateIsoText("created_at").notNull(),
+  scope: text("scope").notNull().default(AUTH_SCOPES),
 });
 
 export const ModerationEvent = sqliteTable("moderation_events", {
