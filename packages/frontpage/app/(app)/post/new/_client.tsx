@@ -7,6 +7,7 @@ import { Input } from "@/lib/components/ui/input";
 import { Button } from "@/lib/components/ui/button";
 import { Alert, AlertDescription, AlertTitle } from "@/lib/components/ui/alert";
 import { Spinner } from "@/lib/components/ui/spinner";
+import { grabTitle } from "@/lib/utils";
 import {
   MAX_POST_TITLE_LENGTH,
   MAX_POST_URL_LENGTH,
@@ -57,8 +58,11 @@ export function NewPostForm({
           id={`${id}-url`}
           type="url"
           value={url}
-          onChange={(e) => {
-            setUrl(e.currentTarget.value);
+          onChange={async (e) => {
+            const url = e.currentTarget.value
+            const title = await grabTitle(url)
+            setTitle(title)
+            setUrl(url);
           }}
         />
         <InputLengthIndicator
