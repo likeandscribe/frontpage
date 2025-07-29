@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { ReauthenticateForm } from "./_lib/reauthenticate-form";
 import { Button } from "@/lib/components/ui/button";
 import { revalidatePath } from "next/cache";
+import { UserAvatar } from "@/lib/components/user-avatar";
 
 export default async function LoginPage({
   searchParams,
@@ -38,18 +39,22 @@ export default async function LoginPage({
           have the latest permissions to access your data.
         </p>
       </div>
-      <ReauthenticateForm />
-      <form
-        action={async () => {
-          "use server";
-          await signOut();
-          revalidatePath("/", "layout");
-        }}
-      >
-        <Button size="lg" variant="secondary" className="w-full mt-4">
-          Logout
-        </Button>
-      </form>
+      <div>
+        <ReauthenticateForm
+          avatar={<UserAvatar did={session.user.did} size="smedium" />}
+        />
+        <form
+          action={async () => {
+            "use server";
+            await signOut();
+            revalidatePath("/", "layout");
+          }}
+        >
+          <Button size="lg" variant="secondary" className="w-full mt-4">
+            Logout
+          </Button>
+        </form>
+      </div>
     </>
   );
 }
