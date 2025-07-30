@@ -39,24 +39,6 @@ export async function middleware(request: NextRequest) {
       return NextResponse.next();
     }
 
-    const requestUrl = new URL(request.url);
-    // If the current session has different scopes than the AUTH_SCOPES, redirect to reauthenticate
-    // Don't redirect if the request is for the reauthenticate page or oauth callback
-    if (
-      requestUrl.pathname !== "/reauthenticate" &&
-      requestUrl.pathname.startsWith("/oauth/") &&
-      session.user.scope !== AUTH_SCOPES
-    ) {
-      // Redirect to page to ask for re-authentication
-      const redirectUrl = new URL("/reauthenticate", request.url);
-      redirectUrl.searchParams.set("redirect", request.nextUrl.pathname);
-      console.log(redirectUrl);
-      return NextResponse.redirect(redirectUrl, {
-        status: 307,
-        headers: NextResponse.next().headers,
-      });
-    }
-
     const authServer = await processDiscoveryResponse(
       new URL(session.user.iss),
       await oauthDiscoveryRequest(new URL(session.user.iss)),
