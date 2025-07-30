@@ -37,6 +37,7 @@ export async function middleware(request: NextRequest) {
     if (!session) {
       return NextResponse.next();
     }
+
     const authServer = await processDiscoveryResponse(
       new URL(session.user.iss),
       await oauthDiscoveryRequest(new URL(session.user.iss)),
