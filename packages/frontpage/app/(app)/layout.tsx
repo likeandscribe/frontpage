@@ -30,6 +30,8 @@ import {
   DialogTrigger,
 } from "@/lib/components/ui/dialog";
 import { NewPostForm } from "./post/new/_client";
+import { AUTH_SCOPES } from "@repo/frontpage-oauth";
+import { redirect } from "next/navigation";
 
 export default async function Layout({
   children,
@@ -37,6 +39,13 @@ export default async function Layout({
   children: React.ReactNode;
 }) {
   const session = await getSession();
+
+  // If the current session has different scopes than the AUTH_SCOPES, redirect to reauthenticate
+  // Don't redirect if the request is for the reauthenticate page or oauth callback
+  if (session && session.user.scope !== AUTH_SCOPES) {
+    redirect("/reauthenticate");
+  }
+
   return (
     <div className="container mx-auto px-4 md:px-6 pt-4 pb-8 md:py-12 max-w-3xl">
       <div className="flex place-content-between items-center mb-8">
