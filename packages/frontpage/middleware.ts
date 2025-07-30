@@ -17,7 +17,6 @@ import {
   getAuthCookie,
   setAuthCookie,
 } from "./lib/auth";
-import { AUTH_SCOPES } from "@repo/frontpage-oauth";
 
 export async function middleware(request: NextRequest) {
   const cookieJwt = await getAuthCookie();
