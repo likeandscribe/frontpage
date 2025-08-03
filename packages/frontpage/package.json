@@ -16,7 +16,7 @@
     "db:pull": "NODE_OPTIONS=--use-openssl-ca drizzle-kit pull",
     "test": "vitest",
     "type-check": "tsc --noEmit",
-    "generate-local-env": "tsx scripts/generate-local-env.mts"
+    "generate-local-env": "node scripts/generate-local-env.mts"
   },
   "dependencies": {
     "@atproto/common-web": "^0.3.2",
@@ -65,7 +65,6 @@
     "postcss": "^8.5.6",
     "require-in-the-middle": "7.4.0",
     "tailwindcss": "^3.4.17",
-    "tsx": "^4.20.3",
     "typescript": "catalog:",
     "vite-tsconfig-paths": "^4.3.2",
     "vitest": "^2.1.9"

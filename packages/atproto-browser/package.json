@@ -39,7 +39,6 @@
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
     "eslint": "catalog:",
-    "tsx": "^4.20.3",
     "typescript": "catalog:",
     "vite-tsconfig-paths": "^4.3.2",
     "vitest": "^2.1.9"

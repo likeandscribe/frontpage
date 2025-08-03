@@ -14,7 +14,7 @@
   },
   "scripts": {
     "format:write": "prettier --write src",
-    "fetch-lexicons": "tsx ./fetch-lexicons.mts",
+    "fetch-lexicons": "node ./fetch-lexicons.mts",
     "type-check": "tsc --noEmit",
     "build": "tsc"
   },
@@ -29,7 +29,6 @@
     "@types/adm-zip": "^0.5.7",
     "@types/node": "catalog:",
     "adm-zip": "^0.5.16",
-    "tsx": "^4.20.3",
     "typescript": "catalog:"
   }
 }
