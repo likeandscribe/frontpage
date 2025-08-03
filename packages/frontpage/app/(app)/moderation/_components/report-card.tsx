@@ -6,14 +6,90 @@ import {
   CardContent,
 } from "@/lib/components/ui/card";
 import { type DID } from "@/lib/data/atproto/did";
-import { type Report } from "@/lib/data/db/report";
-import { performModerationAction } from "../page";
+import { getReport, updateReport, type Report } from "@/lib/data/db/report";
 import { UserHandle } from "./user-handle";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
-import { getPostFromComment } from "@/lib/data/db/post";
+import { getPostFromComment, moderatePost } from "@/lib/data/db/post";
 import { getCommentLink, getPostLink } from "@/lib/navigation";
 import { nsids } from "@/lib/data/atproto/repo";
+import { ensureUser } from "@/lib/data/user";
+import {
+  createModerationEvent,
+  type ModerationEventDTO,
+} from "@/lib/data/db/moderation";
+import { moderateComment } from "@/lib/data/db/comment";
+import { moderateUser } from "@/lib/data/db/user";
+import { revalidatePath } from "next/cache";
+
+async function performModerationAction(
+  input: { reportId: number; status: "accepted" | "rejected" },
+  _: FormData,
+) {
+  "use server";
+  const user = await ensureUser();
+  const report = await getReport(input.reportId);
+
+  if (!report) {
+    throw new Error("Report not found");
+  }
+
+  const newModEvent: ModerationEventDTO = {
+    subjectUri: report.subjectUri,
+    subjectDid: report.subjectDid as DID,
+    createdBy: user.did as DID,
+    createdAt: new Date(),
+    labelsAdded: report.reportReason,
+    creatorReportReason: report.creatorComment,
+  };
+
+  if (report.subjectCollection) {
+    if (report.subjectCollection === nsids.FyiUnravelFrontpagePost) {
+      newModEvent.subjectCollection = nsids.FyiUnravelFrontpagePost;
+    } else if (report.subjectCollection === nsids.FyiUnravelFrontpageComment) {
+      newModEvent.subjectCollection = nsids.FyiUnravelFrontpageComment;
+    }
+
+    newModEvent.subjectRkey = report.subjectRkey;
+    newModEvent.subjectCid = report.subjectCid;
+  }
+
+  const modAction = async () => {
+    switch (report.subjectCollection) {
+      case nsids.FyiUnravelFrontpagePost:
+        return await moderatePost({
+          rkey: report.subjectRkey!,
+          authorDid: report.subjectDid as DID,
+          cid: report.subjectCid!,
+          hide: input.status === "accepted",
+        });
+
+      case nsids.FyiUnravelFrontpageComment:
+        return await moderateComment({
+          rkey: report.subjectRkey!,
+          authorDid: report.subjectDid as DID,
+          cid: report.subjectCid!,
+          hide: input.status === "accepted",
+        });
+
+      default:
+        return await moderateUser({
+          userDid: report.subjectDid as DID,
+          hide: input.status === "accepted",
+          label: report.reportReason,
+        });
+    }
+  };
+
+  await Promise.all([
+    createModerationEvent(newModEvent),
+    updateReport(report.id, input.status, user.did),
+    modAction(),
+  ]);
+
+  revalidatePath("/moderation");
+  return;
+}
 
 const createLink = async (
   collection?: string | null,

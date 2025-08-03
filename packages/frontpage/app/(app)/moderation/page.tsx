@@ -5,95 +5,11 @@ import {
   CardHeader,
   CardTitle,
 } from "@/lib/components/ui/card";
-import { ensureUser, isAdmin as isAdmin } from "@/lib/data/user";
+import { isAdmin as isAdmin } from "@/lib/data/user";
 import { redirect } from "next/navigation";
-import {
-  getModeratorReportStats,
-  getReport,
-  getReports,
-  updateReport,
-} from "@/lib/data/db/report";
-import {
-  type ModerationEventDTO,
-  createModerationEvent,
-} from "@/lib/data/db/moderation";
-import { revalidatePath } from "next/cache";
+import { getModeratorReportStats, getReports } from "@/lib/data/db/report";
 import Link from "next/link";
 import { ReportCard } from "./_components/report-card";
-import { moderatePost } from "@/lib/data/db/post";
-import { type DID } from "@/lib/data/atproto/did";
-import { moderateComment } from "@/lib/data/db/comment";
-import { moderateUser } from "@/lib/data/db/user";
-import { nsids } from "@/lib/data/atproto/repo";
-
-export async function performModerationAction(
-  input: { reportId: number; status: "accepted" | "rejected" },
-  _: FormData,
-) {
-  "use server";
-  const user = await ensureUser();
-  const report = await getReport(input.reportId);
-
-  if (!report) {
-    throw new Error("Report not found");
-  }
-
-  const newModEvent: ModerationEventDTO = {
-    subjectUri: report.subjectUri,
-    subjectDid: report.subjectDid as DID,
-    createdBy: user.did as DID,
-    createdAt: new Date(),
-    labelsAdded: report.reportReason,
-    creatorReportReason: report.creatorComment,
-  };
-
-  if (report.subjectCollection) {
-    if (report.subjectCollection === nsids.FyiUnravelFrontpagePost) {
-      newModEvent.subjectCollection = nsids.FyiUnravelFrontpagePost;
-    } else if (report.subjectCollection === nsids.FyiUnravelFrontpageComment) {
-      newModEvent.subjectCollection = nsids.FyiUnravelFrontpageComment;
-    }
-
-    newModEvent.subjectRkey = report.subjectRkey;
-    newModEvent.subjectCid = report.subjectCid;
-  }
-
-  const modAction = async () => {
-    switch (report.subjectCollection) {
-      case nsids.FyiUnravelFrontpagePost:
-        return await moderatePost({
-          rkey: report.subjectRkey!,
-          authorDid: report.subjectDid as DID,
-          cid: report.subjectCid!,
-          hide: input.status === "accepted",
-        });
-
-      case nsids.FyiUnravelFrontpageComment:
-        return await moderateComment({
-          rkey: report.subjectRkey!,
-          authorDid: report.subjectDid as DID,
-          cid: report.subjectCid!,
-          hide: input.status === "accepted",
-        });
-
-      default:
-        return await moderateUser({
-          userDid: report.subjectDid as DID,
-          hide: input.status === "accepted",
-          label: report.reportReason,
-        });
-    }
-  };
-
-  await Promise.all([
-    createModerationEvent(newModEvent),
-    updateReport(report.id, input.status, user.did),
-    modAction(),
-  ]);
-
-  revalidatePath("/moderation");
-  return;
-}
 
 type StatusTypes = "pending" | "accepted" | "rejected";
 
