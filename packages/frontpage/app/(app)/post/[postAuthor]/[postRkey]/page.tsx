@@ -28,7 +28,7 @@ export async function generateMetadata(props: {
     },
     openGraph: {
       title: post.title,
-      description: "Discuss this post on Frontpage.",
+      description: `Discuss @${handle}'s post on Frontpage.`,
       type: "article",
       publishedTime: post.createdAt.toISOString(),
       authors: [`@${handle}`],
