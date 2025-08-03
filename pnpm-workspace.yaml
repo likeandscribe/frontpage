@@ -12,3 +12,5 @@ catalog:
   typescript: ^5.8.3
   eslint: ^9.31.0
   '@types/node': ^22.16.4
+  babel-plugin-react-compiler: 19.1.0-rc.2
+  eslint-plugin-react-compiler: 19.1.0-rc.2
