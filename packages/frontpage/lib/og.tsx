@@ -24,7 +24,9 @@ async function loadGoogleFont(name: string, weight: 400 | 500 | 700) {
 
   const css = await (
     await fetch(url, {
-      cache: "force-cache",
+      next: {
+        revalidate: 60 * 60 * 24 * 365,
+      },
     })
   ).text();
 
@@ -33,7 +35,11 @@ async function loadGoogleFont(name: string, weight: 400 | 500 | 700) {
   );
 
   if (resource) {
-    const res = await fetch(resource[1]!);
+    const res = await fetch(resource[1]!, {
+      next: {
+        revalidate: 60 * 60 * 24 * 365,
+      },
+    });
     if (res.status == 200) {
       return {
         name,

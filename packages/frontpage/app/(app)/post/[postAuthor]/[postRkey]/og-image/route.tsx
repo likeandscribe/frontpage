@@ -20,8 +20,11 @@ type Params = {
 export const dynamic = "force-static";
 export const revalidate = 3600; // 1 hour
 
-export async function GET(_req: Request, { params }: { params: Params }) {
-  const { post } = await getPostPageData(params);
+export async function GET(
+  _req: Request,
+  { params }: { params: Promise<Params> },
+) {
+  const { post } = await getPostPageData(await params);
   const profile = await getBlueskyProfile(post.authorDid);
 
   return frontpageOgImageResponse(
