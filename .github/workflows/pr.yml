@@ -14,14 +14,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+
       - name: Setup Node.js environment
         uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
           cache: "pnpm"
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
 
       - run: pnpm i
 
@@ -43,14 +43,14 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-turbo-
 
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+
       - name: Setup Node.js environment
         uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
           cache: "pnpm"
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
 
       - run: pnpm i
       - run: pnpm exec turbo run --affected test
@@ -71,14 +71,14 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-turbo-
 
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+
       - name: Setup Node.js environment
         uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
           cache: "pnpm"
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
 
       - run: pnpm i
       - run: pnpm exec turbo run --affected lint
@@ -99,14 +99,14 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-turbo-
 
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+
       - name: Setup Node.js environment
         uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
           cache: "pnpm"
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
 
       - run: pnpm i
       - run: pnpm exec turbo run --affected type-check
