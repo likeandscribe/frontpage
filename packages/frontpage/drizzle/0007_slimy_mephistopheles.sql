@@ -1,1 +1,1 @@
-ALTER TABLE `oauth_sessions` ADD `scope` text DEFAULT 'atproto transition:generic' NOT NULL;
+ALTER TABLE `oauth_sessions` ADD `scope` text NOT NULL;
