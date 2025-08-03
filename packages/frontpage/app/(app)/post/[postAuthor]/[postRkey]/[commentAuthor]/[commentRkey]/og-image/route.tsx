@@ -19,9 +19,9 @@ export const revalidate = 3600; // 1 hour
 
 export async function GET(
   _req: Request,
-  { params }: { params: CommentPageParams },
+  { params }: { params: Promise<CommentPageParams> },
 ) {
-  const { comment } = await getCommentPageData(params);
+  const { comment } = await getCommentPageData(await params);
   if ((await shouldHideComment(comment)) || comment.status !== "live") {
     notFound();
   }

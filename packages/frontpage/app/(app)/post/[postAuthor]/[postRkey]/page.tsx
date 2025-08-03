@@ -5,6 +5,11 @@ import { getVerifiedHandle } from "@/lib/data/atproto/identity";
 import { type PostPageParams, getPostPageData } from "./_lib/page-data";
 import { LinkAlternateAtUri } from "@/lib/components/link-alternate-at";
 import { nsids } from "@/lib/data/atproto/repo";
+import { PrefetchOgImage } from "@/lib/og-client";
+
+function getPagePath(params: PostPageParams) {
+  return `/post/${params.postAuthor}/${params.postRkey}`;
+}
 
 export async function generateMetadata(props: {
   params: Promise<PostPageParams>;
@@ -13,7 +18,7 @@ export async function generateMetadata(props: {
   const { post } = await getPostPageData(params);
 
   const handle = await getVerifiedHandle(post.authorDid);
-  const path = `/post/${params.postAuthor}/${params.postRkey}`;
+  const path = getPagePath(params);
 
   return {
     title: post.title,
@@ -51,6 +56,7 @@ export default async function PostPage(props: {
         collection={nsids.FyiUnravelFrontpagePost}
         rkey={post.rkey}
       />
+      <PrefetchOgImage path={`${getPagePath(params)}/og-image`} />
 
       <div className="flex flex-col gap-6">
         {comments.length === 0 ? (

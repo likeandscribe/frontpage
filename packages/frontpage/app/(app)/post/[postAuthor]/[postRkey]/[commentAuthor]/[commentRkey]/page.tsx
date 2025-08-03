@@ -5,12 +5,17 @@ import { getVerifiedHandle } from "@/lib/data/atproto/identity";
 import { type CommentPageParams, getCommentPageData } from "./_lib/page-data";
 import { LinkAlternateAtUri } from "@/lib/components/link-alternate-at";
 import { nsids } from "@/lib/data/atproto/repo";
+import { PrefetchOgImage } from "@/lib/og-client";
 
 function truncateText(text: string, maxLength: number) {
   if (text.length > maxLength) {
     return text.slice(0, maxLength) + "...";
   }
   return text;
+}
+
+function getPagePath(params: CommentPageParams) {
+  return `/post/${params.postAuthor}/${params.postRkey}/${params.commentAuthor}/${params.commentRkey}`;
 }
 
 export async function generateMetadata(props: {
@@ -20,7 +25,7 @@ export async function generateMetadata(props: {
   const { comment, post } = await getCommentPageData(params);
 
   const handle = await getVerifiedHandle(comment.authorDid);
-  const path = `/post/${params.postAuthor}/${params.postRkey}/${params.commentAuthor}/${params.commentRkey}`;
+  const path = getPagePath(params);
 
   return {
     title:
@@ -64,6 +69,7 @@ export default async function CommentPage(props: {
         collection={nsids.FyiUnravelFrontpageComment}
         rkey={comment.rkey}
       />
+      <PrefetchOgImage path={`${getPagePath(params)}/og-image`} />
       <div className="flex justify-end">
         <Link
           href={`/post/${params.postAuthor}/${params.postRkey}`}
