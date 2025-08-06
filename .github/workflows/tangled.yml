@@ -13,13 +13,10 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Sync to tangled.sh
-        env:
-          SSH_PRIVATE_KEY: ${{ secrets.TANGLED_SSH_PRIVATE_KEY }}
-        run: |
-          echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add - > /dev/null
-          ssh-keyscan tangled.sh >> ~/.ssh/known_hosts
-          git config --global user.name "Frontpage Bot"
-          git config --global user.email "team+githubactions@frontpage.fyi"
-          git remote add tangled git@tangled.sh:frontpage.fyi/frontpage
-          git push tangled main --force
+      - name: Mirror to Tangled.sh
+        uses: yesolutions/mirror-action@18fc60c0629185af960c8256ccb650287a350b4e
+        with:
+          REMOTE: "git@tangled.sh:frontpage.fyi/frontpaget"
+          GIT_USERNAME: Frontpage Bot
+          GIT_EMAIL: team+bot@frontpage.fyi
+          GIT_SSH_PRIVATE_KEY: ${{ secrets.TANGLED_SSH_PRIVATE_KEY }}
