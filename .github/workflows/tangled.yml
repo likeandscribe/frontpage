@@ -16,7 +16,7 @@ jobs:
       - name: Mirror to Tangled.sh
         uses: yesolutions/mirror-action@18fc60c0629185af960c8256ccb650287a350b4e
         with:
-          REMOTE: "git@tangled.sh:frontpage.fyi/frontpaget"
+          REMOTE: "git@tangled.sh:frontpage.fyi/frontpage"
           GIT_USERNAME: Frontpage Bot
-          GIT_EMAIL: team+bot@frontpage.fyi
+          GIT_SSH_KNOWN_HOSTS: ${{ secrets.TANGLED_SSH_KNOWN_HOSTS }}
           GIT_SSH_PRIVATE_KEY: ${{ secrets.TANGLED_SSH_PRIVATE_KEY }}
