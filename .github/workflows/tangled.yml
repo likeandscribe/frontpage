@@ -1,0 +1,25 @@
+name: Sync repo to tangled.sh
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    environment: tangled-sync
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Sync to tangled.sh
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.TANGLED_SSH_PRIVATE_KEY }}
+        run: |
+          echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add - > /dev/null
+          ssh-keyscan tangled.sh >> ~/.ssh/known_hosts
+          git config --global user.name "Frontpage Bot"
+          git config --global user.email "team+githubactions@frontpage.fyi"
+          git remote add tangled git@tangled.sh:frontpage.fyi/frontpage
+          git push tangled main --force
