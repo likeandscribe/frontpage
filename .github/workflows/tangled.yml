@@ -2,10 +2,13 @@ name: sync-tangled
 
 on:
   push:
+    branches:
+      - main
 
 jobs:
   sync:
     runs-on: ubuntu-latest
+    environment: tangled-sync
     steps:
       - uses: actions/checkout@v4.1.7
         with:
