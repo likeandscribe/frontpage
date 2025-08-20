@@ -3,10 +3,10 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "NODE_OPTIONS=--use-openssl-ca next dev --hostname=0.0.0.0 --turbo",
-    "dev-1pw": "NODE_OPTIONS=--use-openssl-ca op run --env-file=\"./.env.1pw\" -- next dev --turbo",
+    "dev": "NODE_OPTIONS=--use-openssl-ca next dev --hostname=0.0.0.0 --turbopack",
+    "dev-1pw": "NODE_OPTIONS=--use-openssl-ca op run --env-file=\"./.env.1pw\" -- next dev --turbopack",
     "build-1pw": "NODE_OPTIONS=--use-openssl-ca op run --env-file=\"./.env.1pw\" -- next build",
-    "build": "NODE_OPTIONS=--use-openssl-ca next build",
+    "build": "NODE_OPTIONS=--use-openssl-ca next build --turbopack",
     "start": "NODE_OPTIONS=--use-openssl-ca next start",
     "lint": "eslint .",
     "db:generate": "NODE_OPTIONS=--use-openssl-ca drizzle-kit generate",
