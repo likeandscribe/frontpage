@@ -2,7 +2,7 @@ packages:
   - packages/*
 
 catalog:
-  next: 15.5.1-canary.22
+  next: ^15.5.0
   eslint-config-next: ^15.5.0
   '@next/eslint-plugin-next': ^15.5.0
   react: ^19.1.0
