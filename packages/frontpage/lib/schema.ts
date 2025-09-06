@@ -225,6 +225,7 @@ export const OauthSession = sqliteTable("oauth_sessions", {
   dpopPublicJwk: text("dpop_public_jwk").notNull(),
   expiresAt: dateIsoText("expires_at").notNull(),
   createdAt: dateIsoText("created_at").notNull(),
+  scope: text("scope").notNull(),
 });
 
 export const ModerationEvent = sqliteTable("moderation_events", {

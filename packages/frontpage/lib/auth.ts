@@ -33,7 +33,10 @@ import {
   getDidFromHandleOrDid,
   getVerifiedHandle,
 } from "./data/atproto/identity";
-import { getClientMetadata as createClientMetadata } from "@repo/frontpage-oauth";
+import {
+  AUTH_SCOPES,
+  getClientMetadata as createClientMetadata,
+} from "@repo/frontpage-oauth";
 import { getRootHost } from "./navigation";
 import { invariant } from "./utils";
 
@@ -332,6 +335,7 @@ export const handlers = {
         dpopNonce,
         dpopPrivateJwk: row.dpopPrivateJwk,
         dpopPublicJwk: row.dpopPublicJwk,
+        scope: AUTH_SCOPES,
       });
 
       if (!lastInsertRowid) {
