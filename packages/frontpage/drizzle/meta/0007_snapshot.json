@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "55a55ad1-0a89-47f7-aaca-3679bb5ea145",
+  "id": "313ce997-54c0-48dd-b9cd-dd4038931f34",
   "prevId": "e428846a-761a-4c51-86c2-b064a994370e",
   "tables": {
     "admin_users": {
@@ -771,7 +771,8 @@
           "type": "text",
           "primaryKey": false,
           "notNull": true,
-          "autoincrement": false
+          "autoincrement": false,
+          "default": "'atproto transition:generic'"
         }
       },
       "indexes": {},
