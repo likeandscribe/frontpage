@@ -829,7 +829,7 @@ export const schemaDict = {
               type: "union",
               description:
                 "The piece of content that this Frontpage post is about.",
-              refs: ["lex:fyi.frontpage.feed.subject.url"],
+              refs: ["lex:fyi.frontpage.feed.post#urlSubject"],
             },
             createdAt: {
               type: "string",
@@ -840,14 +840,7 @@ export const schemaDict = {
           },
         },
       },
-    },
-  },
-  FyiFrontpageFeedSubjectUrl: {
-    lexicon: 1,
-    id: "fyi.frontpage.feed.subject.url",
-    description: "A link to a webpage URL.",
-    defs: {
-      main: {
+      urlSubject: {
         type: "object",
         required: ["url"],
         properties: {
@@ -1049,7 +1042,6 @@ export const ids = {
   ComAtprotoRepoUploadBlob: "com.atproto.repo.uploadBlob",
   FyiFrontpageFeedComment: "fyi.frontpage.feed.comment",
   FyiFrontpageFeedPost: "fyi.frontpage.feed.post",
-  FyiFrontpageFeedSubjectUrl: "fyi.frontpage.feed.subject.url",
   FyiFrontpageFeedVote: "fyi.frontpage.feed.vote",
   FyiFrontpageRichtextBlock: "fyi.frontpage.richtext.block",
   FyiUnravelFrontpageComment: "fyi.unravel.frontpage.comment",

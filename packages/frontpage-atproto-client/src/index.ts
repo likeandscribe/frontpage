@@ -23,7 +23,6 @@ import * as ComAtprotoRepoStrongRef from "./types/com/atproto/repo/strongRef.js"
 import * as ComAtprotoRepoUploadBlob from "./types/com/atproto/repo/uploadBlob.js";
 import * as FyiFrontpageFeedComment from "./types/fyi/frontpage/feed/comment.js";
 import * as FyiFrontpageFeedPost from "./types/fyi/frontpage/feed/post.js";
-import * as FyiFrontpageFeedSubjectUrl from "./types/fyi/frontpage/feed/subject/url.js";
 import * as FyiFrontpageFeedVote from "./types/fyi/frontpage/feed/vote.js";
 import * as FyiFrontpageRichtextBlock from "./types/fyi/frontpage/richtext/block.js";
 import * as FyiUnravelFrontpageComment from "./types/fyi/unravel/frontpage/comment.js";
@@ -44,7 +43,6 @@ export * as ComAtprotoRepoStrongRef from "./types/com/atproto/repo/strongRef.js"
 export * as ComAtprotoRepoUploadBlob from "./types/com/atproto/repo/uploadBlob.js";
 export * as FyiFrontpageFeedComment from "./types/fyi/frontpage/feed/comment.js";
 export * as FyiFrontpageFeedPost from "./types/fyi/frontpage/feed/post.js";
-export * as FyiFrontpageFeedSubjectUrl from "./types/fyi/frontpage/feed/subject/url.js";
 export * as FyiFrontpageFeedVote from "./types/fyi/frontpage/feed/vote.js";
 export * as FyiFrontpageRichtextBlock from "./types/fyi/frontpage/richtext/block.js";
 export * as FyiUnravelFrontpageComment from "./types/fyi/unravel/frontpage/comment.js";
@@ -237,22 +235,12 @@ export class FyiFrontpageFeedNS {
   comment: FyiFrontpageFeedCommentRecord;
   post: FyiFrontpageFeedPostRecord;
   vote: FyiFrontpageFeedVoteRecord;
-  subject: FyiFrontpageFeedSubjectNS;
 
   constructor(client: XrpcClient) {
     this._client = client;
-    this.subject = new FyiFrontpageFeedSubjectNS(client);
     this.comment = new FyiFrontpageFeedCommentRecord(client);
     this.post = new FyiFrontpageFeedPostRecord(client);
     this.vote = new FyiFrontpageFeedVoteRecord(client);
-  }
-}
-
-export class FyiFrontpageFeedSubjectNS {
-  _client: XrpcClient;
-
-  constructor(client: XrpcClient) {
-    this._client = client;
   }
 }
 
@@ -301,6 +289,24 @@ export class FyiFrontpageFeedCommentRecord {
     const collection = "fyi.frontpage.feed.comment";
     const res = await this._client.call(
       "com.atproto.repo.createRecord",
+      undefined,
+      { collection, ...params, record: { ...record, $type: collection } },
+      { encoding: "application/json", headers },
+    );
+    return res.data;
+  }
+
+  async put(
+    params: OmitKey<
+      ComAtprotoRepoPutRecord.InputSchema,
+      "collection" | "record"
+    >,
+    record: Un$Typed<FyiFrontpageFeedComment.Record>,
+    headers?: Record<string, string>,
+  ): Promise<{ uri: string; cid: string }> {
+    const collection = "fyi.frontpage.feed.comment";
+    const res = await this._client.call(
+      "com.atproto.repo.putRecord",
       undefined,
       { collection, ...params, record: { ...record, $type: collection } },
       { encoding: "application/json", headers },
@@ -369,6 +375,24 @@ export class FyiFrontpageFeedPostRecord {
     return res.data;
   }
 
+  async put(
+    params: OmitKey<
+      ComAtprotoRepoPutRecord.InputSchema,
+      "collection" | "record"
+    >,
+    record: Un$Typed<FyiFrontpageFeedPost.Record>,
+    headers?: Record<string, string>,
+  ): Promise<{ uri: string; cid: string }> {
+    const collection = "fyi.frontpage.feed.post";
+    const res = await this._client.call(
+      "com.atproto.repo.putRecord",
+      undefined,
+      { collection, ...params, record: { ...record, $type: collection } },
+      { encoding: "application/json", headers },
+    );
+    return res.data;
+  }
+
   async delete(
     params: OmitKey<ComAtprotoRepoDeleteRecord.InputSchema, "collection">,
     headers?: Record<string, string>,
@@ -423,6 +447,24 @@ export class FyiFrontpageFeedVoteRecord {
     const collection = "fyi.frontpage.feed.vote";
     const res = await this._client.call(
       "com.atproto.repo.createRecord",
+      undefined,
+      { collection, ...params, record: { ...record, $type: collection } },
+      { encoding: "application/json", headers },
+    );
+    return res.data;
+  }
+
+  async put(
+    params: OmitKey<
+      ComAtprotoRepoPutRecord.InputSchema,
+      "collection" | "record"
+    >,
+    record: Un$Typed<FyiFrontpageFeedVote.Record>,
+    headers?: Record<string, string>,
+  ): Promise<{ uri: string; cid: string }> {
+    const collection = "fyi.frontpage.feed.vote";
+    const res = await this._client.call(
+      "com.atproto.repo.putRecord",
       undefined,
       { collection, ...params, record: { ...record, $type: collection } },
       { encoding: "application/json", headers },
@@ -519,6 +561,24 @@ export class FyiUnravelFrontpageCommentRecord {
     return res.data;
   }
 
+  async put(
+    params: OmitKey<
+      ComAtprotoRepoPutRecord.InputSchema,
+      "collection" | "record"
+    >,
+    record: Un$Typed<FyiUnravelFrontpageComment.Record>,
+    headers?: Record<string, string>,
+  ): Promise<{ uri: string; cid: string }> {
+    const collection = "fyi.unravel.frontpage.comment";
+    const res = await this._client.call(
+      "com.atproto.repo.putRecord",
+      undefined,
+      { collection, ...params, record: { ...record, $type: collection } },
+      { encoding: "application/json", headers },
+    );
+    return res.data;
+  }
+
   async delete(
     params: OmitKey<ComAtprotoRepoDeleteRecord.InputSchema, "collection">,
     headers?: Record<string, string>,
@@ -584,6 +644,24 @@ export class FyiUnravelFrontpagePostRecord {
     return res.data;
   }
 
+  async put(
+    params: OmitKey<
+      ComAtprotoRepoPutRecord.InputSchema,
+      "collection" | "record"
+    >,
+    record: Un$Typed<FyiUnravelFrontpagePost.Record>,
+    headers?: Record<string, string>,
+  ): Promise<{ uri: string; cid: string }> {
+    const collection = "fyi.unravel.frontpage.post";
+    const res = await this._client.call(
+      "com.atproto.repo.putRecord",
+      undefined,
+      { collection, ...params, record: { ...record, $type: collection } },
+      { encoding: "application/json", headers },
+    );
+    return res.data;
+  }
+
   async delete(
     params: OmitKey<ComAtprotoRepoDeleteRecord.InputSchema, "collection">,
     headers?: Record<string, string>,
@@ -642,6 +720,24 @@ export class FyiUnravelFrontpageVoteRecord {
     const collection = "fyi.unravel.frontpage.vote";
     const res = await this._client.call(
       "com.atproto.repo.createRecord",
+      undefined,
+      { collection, ...params, record: { ...record, $type: collection } },
+      { encoding: "application/json", headers },
+    );
+    return res.data;
+  }
+
+  async put(
+    params: OmitKey<
+      ComAtprotoRepoPutRecord.InputSchema,
+      "collection" | "record"
+    >,
+    record: Un$Typed<FyiUnravelFrontpageVote.Record>,
+    headers?: Record<string, string>,
+  ): Promise<{ uri: string; cid: string }> {
+    const collection = "fyi.unravel.frontpage.vote";
+    const res = await this._client.call(
+      "com.atproto.repo.putRecord",
       undefined,
       { collection, ...params, record: { ...record, $type: collection } },
       { encoding: "application/json", headers },
