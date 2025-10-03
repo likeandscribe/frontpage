@@ -18,10 +18,13 @@ export default async function LoginPage({
 
   const redirectParam = (await searchParams).redirect;
 
-  // TODO: Test this doesnt allow you to redirect to an external URL
-  const redirectPath = redirectParam?.startsWith("/") ? redirectParam : "/";
-
   if (session.user.scope === AUTH_SCOPES) {
+    // Checking for // and forcing to / to avoid open redirect vulnerabilities
+    // This should ensure we only redirect to internal paths and not external sites
+    const redirectPath =
+      redirectParam?.startsWith("//") || !redirectParam?.startsWith("/")
+        ? "/"
+        : (redirectParam ?? "/");
     console.warn(
       "User has AUTH_SCOPES, redirecting to the specified path or defaulting to /",
     );
