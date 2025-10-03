@@ -6,6 +6,8 @@ type GetClientMetadataOptions = {
   appUrl: string;
 };
 
+export const AUTH_SCOPES = "atproto transition:generic";
+
 export function getClientMetadata({
   redirectUri,
   appUrl,
@@ -20,8 +22,7 @@ export function getClientMetadata({
     subject_type: "public",
     grant_types: ["authorization_code", "refresh_token"],
     response_types: ["code"], // TODO: "code id_token"?
-    // TODO: Tweak these?
-    scope: "atproto transition:generic",
+    scope: AUTH_SCOPES,
     client_name: "Frontpage",
     token_endpoint_auth_method: "private_key_jwt",
     token_endpoint_auth_signing_alg: "ES256",

@@ -50,6 +50,13 @@
       "when": 1744475828986,
       "tag": "0006_thankful_namorita",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "6",
+      "when": 1759526589132,
+      "tag": "0007_silent_franklin_storm",
+      "breakpoints": true
     }
   ]
 }
