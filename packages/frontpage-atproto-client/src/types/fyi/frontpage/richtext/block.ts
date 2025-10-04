@@ -14,6 +14,21 @@ const is$typed = _is$typed,
   validate = _validate;
 const id = "fyi.frontpage.richtext.block";
 
+export interface Main {
+  $type?: "fyi.frontpage.richtext.block";
+  content: $Typed<PlaintextParagraph> | { $type: string };
+}
+
+const hashMain = "main";
+
+export function isMain<V>(v: V) {
+  return is$typed(v, id, hashMain);
+}
+
+export function validateMain<V>(v: V) {
+  return validate<Main & V>(v, id, hashMain);
+}
+
 export interface PlaintextParagraph {
   $type?: "fyi.frontpage.richtext.block#plaintextParagraph";
   text?: string;

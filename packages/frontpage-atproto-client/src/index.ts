@@ -223,10 +223,12 @@ export class FyiNS {
 export class FyiFrontpageNS {
   _client: XrpcClient;
   feed: FyiFrontpageFeedNS;
+  richtext: FyiFrontpageRichtextNS;
 
   constructor(client: XrpcClient) {
     this._client = client;
     this.feed = new FyiFrontpageFeedNS(client);
+    this.richtext = new FyiFrontpageRichtextNS(client);
   }
 }
 
@@ -482,6 +484,14 @@ export class FyiFrontpageFeedVoteRecord {
       { collection: "fyi.frontpage.feed.vote", ...params },
       { headers },
     );
+  }
+}
+
+export class FyiFrontpageRichtextNS {
+  _client: XrpcClient;
+
+  constructor(client: XrpcClient) {
+    this._client = client;
   }
 }
 

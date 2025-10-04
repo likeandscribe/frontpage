@@ -19,10 +19,7 @@ const id = "fyi.frontpage.feed.comment";
 export interface Record {
   $type: "fyi.frontpage.feed.comment";
   /** The content of the comment. Note, there are additional constraints placed on the total size of the content within the Frontpage AppView that are not possible to express in lexicon. Generally a comment can have a maximum length of 10,000 graphemes, the Frontpage AppView will enforce this limit. */
-  blocks: (
-    | $Typed<FyiFrontpageRichtextBlock.PlaintextParagraph>
-    | { $type: string }
-  )[];
+  blocks: FyiFrontpageRichtextBlock.Main[];
   /** Client-declared timestamp when this comment was originally created. */
   createdAt: string;
   parent?: ComAtprotoRepoStrongRef.Main;
