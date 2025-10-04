@@ -766,6 +766,147 @@ export const schemaDict = {
       },
     },
   },
+  FyiFrontpageFeedComment: {
+    lexicon: 1,
+    id: "fyi.frontpage.feed.comment",
+    defs: {
+      main: {
+        type: "record",
+        description: "Record containing a Frontpage comment.",
+        key: "tid",
+        record: {
+          type: "object",
+          required: ["createdAt", "post", "blocks"],
+          properties: {
+            blocks: {
+              type: "array",
+              maxLength: 50,
+              description:
+                "The content of the comment. Note, there are additional constraints placed on the total size of the content within the Frontpage AppView that are not possible to express in lexicon. Generally a comment can have a maximum length of 10,000 graphemes, the Frontpage AppView will enforce this limit.",
+              items: {
+                type: "ref",
+                ref: "lex:fyi.frontpage.richtext.block",
+              },
+            },
+            createdAt: {
+              type: "string",
+              format: "datetime",
+              description:
+                "Client-declared timestamp when this comment was originally created.",
+            },
+            parent: {
+              type: "ref",
+              ref: "lex:com.atproto.repo.strongRef",
+            },
+            post: {
+              type: "ref",
+              ref: "lex:com.atproto.repo.strongRef",
+            },
+          },
+        },
+      },
+    },
+  },
+  FyiFrontpageFeedPost: {
+    lexicon: 1,
+    id: "fyi.frontpage.feed.post",
+    defs: {
+      main: {
+        type: "record",
+        description: "Record containing a Frontpage post.",
+        key: "tid",
+        record: {
+          type: "object",
+          required: ["title", "createdAt"],
+          properties: {
+            title: {
+              type: "string",
+              maxLength: 3000,
+              maxGraphemes: 300,
+              description: "The title of the post.",
+            },
+            subject: {
+              type: "union",
+              description:
+                "The piece of content that this Frontpage post is about.",
+              refs: ["lex:fyi.frontpage.feed.post#urlSubject"],
+            },
+            createdAt: {
+              type: "string",
+              format: "datetime",
+              description:
+                "Client-declared timestamp when this post was originally created.",
+            },
+          },
+        },
+      },
+      urlSubject: {
+        type: "object",
+        required: ["url"],
+        properties: {
+          url: {
+            type: "string",
+            format: "uri",
+          },
+        },
+      },
+    },
+  },
+  FyiFrontpageFeedVote: {
+    lexicon: 1,
+    id: "fyi.frontpage.feed.vote",
+    defs: {
+      main: {
+        type: "record",
+        description: "Record containing a Frontpage vote.",
+        key: "tid",
+        record: {
+          type: "object",
+          required: ["subject", "createdAt"],
+          properties: {
+            subject: {
+              type: "ref",
+              description:
+                "The post or comment that this Frontpage vote is for.",
+              ref: "lex:com.atproto.repo.strongRef",
+            },
+            createdAt: {
+              type: "string",
+              format: "datetime",
+              description:
+                "Client-declared timestamp when this vote was originally created.",
+            },
+          },
+        },
+      },
+    },
+  },
+  FyiFrontpageRichtextBlock: {
+    lexicon: 1,
+    id: "fyi.frontpage.richtext.block",
+    defs: {
+      main: {
+        type: "object",
+        required: ["content"],
+        properties: {
+          content: {
+            type: "union",
+            refs: ["lex:fyi.frontpage.richtext.block#plaintextParagraph"],
+          },
+        },
+      },
+      plaintextParagraph: {
+        type: "object",
+        properties: {
+          text: {
+            type: "string",
+            maxLength: 100000,
+            maxGraphemes: 10000,
+          },
+        },
+      },
+    },
+  },
   FyiUnravelFrontpageComment: {
     lexicon: 1,
     id: "fyi.unravel.frontpage.comment",
@@ -909,6 +1050,10 @@ export const ids = {
   ComAtprotoRepoPutRecord: "com.atproto.repo.putRecord",
   ComAtprotoRepoStrongRef: "com.atproto.repo.strongRef",
   ComAtprotoRepoUploadBlob: "com.atproto.repo.uploadBlob",
+  FyiFrontpageFeedComment: "fyi.frontpage.feed.comment",
+  FyiFrontpageFeedPost: "fyi.frontpage.feed.post",
+  FyiFrontpageFeedVote: "fyi.frontpage.feed.vote",
+  FyiFrontpageRichtextBlock: "fyi.frontpage.richtext.block",
   FyiUnravelFrontpageComment: "fyi.unravel.frontpage.comment",
   FyiUnravelFrontpagePost: "fyi.unravel.frontpage.post",
   FyiUnravelFrontpageVote: "fyi.unravel.frontpage.vote",
