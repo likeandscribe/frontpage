@@ -1,5 +1,6 @@
 use std::path::PathBuf;
 
+use chrono::TimeZone;
 use structopt::StructOpt;
 
 #[derive(StructOpt, Debug)]
@@ -36,7 +37,11 @@ fn main() {
         Opt::GetCursor { db } => {
             let store = drainpipe_store::Store::open(&db).expect("Could not open store");
             if let Some(cursor) = store.get_cursor().expect("Could not get cursor") {
-                println!("Cursor: {}", cursor);
+                println!(
+                    "Cursor: {} ({:?})",
+                    cursor,
+                    chrono::Utc.timestamp_micros(cursor as i64).unwrap()
+                );
             } else {
                 println!("Cursor not set");
                 std::process::exit(1);
