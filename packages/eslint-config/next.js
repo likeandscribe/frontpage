@@ -1,15 +1,14 @@
 import tseslint from "typescript-eslint";
 import typescript from "./typescript.js";
 import react from "./react.js";
-// @ts-ignore no types
 import next from "@next/eslint-plugin-next";
 import { globalIgnores } from "eslint/config";
 
 export default tseslint.config(
   typescript,
   react,
-  next.flatConfig.recommended,
-  next.flatConfig.coreWebVitals,
+  next.configs.recommended,
+  next.configs["core-web-vitals"],
   globalIgnores(
     [".next/", ".vercel/", "node_modules/", "next-env.d.ts"],
     "monorepo-next-config-ignores",
