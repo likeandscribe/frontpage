@@ -2,15 +2,23 @@ packages:
   - packages/*
 
 catalog:
-  next: ^15.5.0
-  eslint-config-next: ^15.5.0
-  '@next/eslint-plugin-next': ^15.5.0
-  react: ^19.1.0
-  react-dom: ^19.1.0
-  '@types/react': ^19.1.8
-  '@types/react-dom': ^19.1.6
-  typescript: ^5.8.3
-  eslint: ^9.31.0
-  '@types/node': ^22.16.4
-  babel-plugin-react-compiler: 19.1.0-rc.2
-  eslint-plugin-react-compiler: 19.1.0-rc.2
+  next: 16.0.0-beta.0
+  eslint-config-next: 16.0.0-beta.0
+  '@next/eslint-plugin-next': 16.0.0-beta.0
+  react: ^19.2.0
+  react-dom: ^19.2.0
+  '@types/react': ^19.2.2
+  '@types/react-dom': ^19.2.1
+  typescript: ^5.9.3
+  eslint: ^9.37.0
+  '@types/node': ^22.18.9
+  babel-plugin-react-compiler: ^1.0.0
+
+onlyBuiltDependencies:
+  - '@vercel/speed-insights'
+  - bufferutil
+  - cbor-extract
+  - esbuild
+  - sharp
+  - unrs-resolver
+  - utf-8-validate
