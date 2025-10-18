@@ -235,29 +235,39 @@ async fn websocket_task(
 ) -> Result<(), JetstreamEventError> {
     // TODO: Use the write half to allow the user to change configuration settings on the fly.
     let (_, mut read) = ws.split();
-    loop {
-        match read.next().await {
-            None => {
-                log::error!("The WebSocket connection was closed unexpectedly.");
-                return Err(JetstreamEventError::WebSocketCloseFailure);
+    while let Some(message) = read.next().await {
+        match decode_message(message, &dictionary) {
+            Ok(Some(event)) => {
+                send_channel
+                    .send(Ok(event))
+                    .map_err(|_| JetstreamEventError::WebSocketCloseFailure)?;
             }
 
-            Some(message) => {
-                send_channel.send(decode_message(message, &dictionary)).map_err(|e| {
-                    log::error!("All receivers for the Jetstream connection have been dropped, closing connection. {:?}", e);
-
-                    JetstreamEventError::WebSocketCloseFailure
-                })?;
+            Ok(None) => {
+                // Ping message, nothing to do.
+                log::debug!("Received ping message, ignoring.");
             }
-        }
+
+            Err(e) => {
+                send_channel
+                    .send(Err(e))
+                    .map_err(|_| JetstreamEventError::WebSocketCloseFailure)?;
+            }
+        };
     }
+
+    log::error!("The WebSocket connection was closed unexpectedly.");
+    Err(JetstreamEventError::WebSocketCloseFailure)
 }
 
 fn decode_message(
     message: Result<Message, tokio_tungstenite::tungstenite::Error>,
     dictionary: &DecoderDictionary<'_>,
-) -> Result<JetstreamEvent, JetstreamEventError> {
+) -> Result<Option<JetstreamEvent>, JetstreamEventError> {
     let json = match message {
+        // Ignore ping messages
+        Ok(Message::Ping(_)) => return Ok(None),
+
         Ok(Message::Text(json)) => json,
 
         Ok(Message::Binary(zstd_json)) => {
@@ -279,6 +289,8 @@ fn decode_message(
         Err(e) => Err(JetstreamEventError::WebsocketReceiveFailure(e))?,
     };
 
-    serde_json::from_str::<JetstreamEvent>(&json)
-        .map_err(|e| JetstreamEventError::ReceivedMalformedJSON { error: e, json })
+    let decoded = serde_json::from_str::<JetstreamEvent>(&json)
+        .map_err(|e| JetstreamEventError::ReceivedMalformedJSON { error: e, json })?;
+
+    Ok(Some(decoded))
 }
