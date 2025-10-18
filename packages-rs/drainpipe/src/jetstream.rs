@@ -251,7 +251,10 @@ async fn websocket_task(
             Err(e) => {
                 send_channel
                     .send(Err(e))
-                    .map_err(|_| JetstreamEventError::WebSocketCloseFailure)?;
+                    .map_err(|e| {
+                        log::error!("All receivers for the Jetstream connection have been dropped, closing connection. {:?}", e);
+                        JetstreamEventError::WebSocketCloseFailure
+                    })?;
             }
         };
     }
