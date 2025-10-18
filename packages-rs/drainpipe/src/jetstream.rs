@@ -236,27 +236,21 @@ async fn websocket_task(
     // TODO: Use the write half to allow the user to change configuration settings on the fly.
     let (_, mut read) = ws.split();
     while let Some(message) = read.next().await {
-        match decode_message(message, &dictionary) {
-            Ok(Some(event)) => {
-                send_channel
-                    .send(Ok(event))
-                    .map_err(|_| JetstreamEventError::WebSocketCloseFailure)?;
-            }
-
+        let event = match decode_message(message, &dictionary) {
             Ok(None) => {
                 // Ping message, nothing to do.
                 log::debug!("Received ping message, ignoring.");
+                continue;
             }
 
-            Err(e) => {
-                send_channel
-                    .send(Err(e))
-                    .map_err(|e| {
-                        log::error!("All receivers for the Jetstream connection have been dropped, closing connection. {:?}", e);
-                        JetstreamEventError::WebSocketCloseFailure
-                    })?;
-            }
+            Ok(Some(event)) => Ok(event),
+            Err(e) => Err(e),
         };
+
+        send_channel.send(event).map_err(|e| {
+            log::error!("All receivers for the Jetstream connection have been dropped, closing connection. {:?}", e);
+            JetstreamEventError::WebSocketCloseFailure
+        })?;
     }
 
     log::error!("The WebSocket connection was closed unexpectedly.");
