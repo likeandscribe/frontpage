@@ -47,7 +47,10 @@ async fn main() -> anyhow::Result<()> {
 
         let receiver = connect(JetstreamConfig {
             endpoint: endpoint.clone(),
-            wanted_collections: vec!["fyi.unravel.frontpage.*".to_string()],
+            wanted_collections: vec![
+                "fyi.unravel.frontpage.*".to_string(),
+                "fyi.frontpage.*".to_string(),
+            ],
             wanted_dids: vec![],
             compression: JetstreamCompression::Zstd,
             // Connect 10 seconds before the most recently received cursor
