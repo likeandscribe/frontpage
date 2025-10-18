@@ -1,0 +1,26 @@
+{
+  "lexicon": 1,
+  "id": "fyi.frontpage.richtext.block",
+  "defs": {
+    "main": {
+      "type": "object",
+      "required": ["content"],
+      "properties": {
+        "content": {
+          "type": "union",
+          "refs": ["#plaintextParagraph"]
+        }
+      }
+    },
+    "plaintextParagraph": {
+      "type": "object",
+      "properties": {
+        "text": {
+          "type": "string",
+          "maxLength": 100000,
+          "maxGraphemes": 10000
+        }
+      }
+    }
+  }
+}
