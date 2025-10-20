@@ -5,6 +5,7 @@ use serde::{Deserialize, Serialize};
 use sled::Tree;
 
 pub struct Store {
+    db: sled::Db,
     cursor_tree: Tree,
     dead_letter_tree: Tree,
 }
@@ -50,18 +51,13 @@ impl DeadLetter {
             error_message,
         })
     }
-
-    pub fn key(&self) -> &String {
-        match &self.0 {
-            DeadLetterInner::V1 { key, .. } => key,
-        }
-    }
 }
 
 impl Store {
     pub fn open(path: &PathBuf) -> anyhow::Result<Store> {
         let db = sled::open(path)?;
         Ok(Self {
+            db: db.clone(),
             cursor_tree: db.open_tree("cursor")?,
             dead_letter_tree: db.open_tree("dead_letter")?,
         })
@@ -92,9 +88,39 @@ impl Store {
             .transpose()
     }
 
-    pub fn record_dead_letter(&self, dead_letter: &DeadLetter) -> anyhow::Result<()> {
-        self.dead_letter_tree
-            .insert(dead_letter.key(), bincode::serialize(&dead_letter)?)?;
+    fn record_dead_letter(&self, commit_json: String, error_message: String) -> anyhow::Result<()> {
+        let key = self.db.generate_id()?.to_string();
+        self.dead_letter_tree.insert(
+            key.clone(),
+            bincode::serialize(&DeadLetter::new(key, commit_json, error_message))?,
+        )?;
         Ok(())
+    }
+
+    pub fn record_dead_letter_commit(
+        &self,
+        commit: &jetstream::event::CommitEvent,
+        error_message: String,
+    ) -> anyhow::Result<()> {
+        self.record_dead_letter(serde_json::to_string(commit)?, error_message)
+    }
+
+    pub fn record_dead_letter_jetstream_error(
+        &self,
+        error: &jetstream::error::JetstreamEventError,
+    ) -> anyhow::Result<()> {
+        self.record_dead_letter("null".into(), error.to_string())
+    }
+
+    pub fn get_dead_letter_messages(&self) -> anyhow::Result<Vec<DeadLetter>> {
+        let mut messages = Vec::new();
+
+        for item in self.dead_letter_tree.iter() {
+            let (_key, value) = item?;
+            let message: DeadLetter =
+                bincode::deserialize(&value).context("Failed to deserialize dead letter")?;
+            messages.push(message);
+        }
+        Ok(messages)
     }
 }

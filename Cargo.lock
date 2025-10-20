@@ -412,24 +412,19 @@ version = "0.2.0"
 dependencies = [
  "anyhow",
  "atrium-api",
- "bincode",
  "chrono",
  "dotenv-flow",
  "drainpipe-store",
  "env_logger",
- "flume",
  "futures-util",
+ "jetstream",
  "log",
  "reqwest",
  "serde",
  "serde_json",
  "sled",
- "thiserror 2.0.17",
  "tokio",
  "tokio-metrics",
- "tokio-tungstenite",
- "url",
- "zstd",
 ]
 
 [[package]]
@@ -439,6 +434,7 @@ dependencies = [
  "chrono",
  "dotenv-flow",
  "drainpipe-store",
+ "serde_json",
  "structopt",
 ]
 
@@ -448,8 +444,10 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "bincode",
+ "jetstream",
  "log",
  "serde",
+ "serde_json",
  "sled",
 ]
 
@@ -1013,6 +1011,24 @@ name = "itoa"
 version = "1.0.15"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "4a5f13b858c8d314ee3e8f639011f7ccefe71f97f96e50151fb991f267928e2c"
+
+[[package]]
+name = "jetstream"
+version = "0.1.0"
+dependencies = [
+ "atrium-api",
+ "chrono",
+ "flume",
+ "futures-util",
+ "log",
+ "serde",
+ "serde_json",
+ "thiserror 2.0.17",
+ "tokio",
+ "tokio-tungstenite",
+ "url",
+ "zstd",
+]
 
 [[package]]
 name = "jiff"
