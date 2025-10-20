@@ -18,6 +18,11 @@ enum Opt {
         #[structopt(long, env = "STORE_LOCATION", parse(from_os_str))]
         db: PathBuf,
     },
+
+    GetDeadLetterMessages {
+        #[structopt(long, env = "STORE_LOCATION", parse(from_os_str))]
+        db: PathBuf,
+    },
 }
 
 fn main() {
@@ -45,6 +50,16 @@ fn main() {
             } else {
                 println!("Cursor not set");
                 std::process::exit(1);
+            }
+        }
+
+        Opt::GetDeadLetterMessages { db } => {
+            let store = drainpipe_store::Store::open(&db).expect("Could not open store");
+            let messages = store
+                .get_dead_letter_messages()
+                .expect("Could not get dead letter messages");
+            for message in messages {
+                println!("{}", serde_json::to_string_pretty(&message).unwrap());
             }
         }
     }

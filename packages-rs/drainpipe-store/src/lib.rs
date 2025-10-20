@@ -111,4 +111,16 @@ impl Store {
     ) -> anyhow::Result<()> {
         self.record_dead_letter("null".into(), error.to_string())
     }
+
+    pub fn get_dead_letter_messages(&self) -> anyhow::Result<Vec<DeadLetter>> {
+        let mut messages = Vec::new();
+
+        for item in self.dead_letter_tree.iter() {
+            let (_key, value) = item?;
+            let message: DeadLetter =
+                bincode::deserialize(&value).context("Failed to deserialize dead letter")?;
+            messages.push(message);
+        }
+        Ok(messages)
+    }
 }
