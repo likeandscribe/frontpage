@@ -1,22 +1,25 @@
-FROM rust:1.78-alpine AS builder
-
-# TODO: Figure out what we need to change here!
-
+FROM rust:1.89-alpine AS chef
 RUN apk add libressl-dev musl-dev sqlite-dev
+RUN cargo install cargo-chef
 
-WORKDIR /usr/src/unravel
+WORKDIR /app
+FROM chef AS planner
+# Assumes . is root of monorepo, so build context should be set accordingly
 COPY . .
-# TODO: Use cargo-chef to cache dependencies compilation independently of the binary
-RUN --mount=type=cache,target=/usr/local/cargo/registry \
-    --mount=type=cache,target=/root/target \
-    cargo build --release --package drainpipe && \
-    # Move the release binary to a folder to be copied to the final image. It can't be copied directly from the target folder because it's in a cache mount
-    # See https://gist.github.com/noelbundick/6922d26667616e2ba5c3aff59f0824cd?permalink_comment_id=4379948#gistcomment-4379948
-    mv ./target/release /root
+RUN cargo chef prepare  --recipe-path recipe.json
+
+FROM chef AS builder
+COPY --from=planner /app/recipe.json recipe.json
+# Build dependencies - this is the caching Docker layer!
+RUN cargo chef cook --release --recipe-path recipe.json
+# Build application. Again, assumes . is root of monorepo.
+COPY . .
+RUN cargo build --release --bin drainpipe
 
 FROM alpine:3.14
-COPY --from=builder /root/release/drainpipe /
+WORKDIR /app
+COPY --from=builder /app/target/release/drainpipe /usr/local/drainpipe
 
 ENV STORE_LOCATION="/drainpipedata/sled"
 
-ENTRYPOINT ["/drainpipe"]
+ENTRYPOINT ["/usr/local/drainpipe"]
