@@ -8,6 +8,7 @@ use jetstream::{
     JetstreamReceiver,
 };
 use serde_json::json;
+use std::net::SocketAddr;
 use std::path::PathBuf;
 use std::time::Duration;
 use std::vec;
@@ -25,7 +26,14 @@ async fn main() -> anyhow::Result<()> {
 
     env_logger::init();
 
-    let monitor = tokio_metrics::TaskMonitor::new();
+    metrics_exporter_prometheus::PrometheusBuilder::new()
+        .with_http_listener(SocketAddr::from(([0, 0, 0, 0], 9898)))
+        .install()?;
+    let task_collector = tokio_metrics_collector::default_task_collector();
+    prometheus::default_registry().register(Box::new(task_collector))?;
+
+    let jetstream_events_monitor = tokio_metrics_collector::TaskMonitor::new();
+    task_collector.add("jetstream_events", jetstream_events_monitor.clone())?;
 
     let config = Config::from_env()?;
     let store = drainpipe_store::Store::open(&config.store_location)?;
@@ -58,10 +66,25 @@ async fn main() -> anyhow::Result<()> {
         .await?;
 
         let metric_logs_abort_handler = {
-            let metrics_monitor = monitor.clone();
+            let metrics_monitor = jetstream_events_monitor.clone();
+            let store = store.clone();
             tokio::spawn(async move {
                 for interval in metrics_monitor.intervals() {
-                    log::info!("{:?} per second", interval.instrumented_count as f64 / 5.0,);
+                    let lag_output = store.get_cursor().unwrap_or(None).and_then(|c| {
+                        let cursor_time = Utc.timestamp_micros(c as i64).earliest()?;
+                        let now = Utc::now();
+                        let lag = now.signed_duration_since(cursor_time);
+                        Some(format!("Cursor lag: {}ms", lag.num_milliseconds()))
+                    });
+                    if let Some(lag) = lag_output {
+                        log::info!(
+                            "{:?} per second; {}",
+                            interval.instrumented_count as f64 / 5.0,
+                            lag
+                        );
+                    } else {
+                        log::info!("{:?} per second", interval.instrumented_count as f64 / 5.0);
+                    }
                     tokio::time::sleep(Duration::from_millis(5000)).await;
                 }
             })
@@ -71,7 +94,7 @@ async fn main() -> anyhow::Result<()> {
         loop {
             match receiver.recv_async().await {
                 Ok(Ok(event)) => {
-                    monitor
+                    jetstream_events_monitor
                         .instrument(async {
                             if let JetstreamEvent::Commit(ref commit) = event {
                                 println!("Received commit: {:?}", commit);

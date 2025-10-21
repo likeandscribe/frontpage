@@ -4,6 +4,7 @@ use anyhow::Context;
 use serde::{Deserialize, Serialize};
 use sled::Tree;
 
+#[derive(Debug, Clone)]
 pub struct Store {
     db: sled::Db,
     cursor_tree: Tree,
@@ -11,7 +12,6 @@ pub struct Store {
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-
 enum CursorInner {
     V1(u64),
 }
