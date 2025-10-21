@@ -14,6 +14,7 @@ pub struct Store {
 #[derive(Serialize, Deserialize, Debug)]
 enum CursorInner {
     V1(u64),
+    V2 { value: u64, recorded_at: i64 },
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -21,12 +22,23 @@ pub struct Cursor(CursorInner);
 
 impl Cursor {
     pub fn new(value: u64) -> Self {
-        Self(CursorInner::V1(value))
+        Self(CursorInner::V2 {
+            value,
+            recorded_at: chrono::Utc::now().timestamp_micros(),
+        })
     }
 
     pub fn value(&self) -> u64 {
         match self.0 {
             CursorInner::V1(value) => value,
+            CursorInner::V2 { value, .. } => value,
+        }
+    }
+
+    pub fn lag_micros(&self) -> Option<i64> {
+        match self.0 {
+            CursorInner::V1(_) => None,
+            CursorInner::V2 { recorded_at, value } => Some(recorded_at - value as i64),
         }
     }
 }
@@ -86,6 +98,19 @@ impl Store {
                     .map(|cursor| cursor.value())
             })
             .transpose()
+    }
+
+    pub fn get_cursor_lag_micros(&self) -> anyhow::Result<Option<i64>> {
+        self.cursor_tree
+            .get("cursor")
+            .context("Failed to get cursor")?
+            .map(|cursor_bytes| {
+                bincode::deserialize::<Cursor>(&cursor_bytes)
+                    .context("Failed to deserialize cursor")
+                    .map(|c| c.lag_micros())
+            })
+            .transpose()
+            .map(|l| l.flatten())
     }
 
     fn record_dead_letter(&self, commit_json: String, error_message: String) -> anyhow::Result<()> {

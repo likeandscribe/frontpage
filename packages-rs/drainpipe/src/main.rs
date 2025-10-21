@@ -70,12 +70,11 @@ async fn main() -> anyhow::Result<()> {
             let store = store.clone();
             tokio::spawn(async move {
                 for interval in metrics_monitor.intervals() {
-                    let lag_output = store.get_cursor().unwrap_or(None).and_then(|c| {
-                        let cursor_time = Utc.timestamp_micros(c as i64).earliest()?;
-                        let now = Utc::now();
-                        let lag = now.signed_duration_since(cursor_time);
-                        Some(format!("Cursor lag: {}ms", lag.num_milliseconds()))
-                    });
+                    let lag_output = store
+                        .get_cursor_lag_micros()
+                        .ok()
+                        .flatten()
+                        .map(|lag| format!("Cursor lag: {}ms", lag / 1000));
                     if let Some(lag) = lag_output {
                         log::info!(
                             "{:?} per second; {}",
