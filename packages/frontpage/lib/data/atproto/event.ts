@@ -8,7 +8,7 @@ import { nsids } from "./repo";
 export const Collection = z.union([
   z.literal(nsids.FyiUnravelFrontpagePost),
   z.literal(nsids.FyiUnravelFrontpageComment),
-  z.literal("fyi.unravel.frontpage.vote"),
+  z.literal(nsids.FyiUnravelFrontpageVote),
 ]);
 
 const Path = z.string().transform((p, ctx) => {
