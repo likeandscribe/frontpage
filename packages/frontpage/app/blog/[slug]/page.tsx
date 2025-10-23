@@ -22,7 +22,7 @@ export default async function BlogPost(props: Props) {
     <>
       <link
         rel="alternate"
-        href={`at://${blog.uri.authority}/${blog.uri.collection}/${blog.uri.rkey}`}
+        href={`at://${blog.uri.host}/${blog.uri.collection}/${blog.uri.rkey}`}
       />
       <title>{blog.value.title}</title>
       <link rel="canonical" href={`/blog/${blog.slug}`} />

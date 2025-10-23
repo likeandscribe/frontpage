@@ -1,7 +1,7 @@
 import { getPdsUrl, type DID } from "@/lib/data/atproto/did";
 import { type Operation } from "@/lib/data/atproto/event";
+import { getDidFromHandleOrDid } from "@/lib/data/atproto/identity";
 import { getAtprotoClient, nsids } from "@/lib/data/atproto/repo";
-import { AtUri } from "@/lib/data/atproto/uri";
 import * as dbComment from "@/lib/data/db/comment";
 import * as dbNotification from "@/lib/data/db/notification";
 import * as dbPost from "@/lib/data/db/post";
@@ -9,6 +9,7 @@ import * as dbVote from "@/lib/data/db/vote";
 import { getBlueskyProfile } from "@/lib/data/user";
 import { sendDiscordMessage } from "@/lib/discord";
 import { invariant } from "@/lib/utils";
+import { AtUri } from "@atproto/syntax";
 import type z from "zod";
 
 type HandlerInput = {
@@ -116,23 +117,30 @@ export async function handleComment({ op, repo, rkey }: HandlerInput) {
       });
     } else {
       const { content, createdAt, parent, post } = commentRecord.value;
-      const postUri = AtUri.parse(post.uri);
-      const parentUri = parent ? AtUri.parse(parent.uri) : null;
+      const postUri = new AtUri(post.uri);
+      const parentData = parent
+        ? {
+            uri: new AtUri(parent.uri),
+            authorDid: await getDidOrThrow(new AtUri(parent.uri).host),
+          }
+        : null;
+
+      const postAuthorDid = await getDidOrThrow(postUri.host);
+
       const createdComment = await dbComment.createComment({
         cid: commentRecord.cid,
         authorDid: repo,
         rkey,
         content,
         createdAt: new Date(createdAt),
-        parent: parentUri
+        parent: parentData
           ? {
-              //TODO: is authority a DID?
-              authorDid: parentUri.authority as DID,
-              rkey: parentUri.rkey,
+              authorDid: parentData.authorDid,
+              rkey: parentData.uri.rkey,
             }
           : undefined,
         post: {
-          authorDid: postUri.authority as DID,
+          authorDid: postAuthorDid,
           rkey: postUri.rkey,
         },
         status: "live",
@@ -142,12 +150,12 @@ export async function handleComment({ op, repo, rkey }: HandlerInput) {
         throw new Error("Failed to insert comment from relay in database");
       }
 
-      const didToNotify = parentUri ? parentUri.authority : postUri.authority;
+      const didToNotify = parentData ? parentData.authorDid : postAuthorDid;
 
       if (didToNotify !== repo) {
         await dbNotification.createNotification({
           commentId: createdComment.id,
-          did: didToNotify as DID,
+          did: didToNotify,
           reason: parent ? "commentReply" : "postComment",
         });
       }
@@ -168,7 +176,7 @@ export async function handleVote({ op, repo, rkey }: HandlerInput) {
     invariant(hydratedRecord, "atproto vote record not found");
 
     const { subject } = hydratedRecord.value;
-    const subjectUri = AtUri.parse(subject.uri);
+    const subjectUri = new AtUri(subject.uri);
 
     switch (subjectUri.collection) {
       case nsids.FyiUnravelFrontpagePost: {
@@ -187,7 +195,7 @@ export async function handleVote({ op, repo, rkey }: HandlerInput) {
             cid: hydratedRecord.cid,
             subject: {
               rkey: subjectUri.rkey,
-              authorDid: subjectUri.authority as DID,
+              authorDid: await getDidOrThrow(subjectUri.host),
               cid: subject.cid,
             },
             status: "live",
@@ -220,7 +228,7 @@ export async function handleVote({ op, repo, rkey }: HandlerInput) {
             cid: hydratedRecord.cid,
             subject: {
               rkey: subjectUri.rkey,
-              authorDid: subjectUri.authority as DID,
+              authorDid: await getDidOrThrow(subjectUri.host),
               cid: subject.cid,
             },
             status: "live",
@@ -241,4 +249,12 @@ export async function handleVote({ op, repo, rkey }: HandlerInput) {
     console.log("deleting vote", rkey);
     await dbVote.deleteVote({ authorDid: repo, rkey });
   }
+}
+
+async function getDidOrThrow(handleOrDid: string): Promise<DID> {
+  const did = await getDidFromHandleOrDid(handleOrDid);
+  if (!did) {
+    throw new Error(`Failed to resolve DID from handle or DID: ${handleOrDid}`);
+  }
+  return did;
 }
