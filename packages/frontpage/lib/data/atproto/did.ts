@@ -29,6 +29,10 @@ export const getDidDoc = cache(async (did: DID) => {
     },
   });
 
+  if (!response.ok) {
+    throw new Error(`Failed to fetch DID document for ${did}`);
+  }
+
   return PlcDocument.parse(await response.json());
 });
 
