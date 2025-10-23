@@ -31,7 +31,7 @@ export function validateMain<V>(v: V) {
 
 export interface PlaintextParagraph {
   $type?: "fyi.frontpage.richtext.block#plaintextParagraph";
-  text?: string;
+  text: string;
 }
 
 const hashPlaintextParagraph = "plaintextParagraph";

@@ -897,6 +897,7 @@ export const schemaDict = {
       },
       plaintextParagraph: {
         type: "object",
+        required: ["text"],
         properties: {
           text: {
             type: "string",
