@@ -1,7 +1,19 @@
 import { type DID, didSchema } from "@/lib/data/atproto/did";
-import { AtUri } from "@/lib/data/atproto/uri";
+import { AtUri } from "@atproto/syntax";
 import slugify from "slugify";
 import { z } from "zod";
+
+const AtUriSchema = z.string().transform((value, ctx) => {
+  try {
+    return new AtUri(value);
+  } catch {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: `Invalid AtUri: ${value}`,
+    });
+    return z.NEVER;
+  }
+});
 
 const FRONTPAGE_PDS_URL = "https://hydnum.us-west.host.bsky.network/xrpc";
 export const FRONTPAGE_DID = "did:plc:klmr76mpewpv7rtm3xgpzd7x" as DID;
@@ -18,7 +30,7 @@ const Blog = z.object({
       z.literal("url"),
     ]),
   }),
-  uri: AtUri,
+  uri: AtUriSchema,
   cid: z.string(),
 });
 
@@ -27,7 +39,7 @@ const BlogMetaRecord = z.object({
     tags: z.array(z.string()).optional(),
     additionalAuthors: z.array(didSchema).optional(),
   }),
-  uri: AtUri,
+  uri: AtUriSchema,
 });
 type BlogMeta = z.infer<typeof BlogMetaRecord>["value"];
 
