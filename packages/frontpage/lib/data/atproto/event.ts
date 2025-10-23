@@ -7,9 +7,14 @@ import { nsids } from "./repo";
 
 export const Collection = z.union([
   z.literal(nsids.FyiUnravelFrontpagePost),
+  z.literal(nsids.FyiFrontpageFeedPost),
   z.literal(nsids.FyiUnravelFrontpageComment),
+  z.literal(nsids.FyiFrontpageFeedComment),
   z.literal(nsids.FyiUnravelFrontpageVote),
+  z.literal(nsids.FyiFrontpageFeedVote),
 ]);
+
+export type Collection = z.infer<typeof Collection>;
 
 const Path = z.string().transform((p, ctx) => {
   const collectionResult = Collection.safeParse(p.split("/")[0]);
