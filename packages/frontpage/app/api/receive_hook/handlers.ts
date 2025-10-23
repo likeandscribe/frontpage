@@ -10,6 +10,10 @@ import { getBlueskyProfile } from "@/lib/data/user";
 import { sendDiscordMessage } from "@/lib/discord";
 import { invariant } from "@/lib/utils";
 import { AtUri } from "@atproto/syntax";
+import {
+  FyiFrontpageFeedPost,
+  FyiFrontpageRichtextBlock,
+} from "@repo/frontpage-atproto-client";
 import type z from "zod";
 
 type HandlerInput = {
@@ -31,34 +35,61 @@ async function getAtprotoClientFromRepo(repo: DID) {
   return getAtprotoClient(pds);
 }
 
-export async function handlePost({ op, repo, rkey }: HandlerInput) {
+async function hydratePost(
+  repo: DID,
+  collection: string,
+  rkey: string,
+): Promise<{
+  title: string;
+  url: string;
+  createdAt: Date;
+  cid: string;
+}> {
   const atproto = await getAtprotoClientFromRepo(repo);
+  if (collection === nsids.FyiUnravelFrontpagePost) {
+    const record = await atproto.fyi.unravel.frontpage.post.get({ repo, rkey });
+    return {
+      title: record.value.title,
+      url: record.value.url,
+      createdAt: new Date(record.value.createdAt),
+      cid: record.cid,
+    };
+  } else if (collection === nsids.FyiFrontpageFeedPost) {
+    const record = await atproto.fyi.frontpage.feed.post.get({ repo, rkey });
+    const subject = record.value.subject;
+    invariant(
+      FyiFrontpageFeedPost.isUrlSubject(subject),
+      `Received non-url subject in frontpage feed post: at://${repo}/${collection}/${rkey}`,
+    );
+    return {
+      title: record.value.title,
+      url: subject.url,
+      createdAt: new Date(record.value.createdAt),
+      cid: record.cid,
+    };
+  } else {
+    throw new Error("Unknown collection for post hydration: ${collection}");
+  }
+}
 
+export async function handlePost({ op, repo, rkey }: HandlerInput) {
   if (op.action === "create") {
-    const postRecord = await atproto.fyi.unravel.frontpage.post.get({
-      repo,
-      rkey,
-    });
+    const post = await hydratePost(repo, op.path.collection, rkey);
 
-    invariant(postRecord, "atproto post record not found");
-
-    const post = await dbPost.uncached_doesPostExist(repo, rkey);
-    const { title, url, createdAt } = postRecord.value;
-
-    if (post) {
+    if (await dbPost.uncached_doesPostExist(repo, rkey)) {
       await dbPost.updatePost(repo, rkey, {
         status: "live",
-        cid: postRecord.cid,
+        cid: post.cid,
       });
     } else {
       await dbPost.createPost({
         post: {
-          title,
-          url,
-          createdAt: new Date(createdAt),
+          title: post.title,
+          url: post.url,
+          createdAt: post.createdAt,
         },
         rkey,
-        cid: postRecord.cid,
+        cid: post.cid,
         authorDid: repo,
         status: "live",
       });
@@ -69,7 +100,7 @@ export async function handlePost({ op, repo, rkey }: HandlerInput) {
       embeds: [
         {
           title: "New post on Frontpage",
-          description: title,
+          description: post.title,
           url: `https://frontpage.fyi/post/${repo}/${rkey}`,
           color: 10181046,
           author: bskyProfile
@@ -82,7 +113,7 @@ export async function handlePost({ op, repo, rkey }: HandlerInput) {
           fields: [
             {
               name: "Link",
-              value: url,
+              value: post.url,
             },
           ],
         },
@@ -96,43 +127,90 @@ export async function handlePost({ op, repo, rkey }: HandlerInput) {
   }
 }
 
-export async function handleComment({ op, repo, rkey }: HandlerInput) {
+async function hydrateComment(
+  repo: DID,
+  collection: string,
+  rkey: string,
+): Promise<{
+  cid: string;
+  content: string;
+  createdAt: Date;
+  parentUri: AtUri | null;
+  postUri: AtUri;
+}> {
   const atproto = await getAtprotoClientFromRepo(repo);
-
-  if (op.action === "create") {
-    const commentRecord = await atproto.fyi.unravel.frontpage.comment.get({
-      rkey,
+  if (collection === nsids.FyiUnravelFrontpageComment) {
+    const record = await atproto.fyi.unravel.frontpage.comment.get({
       repo,
+      rkey,
+    });
+    return {
+      cid: record.cid,
+      content: record.value.content,
+      createdAt: new Date(record.value.createdAt),
+      parentUri: record.value.parent
+        ? new AtUri(record.value.parent.uri)
+        : null,
+      postUri: new AtUri(record.value.post.uri),
+    };
+  } else if (collection === nsids.FyiFrontpageFeedComment) {
+    const record = await atproto.fyi.frontpage.feed.comment.get({
+      repo,
+      rkey,
     });
 
-    invariant(commentRecord, "atproto comment record not found");
+    const blockContents = record.value.blocks.flatMap((block) => {
+      if (FyiFrontpageRichtextBlock.isPlaintextParagraph(block.content)) {
+        return [block.content.text];
+      } else {
+        return [];
+      }
+    });
 
-    const comment = await dbComment.uncached_doesCommentExist(repo, rkey);
+    invariant(
+      blockContents.length !== record.value.blocks.length,
+      `Received non plaintext blocks in frontpage feed comment: at://${repo}/${collection}/${rkey}`,
+    );
 
-    if (comment) {
-      console.log("comment already exists", commentRecord.value);
+    return {
+      cid: record.cid,
+      content: blockContents.join("\n\n"),
+      createdAt: new Date(record.value.createdAt),
+      parentUri: record.value.parent
+        ? new AtUri(record.value.parent.uri)
+        : null,
+      postUri: new AtUri(record.value.post.uri),
+    };
+  } else {
+    throw new Error("Unknown collection for comment hydration: ${collection}");
+  }
+}
+
+export async function handleComment({ op, repo, rkey }: HandlerInput) {
+  if (op.action === "create") {
+    const comment = await hydrateComment(repo, op.path.collection, rkey);
+
+    if (await dbComment.uncached_doesCommentExist(repo, rkey)) {
       await dbComment.updateComment(repo, rkey, {
         status: "live",
-        cid: commentRecord.cid,
+        cid: comment.cid,
       });
     } else {
-      const { content, createdAt, parent, post } = commentRecord.value;
-      const postUri = new AtUri(post.uri);
-      const parentData = parent
+      const parentData = comment.parentUri
         ? {
-            uri: new AtUri(parent.uri),
-            authorDid: await getDidOrThrow(new AtUri(parent.uri).host),
+            uri: comment.parentUri,
+            authorDid: await getDidOrThrow(comment.parentUri.host),
           }
         : null;
 
-      const postAuthorDid = await getDidOrThrow(postUri.host);
+      const postAuthorDid = await getDidOrThrow(comment.postUri.host);
 
       const createdComment = await dbComment.createComment({
-        cid: commentRecord.cid,
+        cid: comment.cid,
         authorDid: repo,
         rkey,
-        content,
-        createdAt: new Date(createdAt),
+        content: comment.content,
+        createdAt: comment.createdAt,
         parent: parentData
           ? {
               authorDid: parentData.authorDid,
@@ -141,7 +219,7 @@ export async function handleComment({ op, repo, rkey }: HandlerInput) {
           : undefined,
         post: {
           authorDid: postAuthorDid,
-          rkey: postUri.rkey,
+          rkey: comment.postUri.rkey,
         },
         status: "live",
       });
@@ -165,38 +243,61 @@ export async function handleComment({ op, repo, rkey }: HandlerInput) {
   }
 }
 
-export async function handleVote({ op, repo, rkey }: HandlerInput) {
+async function hydrateVote(
+  repo: DID,
+  collection: string,
+  rkey: string,
+): Promise<{
+  cid: string;
+  createdAt: Date;
+  subject: {
+    uri: AtUri;
+    cid: string;
+  };
+}> {
   const atproto = await getAtprotoClientFromRepo(repo);
+  let record;
+  if (collection === nsids.FyiUnravelFrontpageVote) {
+    record = await atproto.fyi.unravel.frontpage.vote.get({ repo, rkey });
+  } else if (collection === nsids.FyiFrontpageFeedVote) {
+    record = await atproto.fyi.frontpage.feed.vote.get({ repo, rkey });
+  } else {
+    throw new Error("Unknown collection for vote hydration: ${collection}");
+  }
+
+  return {
+    cid: record.cid,
+    createdAt: new Date(record.value.createdAt),
+    subject: {
+      uri: new AtUri(record.value.subject.uri),
+      cid: record.value.subject.cid,
+    },
+  };
+}
+
+export async function handleVote({ op, repo, rkey }: HandlerInput) {
   if (op.action === "create") {
-    const hydratedRecord = await atproto.fyi.unravel.frontpage.vote.get({
-      repo,
-      rkey,
-    });
+    const vote = await hydrateVote(repo, op.path.collection, rkey);
 
-    invariant(hydratedRecord, "atproto vote record not found");
-
-    const { subject } = hydratedRecord.value;
-    const subjectUri = new AtUri(subject.uri);
-
-    switch (subjectUri.collection) {
-      case nsids.FyiUnravelFrontpagePost: {
-        const postVote = await dbVote.uncached_doesPostVoteExist(repo, rkey);
-        if (postVote) {
+    switch (vote.subject.uri.collection) {
+      case nsids.FyiUnravelFrontpagePost:
+      case nsids.FyiFrontpageFeedPost: {
+        if (await dbVote.uncached_doesPostVoteExist(repo, rkey)) {
           await dbVote.updatePostVote({
             authorDid: repo,
             rkey,
             status: "live",
-            cid: hydratedRecord.cid,
+            cid: vote.cid,
           });
         } else {
           const createdDbPostVote = await dbVote.createPostVote({
             repo,
             rkey,
-            cid: hydratedRecord.cid,
+            cid: vote.cid,
             subject: {
-              rkey: subjectUri.rkey,
-              authorDid: await getDidOrThrow(subjectUri.host),
-              cid: subject.cid,
+              rkey: vote.subject.uri.rkey,
+              authorDid: await getDidOrThrow(vote.subject.uri.host),
+              cid: vote.subject.cid,
             },
             status: "live",
           });
@@ -209,27 +310,24 @@ export async function handleVote({ op, repo, rkey }: HandlerInput) {
         }
         break;
       }
-      case nsids.FyiUnravelFrontpageComment: {
-        const commentVote = await dbVote.uncached_doesCommentVoteExist(
-          repo,
-          rkey,
-        );
-        if (commentVote) {
+      case nsids.FyiUnravelFrontpageComment:
+      case nsids.FyiFrontpageFeedComment: {
+        if (await dbVote.uncached_doesCommentVoteExist(repo, rkey)) {
           await dbVote.updateCommentVote({
             authorDid: repo,
             rkey,
             status: "live",
-            cid: hydratedRecord.cid,
+            cid: vote.cid,
           });
         } else {
           const createdDbCommentVote = await dbVote.createCommentVote({
             repo,
             rkey,
-            cid: hydratedRecord.cid,
+            cid: vote.cid,
             subject: {
-              rkey: subjectUri.rkey,
-              authorDid: await getDidOrThrow(subjectUri.host),
-              cid: subject.cid,
+              rkey: vote.subject.uri.rkey,
+              authorDid: await getDidOrThrow(vote.subject.uri.host),
+              cid: vote.subject.cid,
             },
             status: "live",
           });
@@ -242,11 +340,13 @@ export async function handleVote({ op, repo, rkey }: HandlerInput) {
         }
         break;
       }
-      default:
-        invariant(subjectUri.collection, "Unknown collection");
+      default: {
+        throw new Error(
+          `Unknown vote subject collection: ${vote.subject.uri.collection} received from at://${repo}/${op.path.collection}/${rkey}`,
+        );
+      }
     }
   } else if (op.action === "delete") {
-    console.log("deleting vote", rkey);
     await dbVote.deleteVote({ authorDid: repo, rkey });
   }
 }
