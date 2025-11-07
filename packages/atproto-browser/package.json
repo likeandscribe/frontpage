@@ -11,12 +11,12 @@
     "test": "vitest"
   },
   "dependencies": {
-    "@atproto/api": "^0.14.22",
-    "@atproto/did": "^0.1.5",
-    "@atproto/identity": "^0.4.8",
+    "@atproto/api": "catalog:",
+    "@atproto/did": "catalog:",
+    "@atproto/identity": "catalog:",
     "@atproto/lexicon": "^0.4.12",
-    "@atproto/repo": "^0.7.3",
-    "@atproto/syntax": "^0.3.4",
+    "@atproto/repo": "catalog:",
+    "@atproto/syntax": "catalog:",
     "@lpm/core": "npm:@jsr/lpm__core@^0.2.9",
     "hls.js": "^1.6.7",
     "http-link-header": "^1.1.3",

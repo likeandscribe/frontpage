@@ -16,6 +16,11 @@ catalog:
   '@vitejs/plugin-react': ^5.1.0
   vite-tsconfig-paths: ^5.1.4
   vitest: ^4.0.8
+  '@atproto/repo': ^0.8.10
+  '@atproto/syntax': ^0.3.4
+  '@atproto/identity': ^0.4.9
+  '@atproto/did': ^0.2.1
+  '@atproto/api': ^0.18.0
 
 onlyBuiltDependencies:
   - '@vercel/speed-insights'

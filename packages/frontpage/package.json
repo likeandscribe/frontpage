@@ -21,7 +21,7 @@
   "dependencies": {
     "@atproto/common-web": "^0.3.2",
     "@atproto/oauth-types": "^0.1.5",
-    "@atproto/syntax": "^0.3.4",
+    "@atproto/syntax": "catalog:",
     "@libsql/client": "^0.15.10",
     "@markdoc/markdoc": "^0.4.0",
     "@next/env": "16.0.0-beta.0",
