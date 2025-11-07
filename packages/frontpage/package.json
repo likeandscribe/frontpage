@@ -29,7 +29,7 @@
     "@repo/frontpage-atproto-client": "workspace:*",
     "@repo/frontpage-oauth": "workspace:*",
     "@vercel/analytics": "^1.5.0",
-    "@vercel/toolbar": "^0.1.38",
+    "@vercel/toolbar": "^0.1.41",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "date-fns": "^3.6.0",
