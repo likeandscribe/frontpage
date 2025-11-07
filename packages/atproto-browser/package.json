@@ -40,7 +40,7 @@
     "@types/react-dom": "catalog:",
     "eslint": "catalog:",
     "typescript": "catalog:",
-    "vite-tsconfig-paths": "^4.3.2",
-    "vitest": "^2.1.9"
+    "vite-tsconfig-paths": "catalog:",
+    "vitest": "catalog:"
   }
 }

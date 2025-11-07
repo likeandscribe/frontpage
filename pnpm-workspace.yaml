@@ -13,6 +13,9 @@ catalog:
   eslint: ^9.37.0
   '@types/node': ^22.18.9
   babel-plugin-react-compiler: ^1.0.0
+  '@vitejs/plugin-react': ^5.1.0
+  vite-tsconfig-paths: ^5.1.4
+  vitest: ^4.0.8
 
 onlyBuiltDependencies:
   - '@vercel/speed-insights'
