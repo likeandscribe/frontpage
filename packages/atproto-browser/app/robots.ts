@@ -5,8 +5,8 @@ export default function robots(): MetadataRoute.Robots {
     rules: {
       userAgent: "*",
       // Disallow all paths except for the root path.
-      allow: "/$",
       disallow: "/",
+      allow: "/$",
     },
   };
 }
