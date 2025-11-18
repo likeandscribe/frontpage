@@ -59,7 +59,7 @@ async function hydratePost(
     const subject = record.value.subject;
     invariant(
       FyiFrontpageFeedPost.isUrlSubject(subject),
-      `Received non-url subject in frontpage feed post: at://${repo}/${collection}/${rkey}`,
+      `Received non-url subject in frontpage feed post: at://${repo}/${collection}/${rkey}#${record.cid}`,
     );
     return {
       title: record.value.title,
@@ -169,7 +169,7 @@ async function hydrateComment(
 
     invariant(
       blockContents.length !== record.value.blocks.length,
-      `Received non plaintext blocks in frontpage feed comment: at://${repo}/${collection}/${rkey}`,
+      `Received non plaintext blocks in frontpage feed comment: at://${repo}/${collection}/${rkey}#${record.cid}`,
     );
 
     return {
@@ -342,7 +342,7 @@ export async function handleVote({ op, repo, rkey }: HandlerInput) {
       }
       default: {
         throw new Error(
-          `Unknown vote subject collection: ${vote.subject.uri.collection} received from at://${repo}/${op.path.collection}/${rkey}`,
+          `Unknown vote subject collection: ${vote.subject.uri.collection} received from at://${repo}/${op.path.collection}/${rkey}#${vote.cid}`,
         );
       }
     }
