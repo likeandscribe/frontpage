@@ -17,6 +17,17 @@ import {
 import { type ColumnBaseConfig, sql } from "drizzle-orm";
 import { AUTH_SCOPES } from "@repo/frontpage-oauth";
 
+// Copying these here because Drizzle Kit doesn't support esm and therefore isn't able to load @repo/frontpage-atproto-client
+// Once Drizzle Kit supports esm, we can remove this and import them from @repo/frontpage-atproto-client/lexicons
+const nsids = {
+  FyiFrontpageFeedPost: "fyi.frontpage.feed.post",
+  FyiUnravelFrontpagePost: "fyi.unravel.frontpage.post",
+  FyiFrontpageFeedComment: "fyi.frontpage.feed.comment",
+  FyiUnravelFrontpageComment: "fyi.unravel.frontpage.comment",
+  FyiFrontpageFeedVote: "fyi.frontpage.feed.vote",
+  FyiUnravelFrontpageVote: "fyi.unravel.frontpage.vote",
+};
+
 const did = customType<{ data: DID }>({
   dataType() {
     return "text";
@@ -66,11 +77,22 @@ export const Post = sqliteTable(
     authorDid: did("author_did").notNull(),
     // TODO: add notNull once this is rolled out
     status: createStatusColumn("status"),
+    collection: text("collection", {
+      enum: [nsids.FyiFrontpageFeedPost, nsids.FyiUnravelFrontpagePost],
+    })
+      .notNull()
+      .default(nsids.FyiUnravelFrontpagePost),
   },
   (t) => ({
     unique_author_rkey: unique().on(t.authorDid, t.rkey),
   }),
 );
+
+const voteCollectionColumn = text("collection", {
+  enum: [nsids.FyiFrontpageFeedVote, nsids.FyiUnravelFrontpageVote],
+})
+  .notNull()
+  .default(nsids.FyiUnravelFrontpageVote);
 
 export const PostVote = sqliteTable(
   "post_votes",
@@ -84,6 +106,7 @@ export const PostVote = sqliteTable(
     cid: text("cid").notNull().default(""),
     rkey: text("rkey").notNull(),
     status: createStatusColumn("status"),
+    collection: voteCollectionColumn,
   },
   (t) => ({
     unique_authr_rkey: unique().on(t.authorDid, t.rkey),
@@ -130,6 +153,11 @@ export const Comment = sqliteTable(
     // TODO: add notNull once this is rolled out
     status: createStatusColumn("status"),
     parentCommentId: integer("parent_comment_id"),
+    collection: text("collection", {
+      enum: [nsids.FyiFrontpageFeedComment, nsids.FyiUnravelFrontpageComment],
+    })
+      .notNull()
+      .default(nsids.FyiUnravelFrontpageComment),
   },
   (t) => ({
     parentReference: foreignKey({
@@ -172,6 +200,7 @@ export const CommentVote = sqliteTable(
     cid: text("cid").notNull().default(""),
     rkey: text("rkey").notNull(),
     status: createStatusColumn("status"),
+    collection: voteCollectionColumn,
   },
   (t) => ({
     unique_authr_rkey: unique().on(t.authorDid, t.rkey),
