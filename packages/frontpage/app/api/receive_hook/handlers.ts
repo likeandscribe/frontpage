@@ -277,7 +277,7 @@ async function hydrateVote(
   } else if (collection === nsids.FyiFrontpageFeedVote) {
     record = await atproto.fyi.frontpage.feed.vote.get({ repo, rkey });
   } else {
-    throw new Error("Unknown collection for vote hydration: ${collection}");
+    throw new Error(`Unknown collection for vote hydration: ${collection}`);
   }
 
   return {
