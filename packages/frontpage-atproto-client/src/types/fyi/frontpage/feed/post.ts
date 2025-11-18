@@ -18,7 +18,7 @@ export interface Record {
   $type: "fyi.frontpage.feed.post";
   /** The title of the post. */
   title: string;
-  subject?: $Typed<UrlSubject> | { $type: string };
+  subject: $Typed<UrlSubject> | { $type: string };
   /** Client-declared timestamp when this post was originally created. */
   createdAt: string;
   [k: string]: unknown;
