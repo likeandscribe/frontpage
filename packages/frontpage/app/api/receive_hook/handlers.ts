@@ -2,10 +2,10 @@ import { getPdsUrl, type DID } from "@/lib/data/atproto/did";
 import { type Operation } from "@/lib/data/atproto/event";
 import { getDidFromHandleOrDid } from "@/lib/data/atproto/identity";
 import {
-  CommentCollectionType,
+  type CommentCollectionType,
   getAtprotoClient,
   nsids,
-  VoteCollectionType,
+  type VoteCollectionType,
   type PostCollectionType,
 } from "@/lib/data/atproto/repo";
 import * as dbComment from "@/lib/data/db/comment";
