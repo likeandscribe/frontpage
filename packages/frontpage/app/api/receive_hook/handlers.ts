@@ -77,7 +77,7 @@ async function hydratePost(
       $type: record.value.$type,
     };
   } else {
-    throw new Error("Unknown collection for post hydration: ${collection}");
+    throw new Error(`Unknown collection for post hydration: ${collection}`);
   }
 }
 
