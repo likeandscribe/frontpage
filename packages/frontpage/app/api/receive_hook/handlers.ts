@@ -195,7 +195,7 @@ async function hydrateComment(
       $type: record.value.$type,
     };
   } else {
-    throw new Error("Unknown collection for comment hydration: ${collection}");
+    throw new Error(`Unknown collection for comment hydration: ${collection}`);
   }
 }
 
