@@ -18,6 +18,7 @@ import {
   deleteCommentAggregateTrigger,
   newCommentAggregateTrigger,
 } from "./triggers";
+import { nsids } from "../atproto/repo";
 
 type CommentRow = Omit<
   InferSelectModel<typeof schema.Comment>,
@@ -380,6 +381,7 @@ export async function createComment({
         createdAt: createdAt,
         parentCommentId: existingParent?.id ?? null,
         status,
+        collection: nsids.FyiUnravelFrontpageComment,
       })
       .returning({
         id: schema.Comment.id,

@@ -17,6 +17,7 @@ import { getUser, isAdmin } from "../user";
 import { type DID } from "../atproto/did";
 import { newPostAggregateTrigger } from "./triggers";
 import { invariant } from "@/lib/utils";
+import { nsids } from "../atproto/repo";
 
 const buildUserHasVotedQuery = cache(async () => {
   const user = await getUser();
@@ -199,6 +200,7 @@ export async function createPost({
         url: post.url,
         createdAt: post.createdAt,
         status,
+        collection: nsids.FyiUnravelFrontpagePost,
       })
       .returning({ postId: schema.Post.id });
 

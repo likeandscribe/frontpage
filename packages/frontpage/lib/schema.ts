@@ -79,9 +79,7 @@ export const Post = sqliteTable(
     status: createStatusColumn("status"),
     collection: text("collection", {
       enum: [nsids.FyiFrontpageFeedPost, nsids.FyiUnravelFrontpagePost],
-    })
-      .notNull()
-      .default(nsids.FyiUnravelFrontpagePost),
+    }).notNull(),
   },
   (t) => ({
     unique_author_rkey: unique().on(t.authorDid, t.rkey),
@@ -90,9 +88,7 @@ export const Post = sqliteTable(
 
 const voteCollectionColumn = text("collection", {
   enum: [nsids.FyiFrontpageFeedVote, nsids.FyiUnravelFrontpageVote],
-})
-  .notNull()
-  .default(nsids.FyiUnravelFrontpageVote);
+}).notNull();
 
 export const PostVote = sqliteTable(
   "post_votes",
@@ -155,9 +151,7 @@ export const Comment = sqliteTable(
     parentCommentId: integer("parent_comment_id"),
     collection: text("collection", {
       enum: [nsids.FyiFrontpageFeedComment, nsids.FyiUnravelFrontpageComment],
-    })
-      .notNull()
-      .default(nsids.FyiUnravelFrontpageComment),
+    }).notNull(),
   },
   (t) => ({
     parentReference: foreignKey({
