@@ -12,6 +12,9 @@ const nextConfig = {
       destination: "/security.txt",
     },
   ],
+
+  // Allow Cloudflare tunnels in local dev
+  allowedDevOrigins: ["*.trycloudflare.com"],
 };
 
 export default withVercelToolbar()(nextConfig);
