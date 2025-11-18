@@ -19,7 +19,10 @@ import {
   newCommentAggregateTrigger,
 } from "./triggers";
 
-type CommentRow = Omit<InferSelectModel<typeof schema.Comment>, "cid"> & {
+type CommentRow = Omit<
+  InferSelectModel<typeof schema.Comment>,
+  "cid" | "collection"
+> & {
   cid: string | null;
 };
 
