@@ -71,6 +71,13 @@
       "when": 1763469054822,
       "tag": "0009_soft_strong_guy",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "6",
+      "when": 1763477115302,
+      "tag": "0010_superb_vision",
+      "breakpoints": true
     }
   ]
 }
