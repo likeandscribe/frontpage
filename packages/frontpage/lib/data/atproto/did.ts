@@ -5,7 +5,8 @@ type Brand<K, T> = K & { __brand: T };
 export type DID = Brand<string, "DID">;
 
 export function isDid(s: string): s is DID {
-  return s.startsWith("did:");
+  // We don't support did:web yet
+  return s.startsWith("did:plc:");
 }
 
 export const didSchema = z.string().refine((s) => isDid(s), {
