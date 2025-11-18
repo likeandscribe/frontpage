@@ -6,7 +6,7 @@ import { invariant } from "../utils";
 import { TID } from "@atproto/common-web";
 import { type DID } from "../data/atproto/did";
 import { after } from "next/server";
-import { getAtprotoClient } from "../data/atproto/repo";
+import { getAtprotoClient, nsids } from "../data/atproto/repo";
 
 export type ApiCreatePostInput = {
   authorDid: DID;
@@ -32,6 +32,7 @@ export async function createPost({
       rkey,
       authorDid: user.did,
       status: "pending",
+      collection: nsids.FyiUnravelFrontpagePost,
     });
     invariant(dbCreatedPost, "Failed to insert post in database");
 

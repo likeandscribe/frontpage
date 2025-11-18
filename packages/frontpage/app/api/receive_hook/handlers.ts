@@ -1,7 +1,13 @@
 import { getPdsUrl, type DID } from "@/lib/data/atproto/did";
 import { type Operation } from "@/lib/data/atproto/event";
 import { getDidFromHandleOrDid } from "@/lib/data/atproto/identity";
-import { getAtprotoClient, nsids } from "@/lib/data/atproto/repo";
+import {
+  CommentCollectionType,
+  getAtprotoClient,
+  nsids,
+  VoteCollectionType,
+  type PostCollectionType,
+} from "@/lib/data/atproto/repo";
 import * as dbComment from "@/lib/data/db/comment";
 import * as dbNotification from "@/lib/data/db/notification";
 import * as dbPost from "@/lib/data/db/post";
@@ -44,6 +50,7 @@ async function hydratePost(
   url: string;
   createdAt: Date;
   cid: string;
+  $type: PostCollectionType;
 }> {
   const atproto = await getAtprotoClientFromRepo(repo);
   if (collection === nsids.FyiUnravelFrontpagePost) {
@@ -53,6 +60,7 @@ async function hydratePost(
       url: record.value.url,
       createdAt: new Date(record.value.createdAt),
       cid: record.cid,
+      $type: record.value.$type,
     };
   } else if (collection === nsids.FyiFrontpageFeedPost) {
     const record = await atproto.fyi.frontpage.feed.post.get({ repo, rkey });
@@ -66,6 +74,7 @@ async function hydratePost(
       url: subject.url,
       createdAt: new Date(record.value.createdAt),
       cid: record.cid,
+      $type: record.value.$type,
     };
   } else {
     throw new Error("Unknown collection for post hydration: ${collection}");
@@ -92,6 +101,7 @@ export async function handlePost({ op, repo, rkey }: HandlerInput) {
         cid: post.cid,
         authorDid: repo,
         status: "live",
+        collection: post.$type,
       });
     }
 
@@ -137,6 +147,7 @@ async function hydrateComment(
   createdAt: Date;
   parentUri: AtUri | null;
   postUri: AtUri;
+  $type: CommentCollectionType;
 }> {
   const atproto = await getAtprotoClientFromRepo(repo);
   if (collection === nsids.FyiUnravelFrontpageComment) {
@@ -152,6 +163,7 @@ async function hydrateComment(
         ? new AtUri(record.value.parent.uri)
         : null,
       postUri: new AtUri(record.value.post.uri),
+      $type: record.value.$type,
     };
   } else if (collection === nsids.FyiFrontpageFeedComment) {
     const record = await atproto.fyi.frontpage.feed.comment.get({
@@ -180,6 +192,7 @@ async function hydrateComment(
         ? new AtUri(record.value.parent.uri)
         : null,
       postUri: new AtUri(record.value.post.uri),
+      $type: record.value.$type,
     };
   } else {
     throw new Error("Unknown collection for comment hydration: ${collection}");
@@ -222,6 +235,7 @@ export async function handleComment({ op, repo, rkey }: HandlerInput) {
           rkey: comment.postUri.rkey,
         },
         status: "live",
+        collection: comment.$type,
       });
 
       if (!createdComment) {
@@ -254,6 +268,7 @@ async function hydrateVote(
     uri: AtUri;
     cid: string;
   };
+  $type: VoteCollectionType;
 }> {
   const atproto = await getAtprotoClientFromRepo(repo);
   let record;
@@ -272,6 +287,7 @@ async function hydrateVote(
       uri: new AtUri(record.value.subject.uri),
       cid: record.value.subject.cid,
     },
+    $type: record.value.$type,
   };
 }
 
@@ -300,6 +316,7 @@ export async function handleVote({ op, repo, rkey }: HandlerInput) {
               cid: vote.subject.cid,
             },
             status: "live",
+            collection: vote.$type,
           });
 
           if (!createdDbPostVote) {
@@ -330,6 +347,7 @@ export async function handleVote({ op, repo, rkey }: HandlerInput) {
               cid: vote.subject.cid,
             },
             status: "live",
+            collection: vote.$type,
           });
 
           if (!createdDbCommentVote) {

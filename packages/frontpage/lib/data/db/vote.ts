@@ -12,7 +12,7 @@ import {
   newPostVoteAggregateTrigger,
 } from "./triggers";
 import { invariant } from "@/lib/utils";
-import { nsids } from "../atproto/repo";
+import type { VoteCollectionType } from "../atproto/repo";
 
 export const getVoteForPost = cache(async (postId: number) => {
   const user = await getUser();
@@ -95,6 +95,7 @@ export type CreateVoteInput = {
     cid: string;
   };
   status: "live" | "pending";
+  collection: VoteCollectionType;
 };
 
 export const createPostVote = async ({
@@ -102,6 +103,7 @@ export const createPostVote = async ({
   rkey,
   cid,
   subject,
+  collection,
 }: CreateVoteInput) => {
   return await db.transaction(async (tx) => {
     const post = (
@@ -133,7 +135,7 @@ export const createPostVote = async ({
         createdAt: new Date(),
         cid: cid ?? "",
         rkey,
-        collection: nsids.FyiUnravelFrontpageVote,
+        collection,
       })
       .returning({ id: schema.PostVote.id });
 
@@ -152,6 +154,7 @@ export async function createCommentVote({
   rkey,
   cid,
   subject,
+  collection,
 }: CreateVoteInput) {
   return await db.transaction(async (tx) => {
     const comment = (
@@ -180,7 +183,7 @@ export async function createCommentVote({
         createdAt: new Date(),
         cid: cid ?? "",
         rkey,
-        collection: nsids.FyiUnravelFrontpageVote,
+        collection,
       })
       .returning({ id: schema.CommentVote.id });
 

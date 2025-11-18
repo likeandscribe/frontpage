@@ -18,7 +18,7 @@ import {
   deleteCommentAggregateTrigger,
   newCommentAggregateTrigger,
 } from "./triggers";
-import { nsids } from "../atproto/repo";
+import type { CommentCollectionType } from "../atproto/repo";
 
 type CommentRow = Omit<
   InferSelectModel<typeof schema.Comment>,
@@ -322,6 +322,7 @@ export type CreateCommentInput = {
     rkey: string;
   };
   status: "live" | "pending";
+  collection: CommentCollectionType;
 };
 
 export async function createComment({
@@ -333,6 +334,7 @@ export async function createComment({
   parent,
   post,
   status,
+  collection,
 }: CreateCommentInput) {
   return await db.transaction(async (tx) => {
     const existingPost = (
@@ -381,7 +383,7 @@ export async function createComment({
         createdAt: createdAt,
         parentCommentId: existingParent?.id ?? null,
         status,
-        collection: nsids.FyiUnravelFrontpageComment,
+        collection,
       })
       .returning({
         id: schema.Comment.id,
