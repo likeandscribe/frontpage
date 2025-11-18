@@ -12,6 +12,7 @@ import {
   newPostVoteAggregateTrigger,
 } from "./triggers";
 import { invariant } from "@/lib/utils";
+import { nsids } from "../atproto/repo";
 
 export const getVoteForPost = cache(async (postId: number) => {
   const user = await getUser();
@@ -132,6 +133,7 @@ export const createPostVote = async ({
         createdAt: new Date(),
         cid: cid ?? "",
         rkey,
+        collection: nsids.FyiUnravelFrontpageVote,
       })
       .returning({ id: schema.PostVote.id });
 
@@ -178,6 +180,7 @@ export async function createCommentVote({
         createdAt: new Date(),
         cid: cid ?? "",
         rkey,
+        collection: nsids.FyiUnravelFrontpageVote,
       })
       .returning({ id: schema.CommentVote.id });
 

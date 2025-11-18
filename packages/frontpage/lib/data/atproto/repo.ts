@@ -1,4 +1,3 @@
-import "server-only";
 import { AtpBaseClient } from "@repo/frontpage-atproto-client";
 import { getUser } from "../user";
 import { fetchAuthenticatedAtproto } from "@/lib/auth";
