@@ -82,7 +82,11 @@ export const Post = sqliteTable(
     }).notNull(),
   },
   (t) => ({
-    unique_author_rkey: unique().on(t.authorDid, t.rkey),
+    unique_author_collection_rkey: unique().on(
+      t.authorDid,
+      t.collection,
+      t.rkey,
+    ),
   }),
 );
 
@@ -105,7 +109,11 @@ export const PostVote = sqliteTable(
     collection: voteCollectionColumn,
   },
   (t) => ({
-    unique_authr_rkey: unique().on(t.authorDid, t.rkey),
+    unique_author_collection_rkey: unique().on(
+      t.authorDid,
+      t.collection,
+      t.rkey,
+    ),
     // Ensures you can only vote once per post
     unique_author_postId: unique().on(t.authorDid, t.postId),
   }),
@@ -159,7 +167,11 @@ export const Comment = sqliteTable(
       foreignColumns: [t.id],
       name: "parent_comment_id_fkey",
     }),
-    unique_author_rkey: unique().on(t.authorDid, t.rkey),
+    unique_author_collection_rkey: unique().on(
+      t.authorDid,
+      t.collection,
+      t.rkey,
+    ),
   }),
 );
 
@@ -197,7 +209,11 @@ export const CommentVote = sqliteTable(
     collection: voteCollectionColumn,
   },
   (t) => ({
-    unique_authr_rkey: unique().on(t.authorDid, t.rkey),
+    unique_author_collection_rkey: unique().on(
+      t.authorDid,
+      t.collection,
+      t.rkey,
+    ),
     // Ensures you can only vote once per post
     unique_author_commentId: unique().on(t.authorDid, t.commentId),
   }),
