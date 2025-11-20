@@ -19,6 +19,7 @@ import {
 } from "./lib/auth";
 
 export async function proxy(request: NextRequest) {
+  return NextResponse.next();
   const cookieJwt = await getAuthCookie();
   if (!cookieJwt) {
     return NextResponse.next();

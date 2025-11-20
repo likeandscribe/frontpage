@@ -4,7 +4,7 @@ import { getFrontpagePosts } from "@/lib/data/db/post";
 import { PostCard } from "./_components/post-card";
 
 export default async function Home() {
-  await connection();
+  return null;
 
   // Calling an action directly is not recommended in the doc but here we do it as a DRY shortcut.
   const initialData = await getMorePostsAction(0);

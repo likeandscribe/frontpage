@@ -11,16 +11,16 @@ export async function NotificationIndicator({
 }: {
   children: ReactNode;
 }) {
-  const user = await getUser();
-  if (user === null) return null;
+  // if ((await getUser()) === null) return null;
   return (
     <div className="relative">
-      {children}
+      <Suspense />
+      {/* {children}
       <ErrorBoundary fallback={null}>
         <Suspense>
           <NotificationIndicatorInner />
         </Suspense>
-      </ErrorBoundary>
+      </ErrorBoundary> */}
     </div>
   );
 }
