@@ -3,13 +3,84 @@
 import { AlertDialog as AlertDialogPrimitive } from "radix-ui";
 
 import { cn } from "@/lib/utils";
-import { buttonVariants } from "@/lib/components/ui/button";
+import { Button, buttonVariants } from "@/lib/components/ui/button";
+import { useMediaQuery } from "@/lib/use-media-query";
+import {
+  Drawer,
+  DrawerContent,
+  DrawerDescription,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerPortal,
+  DrawerTitle,
+  DrawerTrigger,
+} from "./drawer";
+import { useContext, useState } from "react";
+import { ResponsiveDialogContext } from "./dialog-context";
 
-const AlertDialog = AlertDialogPrimitive.Root;
+function AlertDialog(
+  props: React.ComponentProps<typeof AlertDialogPrimitive.Root>,
+) {
+  const [openState, setOpen] = useState(props.open ?? false);
+  const shouldUseDrawer = !useMediaQuery("sm");
 
-const AlertDialogTrigger = AlertDialogPrimitive.Trigger;
+  function handleOpenChange(newOpen: boolean) {
+    setOpen(newOpen);
+    props.onOpenChange?.(newOpen);
+  }
 
-const AlertDialogPortal = AlertDialogPrimitive.Portal;
+  const open = props.open ?? openState;
+
+  return (
+    <ResponsiveDialogContext
+      value={{
+        shouldUseDrawer,
+        setOpen: handleOpenChange,
+      }}
+    >
+      {shouldUseDrawer ? (
+        <Drawer
+          {...props}
+          open={open}
+          onOpenChange={handleOpenChange}
+          dismissible={false}
+        />
+      ) : (
+        <AlertDialogPrimitive.Root
+          {...props}
+          open={open}
+          onOpenChange={handleOpenChange}
+        />
+      )}
+    </ResponsiveDialogContext>
+  );
+}
+AlertDialog.displayName = AlertDialogPrimitive.Root.displayName;
+
+function AlertDialogTrigger(
+  props: React.ComponentProps<typeof AlertDialogPrimitive.Trigger>,
+) {
+  const { shouldUseDrawer } = useContext(ResponsiveDialogContext);
+
+  if (shouldUseDrawer) {
+    return <DrawerTrigger {...props} />;
+  }
+
+  return <AlertDialogPrimitive.Trigger {...props} />;
+}
+AlertDialogTrigger.displayName = AlertDialogPrimitive.Trigger.displayName;
+
+function AlertDialogPortal(
+  props: React.ComponentProps<typeof AlertDialogPrimitive.Portal>,
+) {
+  const { shouldUseDrawer } = useContext(ResponsiveDialogContext);
+
+  if (shouldUseDrawer) {
+    return <DrawerPortal {...props} />;
+  }
+  return <AlertDialogPrimitive.Portal {...props} />;
+}
+AlertDialogPortal.displayName = AlertDialogPrimitive.Portal.displayName;
 
 function AlertDialogOverlay({
   className,
@@ -32,6 +103,12 @@ function AlertDialogContent({
   className,
   ...props
 }: React.ComponentProps<typeof AlertDialogPrimitive.Content>) {
+  const { shouldUseDrawer } = useContext(ResponsiveDialogContext);
+
+  if (shouldUseDrawer) {
+    return <DrawerContent {...props} className={className} resizable={false} />;
+  }
+
   return (
     <AlertDialogPortal>
       <AlertDialogOverlay />
@@ -52,6 +129,12 @@ function AlertDialogHeader({
   className,
   ...props
 }: React.HTMLAttributes<HTMLDivElement>) {
+  const { shouldUseDrawer } = useContext(ResponsiveDialogContext);
+
+  if (shouldUseDrawer) {
+    return <DrawerHeader {...props} className={className} />;
+  }
+
   return (
     <div
       className={cn(
@@ -68,6 +151,12 @@ function AlertDialogFooter({
   className,
   ...props
 }: React.HTMLAttributes<HTMLDivElement>) {
+  const { shouldUseDrawer } = useContext(ResponsiveDialogContext);
+
+  if (shouldUseDrawer) {
+    return <DrawerFooter {...props} className={className} />;
+  }
+
   return (
     <div
       className={cn(
@@ -84,6 +173,12 @@ function AlertDialogTitle({
   className,
   ...props
 }: React.ComponentProps<typeof AlertDialogPrimitive.Title>) {
+  const { shouldUseDrawer } = useContext(ResponsiveDialogContext);
+
+  if (shouldUseDrawer) {
+    return <DrawerTitle {...props} className={className} />;
+  }
+
   return (
     <AlertDialogPrimitive.Title
       className={cn("text-lg font-semibold", className)}
@@ -98,6 +193,12 @@ function AlertDialogDescription({
   className,
   ...props
 }: React.ComponentProps<typeof AlertDialogPrimitive.Description>) {
+  const { shouldUseDrawer } = useContext(ResponsiveDialogContext);
+
+  if (shouldUseDrawer) {
+    return <DrawerDescription {...props} className={className} />;
+  }
+
   return (
     <AlertDialogPrimitive.Description
       className={cn("text-sm text-muted-foreground", className)}
@@ -110,30 +211,56 @@ AlertDialogDescription.displayName =
   AlertDialogPrimitive.Description.displayName;
 
 function AlertDialogAction({
-  className,
+  className: classNameProp,
   ...props
 }: React.ComponentProps<typeof AlertDialogPrimitive.Action>) {
-  return (
-    <AlertDialogPrimitive.Action
-      className={cn(buttonVariants(), className)}
-      {...props}
-    />
-  );
+  const { shouldUseDrawer, setOpen } = useContext(ResponsiveDialogContext);
+
+  const className = cn(buttonVariants(), classNameProp);
+
+  if (shouldUseDrawer) {
+    return (
+      <Button
+        className={classNameProp}
+        {...props}
+        onClick={(event) => {
+          setOpen(false);
+          props.onClick?.(event);
+        }}
+      />
+    );
+  }
+
+  return <AlertDialogPrimitive.Action className={className} {...props} />;
 }
 
 AlertDialogAction.displayName = AlertDialogPrimitive.Action.displayName;
 
 function AlertDialogCancel({
-  className,
+  className: classNameProp,
   ...props
 }: React.ComponentProps<typeof AlertDialogPrimitive.Cancel>) {
+  const { shouldUseDrawer, setOpen } = useContext(ResponsiveDialogContext);
+
+  const buttonClassName = cn("mt-2 sm:mt-0", classNameProp);
+
+  if (shouldUseDrawer) {
+    return (
+      <Button
+        className={buttonClassName}
+        variant="outline"
+        {...props}
+        onClick={(event) => {
+          setOpen(false);
+          props.onClick?.(event);
+        }}
+      />
+    );
+  }
+
   return (
     <AlertDialogPrimitive.Cancel
-      className={cn(
-        buttonVariants({ variant: "outline" }),
-        "mt-2 sm:mt-0",
-        className,
-      )}
+      className={cn(buttonVariants({ variant: "outline" }), buttonClassName)}
       {...props}
     />
   );
@@ -143,8 +270,6 @@ AlertDialogCancel.displayName = AlertDialogPrimitive.Cancel.displayName;
 
 export {
   AlertDialog,
-  AlertDialogPortal,
-  AlertDialogOverlay,
   AlertDialogTrigger,
   AlertDialogContent,
   AlertDialogHeader,
