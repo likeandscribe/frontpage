@@ -1,10 +1,10 @@
-import tseslint from "typescript-eslint";
+import { defineConfig } from "eslint/config";
 import jsxA11y from "eslint-plugin-jsx-a11y";
 import reactHooks from "eslint-plugin-react-hooks";
 import react from "eslint-plugin-react";
 import { version as reactVersion } from "react";
 
-export default tseslint.config(
+export default defineConfig(
   // @ts-expect-error
   reactHooks.configs["recommended-latest"],
   // @ts-expect-error
