@@ -1,4 +1,6 @@
 name: Lex Check
+permissions:
+  contents: read
 
 on:
   pull_request:
