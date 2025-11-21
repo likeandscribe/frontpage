@@ -1,0 +1,65 @@
+name: Lex Check
+permissions:
+  contents: read
+
+on:
+  pull_request:
+    paths:
+      - "lexicons/fyi/**/*"
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "stable"
+          cache: true
+
+      - name: Cache glot binary
+        uses: actions/cache@v4
+        id: cache-glot
+        with:
+          path: ~/go/bin/glot
+          key: ${{ runner.os }}-glot-671143193b640e1d1224b311f62acc54dd33b241
+          restore-keys: |
+            ${{ runner.os }}-glot-
+
+      - name: Install glot
+        if: steps.cache-glot.outputs.cache-hit != 'true'
+        run: go install tangled.org/bnewbold.net/cobalt/cmd/glot@671143193b640e1d1224b311f62acc54dd33b241
+
+      - name: Run lexicon lint
+        run: glot lint lexicons/fyi/frontpage
+
+  compat-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "stable"
+          cache: true
+
+      - name: Cache glot binary
+        uses: actions/cache@v4
+        id: cache-glot
+        with:
+          path: ~/go/bin/glot
+          key: ${{ runner.os }}-glot-671143193b640e1d1224b311f62acc54dd33b241
+          restore-keys: |
+            ${{ runner.os }}-glot-
+
+      - name: Install glot
+        if: steps.cache-glot.outputs.cache-hit != 'true'
+        run: go install tangled.org/bnewbold.net/cobalt/cmd/glot@671143193b640e1d1224b311f62acc54dd33b241
+
+      - name: Run lexicon compatibility check
+        run: glot compat lexicons/fyi/frontpage
