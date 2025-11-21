@@ -33,7 +33,7 @@ export async function createVote(subject: ApiCreateVoteInput) {
           cid: subject.cid,
         },
         status: "pending",
-        collection: nsids.FyiFrontpageFeedVote,
+        collection: nsids.FyiUnravelFrontpageVote,
       });
 
       invariant(dbCreatedVote, "Failed to insert post vote in database");
@@ -47,7 +47,7 @@ export async function createVote(subject: ApiCreateVoteInput) {
           cid: subject.cid,
         },
         status: "pending",
-        collection: nsids.FyiFrontpageFeedVote,
+        collection: nsids.FyiUnravelFrontpageVote,
       });
 
       invariant(dbCreatedVote, "Failed to insert comment vote in database");
