@@ -5,6 +5,9 @@ on:
     paths:
       - "lexicons/fyi/**/*"
 
+permissions:
+  contents: read
+
 jobs:
   lint:
     runs-on: ubuntu-latest
