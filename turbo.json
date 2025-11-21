@@ -2,7 +2,9 @@
   "$schema": "https://turbo.build/schema.json",
   "ui": "tui",
   "tasks": {
-    "build": {},
+    "build": {
+      "dependsOn": ["^build"]
+    },
     "dev": {
       "persistent": true,
       "dependsOn": ["^build"]
