@@ -109,7 +109,7 @@ export async function handlePost({ op, repo, rkey }: HandlerInput) {
     await sendDiscordMessage({
       embeds: [
         {
-          title: "New post on Frontpage",
+          title: `New ${post.$type} on Frontpage`,
           description: post.title,
           url: `https://frontpage.fyi/post/${repo}/${rkey}`,
           color: 10181046,
