@@ -37,6 +37,7 @@ export async function createComment({
       parent,
       post,
       status: "pending",
+      collection: nsids.FyiUnravelFrontpageComment,
     });
 
     invariant(dbCreatedComment, "Failed to insert comment in database");

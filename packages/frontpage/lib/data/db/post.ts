@@ -17,7 +17,7 @@ import { getUser, isAdmin } from "../user";
 import { type DID } from "../atproto/did";
 import { newPostAggregateTrigger } from "./triggers";
 import { invariant } from "@/lib/utils";
-import { nsids } from "../atproto/repo";
+import type { PostCollectionType } from "../atproto/repo";
 
 const buildUserHasVotedQuery = cache(async () => {
   const user = await getUser();
@@ -180,6 +180,7 @@ export type CreatePostInput = {
   rkey: string;
   cid?: string;
   status: "live" | "pending";
+  collection: PostCollectionType;
 };
 
 export async function createPost({
@@ -188,6 +189,7 @@ export async function createPost({
   rkey,
   cid,
   status,
+  collection,
 }: CreatePostInput) {
   return await db.transaction(async (tx) => {
     const [insertedPostRow] = await tx
@@ -200,7 +202,7 @@ export async function createPost({
         url: post.url,
         createdAt: post.createdAt,
         status,
-        collection: nsids.FyiUnravelFrontpagePost,
+        collection,
       })
       .returning({ postId: schema.Post.id });
 

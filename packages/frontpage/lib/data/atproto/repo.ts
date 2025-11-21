@@ -1,4 +1,12 @@
-import { AtpBaseClient } from "@repo/frontpage-atproto-client";
+import {
+  AtpBaseClient,
+  type FyiFrontpageFeedComment,
+  type FyiFrontpageFeedPost,
+  type FyiFrontpageFeedVote,
+  type FyiUnravelFrontpageComment,
+  type FyiUnravelFrontpagePost,
+  type FyiUnravelFrontpageVote,
+} from "@repo/frontpage-atproto-client";
 import { getUser } from "../user";
 import { fetchAuthenticatedAtproto } from "@/lib/auth";
 import { cache } from "react";
@@ -28,3 +36,15 @@ export const getAtprotoClient = cache(
       return fetch(u, init);
     }),
 );
+
+export type PostCollectionType =
+  | FyiFrontpageFeedPost.Record["$type"]
+  | FyiUnravelFrontpagePost.Record["$type"];
+
+export type CommentCollectionType =
+  | FyiUnravelFrontpageComment.Record["$type"]
+  | FyiFrontpageFeedComment.Record["$type"];
+
+export type VoteCollectionType =
+  | FyiUnravelFrontpageVote.Record["$type"]
+  | FyiFrontpageFeedVote.Record["$type"];

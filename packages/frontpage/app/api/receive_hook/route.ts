@@ -47,15 +47,24 @@ export async function POST(request: Request) {
     console.log("Processing", collection, rkey, op.action);
 
     switch (collection) {
-      case nsids.FyiUnravelFrontpagePost:
+      case nsids.FyiFrontpageFeedPost:
+      case nsids.FyiUnravelFrontpagePost: {
         await handlePost({ op, repo, rkey });
         break;
-      case nsids.FyiUnravelFrontpageComment:
+      }
+
+      case nsids.FyiFrontpageFeedComment:
+      case nsids.FyiUnravelFrontpageComment: {
         await handleComment({ op, repo, rkey });
         break;
-      case nsids.FyiUnravelFrontpageVote:
+      }
+
+      case nsids.FyiFrontpageFeedVote:
+      case nsids.FyiUnravelFrontpageVote: {
         await handleVote({ op, repo, rkey });
         break;
+      }
+
       default:
         exhaustiveCheck(collection, `Unknown collection ${JSON.stringify(op)}`);
     }
