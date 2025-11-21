@@ -1,9 +1,6 @@
 name: Lex Check
 
 on:
-  push:
-    paths:
-      - "lexicons/fyi/**/*"
   pull_request:
     paths:
       - "lexicons/fyi/**/*"
