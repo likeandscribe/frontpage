@@ -780,7 +780,7 @@ export const schemaDict = {
           properties: {
             blocks: {
               type: "array",
-              maxLength: 50,
+              maxLength: 200,
               description:
                 "The content of the comment. Note, there are additional constraints placed on the total size of the content within the Frontpage AppView that are not possible to express in lexicon. Generally a comment can have a maximum length of 10,000 graphemes, the Frontpage AppView will enforce this limit.",
               items: {
