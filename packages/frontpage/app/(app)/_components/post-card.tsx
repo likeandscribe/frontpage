@@ -87,7 +87,7 @@ export async function PostCard({
           votes={votes}
         />
       </div>
-      <div className="w-full">
+      <div className="w-full overflow-hidden">
         <h2 className="mb-1 text-xl">
           <a
             href={url}
