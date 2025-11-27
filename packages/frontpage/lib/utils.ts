@@ -22,3 +22,25 @@ export function exhaustiveCheck(value: never, message?: string): never {
   // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
   throw new Error(`Unhandled value (${message}): ${value}`);
 }
+
+export function setAbortableTimeout(
+  callback: () => void,
+  delay: number,
+  signal: AbortSignal,
+) {
+  if (signal.aborted) {
+    return;
+  }
+
+  const timeoutId = setTimeout(() => {
+    callback();
+  }, delay);
+
+  signal.addEventListener(
+    "abort",
+    () => {
+      clearTimeout(timeoutId);
+    },
+    { once: true },
+  );
+}

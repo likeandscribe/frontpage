@@ -4,13 +4,72 @@ import { Dialog as DialogPrimitive } from "radix-ui";
 import { Cross2Icon } from "@radix-ui/react-icons";
 
 import { cn } from "@/lib/utils";
-import { useRef, type ComponentProps } from "react";
+import { useRef, type ComponentProps, useContext, useState } from "react";
+import { useMediaQuery } from "@/lib/use-media-query";
+import {
+  Drawer,
+  DrawerContent,
+  DrawerDescription,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerPortal,
+  DrawerTitle,
+  DrawerTrigger,
+} from "./drawer";
+import { ResponsiveDialogContext } from "./dialog-context";
 
-const Dialog = DialogPrimitive.Root;
+function Dialog(props: ComponentProps<typeof DialogPrimitive.Root>) {
+  const [openState, setOpen] = useState(props.open ?? false);
+  const shouldUseDrawer = !useMediaQuery("sm");
 
-const DialogTrigger = DialogPrimitive.Trigger;
+  function handleOpenChange(newOpen: boolean) {
+    setOpen(newOpen);
+    props.onOpenChange?.(newOpen);
+  }
 
-const DialogPortal = DialogPrimitive.Portal;
+  const open = props.open ?? openState;
+
+  return (
+    <ResponsiveDialogContext
+      value={{
+        shouldUseDrawer,
+        setOpen: handleOpenChange,
+      }}
+    >
+      {shouldUseDrawer ? (
+        <Drawer {...props} open={open} onOpenChange={handleOpenChange} />
+      ) : (
+        <DialogPrimitive.Root
+          {...props}
+          open={open}
+          onOpenChange={handleOpenChange}
+        />
+      )}
+    </ResponsiveDialogContext>
+  );
+}
+Dialog.displayName = DialogPrimitive.Root.displayName;
+
+function DialogTrigger(props: ComponentProps<typeof DialogPrimitive.Trigger>) {
+  const { shouldUseDrawer } = useContext(ResponsiveDialogContext);
+
+  if (shouldUseDrawer) {
+    return <DrawerTrigger {...props} />;
+  }
+
+  return <DialogPrimitive.Trigger {...props} />;
+}
+DialogTrigger.displayName = DialogPrimitive.Trigger.displayName;
+
+function DialogPortal(props: ComponentProps<typeof DialogPrimitive.Portal>) {
+  const { shouldUseDrawer } = useContext(ResponsiveDialogContext);
+
+  if (shouldUseDrawer) {
+    return <DrawerPortal {...props} />;
+  }
+  return <DialogPrimitive.Portal {...props} />;
+}
+DialogPortal.displayName = DialogPrimitive.Portal.displayName;
 
 const DialogClose = DialogPrimitive.Close;
 
@@ -36,6 +95,16 @@ function DialogContent({
   ...props
 }: ComponentProps<typeof DialogPrimitive.Content>) {
   const contentRef = useRef<HTMLDivElement>(null);
+  const { shouldUseDrawer } = useContext(ResponsiveDialogContext);
+
+  if (shouldUseDrawer) {
+    return (
+      <DrawerContent {...props} className={className}>
+        {children}
+      </DrawerContent>
+    );
+  }
+
   return (
     <DialogPortal>
       <DialogOverlay />
@@ -84,6 +153,12 @@ function DialogHeader({
   className,
   ...props
 }: React.HTMLAttributes<HTMLDivElement>) {
+  const { shouldUseDrawer } = useContext(ResponsiveDialogContext);
+
+  if (shouldUseDrawer) {
+    return <DrawerHeader {...props} className={className} />;
+  }
+
   return (
     <div
       className={cn(
@@ -100,6 +175,12 @@ function DialogFooter({
   className,
   ...props
 }: React.HTMLAttributes<HTMLDivElement>) {
+  const { shouldUseDrawer } = useContext(ResponsiveDialogContext);
+
+  if (shouldUseDrawer) {
+    return <DrawerFooter {...props} className={className} />;
+  }
+
   return (
     <div
       className={cn(
@@ -116,6 +197,12 @@ function DialogTitle({
   className,
   ...props
 }: ComponentProps<typeof DialogPrimitive.Title>) {
+  const { shouldUseDrawer } = useContext(ResponsiveDialogContext);
+
+  if (shouldUseDrawer) {
+    return <DrawerTitle {...props} className={className} />;
+  }
+
   return (
     <DialogPrimitive.Title
       className={cn(
@@ -132,6 +219,12 @@ function DialogDescription({
   className,
   ...props
 }: ComponentProps<typeof DialogPrimitive.Description>) {
+  const { shouldUseDrawer } = useContext(ResponsiveDialogContext);
+
+  if (shouldUseDrawer) {
+    return <DrawerDescription {...props} className={className} />;
+  }
+
   return (
     <DialogPrimitive.Description
       className={cn("text-sm text-muted-foreground", className)}
@@ -144,7 +237,6 @@ DialogDescription.displayName = DialogPrimitive.Description.displayName;
 export {
   Dialog,
   DialogPortal,
-  DialogOverlay,
   DialogTrigger,
   DialogClose,
   DialogContent,
