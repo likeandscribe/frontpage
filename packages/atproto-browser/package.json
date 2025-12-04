@@ -29,6 +29,7 @@
     "react-error-boundary": "^4.1.2",
     "server-only": "^0.0.1",
     "swr": "^2.3.4",
+    "thread-stream": "2.7.0",
     "zod": "^3.25.76"
   },
   "devDependencies": {
