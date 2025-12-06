@@ -9,5 +9,6 @@ import { createContext } from "react";
  */
 export const ResponsiveDialogContext = createContext({
   shouldUseDrawer: false,
+  dismissable: true,
   setOpen: (_open: boolean) => {},
 });

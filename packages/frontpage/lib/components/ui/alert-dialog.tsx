@@ -36,6 +36,7 @@ function AlertDialog(
       value={{
         shouldUseDrawer,
         setOpen: handleOpenChange,
+        dismissable: false,
       }}
     >
       {shouldUseDrawer ? (
@@ -106,7 +107,7 @@ function AlertDialogContent({
   const { shouldUseDrawer } = useContext(ResponsiveDialogContext);
 
   if (shouldUseDrawer) {
-    return <DrawerContent {...props} className={className} resizable={false} />;
+    return <DrawerContent {...props} className={className} />;
   }
 
   return (

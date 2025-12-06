@@ -34,6 +34,7 @@ function Dialog(props: ComponentProps<typeof DialogPrimitive.Root>) {
       value={{
         shouldUseDrawer,
         setOpen: handleOpenChange,
+        dismissable: true,
       }}
     >
       {shouldUseDrawer ? (

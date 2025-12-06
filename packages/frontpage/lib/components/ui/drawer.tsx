@@ -1,9 +1,10 @@
 "use client";
 
-import * as React from "react";
 import { Drawer as DrawerPrimitive } from "vaul";
 
 import { cn } from "@/lib/utils";
+import { useContext } from "react";
+import { ResponsiveDialogContext } from "./dialog-context";
 
 function Drawer({
   ...props
@@ -42,11 +43,9 @@ function DrawerOverlay({
 function DrawerContent({
   className,
   children,
-  resizable,
   ...props
-}: React.ComponentProps<typeof DrawerPrimitive.Content> & {
-  resizable?: boolean;
-}) {
+}: React.ComponentProps<typeof DrawerPrimitive.Content>) {
+  const { dismissable } = useContext(ResponsiveDialogContext);
   return (
     <DrawerPortal data-slot="drawer-portal">
       <DrawerOverlay />
@@ -62,7 +61,7 @@ function DrawerContent({
         )}
         {...props}
       >
-        {resizable ? (
+        {dismissable ? (
           <div className="bg-muted mx-auto mt-4 hidden h-2 w-[100px] shrink-0 rounded-full group-data-[vaul-drawer-direction=bottom]/drawer-content:block" />
         ) : null}
         {children}
